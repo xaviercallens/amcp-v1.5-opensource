@@ -1,0 +1,160 @@
+version: '3.8'
+
+networks:
+  amcp-network:
+    driver: bridge
+
+volumes:
+  kafka-data:
+  zookeeper-data:
+  prometheus-data:
+  grafana-data:
+
+services:
+  # Zookeeper for Kafka
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    hostname: zookeeper
+    container_name: amcp-zookeeper
+    networks:
+      - amcp-network
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+
+  # Kafka
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    hostname: kafka
+    container_name: amcp-kafka
+    networks:
+      - amcp-network
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+
+  # AMCP Agent Context 1
+  amcp-context-1:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+    container_name: amcp-agent-context-1
+    hostname: amcp-context-1
+    networks:
+      - amcp-network
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+      - "8082:8082"
+    depends_on:
+      - kafka
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      AMCP_CONTEXT_ID: context-1
+      AMCP_EVENT_BROKER_TYPE: kafka
+      AMCP_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      WAIT_FOR_SERVICES: "http://kafka:29092"
+      JAVA_OPTS: "-Xmx1g -Xms512m -XX:+UseG1GC"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # AMCP Agent Context 2
+  amcp-context-2:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+    container_name: amcp-agent-context-2
+    hostname: amcp-context-2
+    networks:
+      - amcp-network
+    ports:
+      - "8083:8080"
+      - "8084:8081"
+      - "8085:8082"
+    depends_on:
+      - kafka
+      - amcp-context-1
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      AMCP_CONTEXT_ID: context-2
+      AMCP_EVENT_BROKER_TYPE: kafka
+      AMCP_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      WAIT_FOR_SERVICES: "http://kafka:29092"
+      JAVA_OPTS: "-Xmx1g -Xms512m -XX:+UseG1GC"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Prometheus
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    container_name: amcp-prometheus
+    hostname: prometheus
+    networks:
+      - amcp-network
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:10.0.0
+    container_name: amcp-grafana
+    hostname: grafana
+    networks:
+      - amcp-network
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+
+  # Jaeger
+  jaeger:
+    image: jaegertracing/all-in-one:1.47
+    container_name: amcp-jaeger
+    hostname: jaeger
+    networks:
+      - amcp-network
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true

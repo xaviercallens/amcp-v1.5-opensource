@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: amcp-system
+  labels:
+    name: amcp-system
+    istio-injection: enabled
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: amcp-agent-context
+  namespace: amcp-system
+  labels:
+    app: amcp
+    component: agent-context
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: amcp-agent-context
+rules:
+- apiGroups: [""]
+  resources: ["configmaps", "secrets", "services", "pods"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: amcp-agent-context
+subjects:
+- kind: ServiceAccount
+  name: amcp-agent-context
+  namespace: amcp-system
+roleRef:
+  kind: ClusterRole
+  name: amcp-agent-context
+  apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: amcp-config
+  namespace: amcp-system
+  labels:
+    app: amcp
+    component: config
+data:
+  application.properties: |
+    # AMCP v1.4 Configuration
+    
+    # EventBroker Configuration
+    amcp.event.broker.type=kafka
+    amcp.kafka.bootstrap.servers=kafka-cluster.amcp-system:9092
+    amcp.kafka.consumer.group.id=amcp-agents
+    amcp.kafka.auto.offset.reset=latest
+    
+    # Migration Configuration  
+    amcp.migration.enabled=true
+    amcp.migration.timeout=30s
+    amcp.migration.retry.max=3
+    amcp.migration.authentication.enabled=true
+    amcp.migration.encryption.enabled=true
+    
+    # MCP Integration
+    amcp.mcp.enabled=true
+    amcp.mcp.connectors.duckduckgo.url=http://duckduckgo-mcp.amcp-system:8080
+    amcp.mcp.connectors.weather.url=http://weather-api.amcp-system:8080
+    amcp.mcp.connectors.weather.auth.type=api-key
+    
+    # Security Configuration
+    amcp.security.oauth.enabled=true
+    amcp.security.oauth.issuer=https://auth.amcp.io
+    amcp.security.mtls.enabled=true
+    
+    # Observability
+    management.endpoints.web.exposure.include=health,info,metrics,prometheus
+    management.endpoint.health.show-details=always
+    management.metrics.export.prometheus.enabled=true
+    
+    # Tracing
+    opentracing.jaeger.service-name=amcp-agent-context
+    opentracing.jaeger.sampler-type=probabilistic
+    opentracing.jaeger.sampler-param=0.1
+    
+    # Logging
+    logging.level.io.amcp=INFO
+    logging.level.io.amcp.mobility=DEBUG
+    logging.pattern.console=%d{HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId:-}] %logger{36} - %msg%n
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: amcp-secrets
+  namespace: amcp-system
+  labels:
+    app: amcp
+    component: secrets
+type: Opaque
+data:
+  # OAuth client secret (base64 encoded)
+  oauth-client-secret: YW1jcC1zZWNyZXQtdjEuNA==
+  
+  # API keys for external services (base64 encoded)
+  weather-api-key: d2VhdGhlci1hcGkta2V5LXYxLjQ=
+  
+  # mTLS certificates (base64 encoded)
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0t
+  tls.key: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0t
