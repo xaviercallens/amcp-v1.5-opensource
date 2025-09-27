@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# AMCP v1.4 Weather System Demo Launcher
+# AMCP v1.5 Enterprise Edition Weather System Demo Launcher
 # Compiles and runs the weather monitoring command-line interface
 
 set -e
@@ -13,7 +13,7 @@ RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}╔═══════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║                AMCP v1.4 Weather System Launcher             ║${NC}"
+echo -e "${BLUE}║           AMCP v1.5 Enterprise Edition Launcher              ║${NC}"
 echo -e "${BLUE}║          Agent Mesh Communication Protocol Demo              ║${NC}"
 echo -e "${BLUE}╚═══════════════════════════════════════════════════════════════╝${NC}"
 
@@ -21,7 +21,7 @@ echo -e "${BLUE}╚════════════════════�
 if [[ ! -d "examples" ]] || [[ ! -d "core" ]]; then
     echo -e "${RED}Error: Please run this script from the AMCP project root directory${NC}"
     echo "Expected directory structure:"
-    echo "  amcp-v1.4-opensource/"
+    echo "  amcp-v1.5-enterprise-edition/"
     echo "    ├── core/"
     echo "    ├── examples/"
     echo "    └── run-weather-demo.sh (this script)"
@@ -79,4 +79,4 @@ java -cp "build/classes:../${CORE_CLASSES}" io.amcp.examples.weather.WeatherSyst
 
 echo ""
 echo -e "${GREEN}✅ Weather System Demo completed successfully!${NC}"
-echo -e "${BLUE}Thank you for trying AMCP v1.4 Weather System Demo${NC}"
+echo -e "${BLUE}Thank you for trying AMCP v1.5 Enterprise Edition Weather System Demo${NC}"

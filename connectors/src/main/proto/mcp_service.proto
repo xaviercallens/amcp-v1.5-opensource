@@ -1,0 +1,168 @@
+syntax = "proto3";
+
+package io.amcp.mcp;
+
+import "google/protobuf/any.proto";
+import "google/protobuf/struct.proto";
+
+option java_package = "io.amcp.mcp.proto";
+option java_outer_classname = "McpServiceProto";
+
+// Model Context Protocol (MCP) Service Definition
+// Compliant with MCP standard specification
+service McpService {
+  // Initialize MCP connection
+  rpc Initialize(InitializeRequest) returns (InitializeResponse);
+  
+  // List available tools
+  rpc ListTools(ListToolsRequest) returns (ListToolsResponse);
+  
+  // Call a tool
+  rpc CallTool(CallToolRequest) returns (CallToolResponse);
+  
+  // List available resources
+  rpc ListResources(ListResourcesRequest) returns (ListResourcesResponse);
+  
+  // Read a resource
+  rpc ReadResource(ReadResourceRequest) returns (ReadResourceResponse);
+  
+  // Subscribe to notifications
+  rpc Subscribe(SubscribeRequest) returns (stream NotificationMessage);
+  
+  // Send notification
+  rpc SendNotification(NotificationMessage) returns (NotificationResponse);
+}
+
+// Initialize connection to MCP server
+message InitializeRequest {
+  string protocol_version = 1;
+  string client_info_name = 2;
+  string client_info_version = 3;
+  ClientCapabilities capabilities = 4;
+}
+
+message InitializeResponse {
+  string protocol_version = 1;
+  ServerInfo server_info = 2;
+  ServerCapabilities capabilities = 3;
+}
+
+message ClientCapabilities {
+  bool tools = 1;
+  bool resources = 2;
+  bool notifications = 3;
+  bool experimental = 4;
+}
+
+message ServerInfo {
+  string name = 1;
+  string version = 2;
+  string description = 3;
+}
+
+message ServerCapabilities {
+  bool tools = 1;
+  bool resources = 2;
+  bool notifications = 3;
+  bool experimental = 4;
+}
+
+// Tool operations
+message ListToolsRequest {
+  string cursor = 1;
+}
+
+message ListToolsResponse {
+  repeated Tool tools = 1;
+  string next_cursor = 2;
+}
+
+message Tool {
+  string name = 1;
+  string description = 2;
+  google.protobuf.Struct input_schema = 3;
+  map<string, string> metadata = 4;
+}
+
+message CallToolRequest {
+  string name = 1;
+  google.protobuf.Struct arguments = 2;
+  string request_id = 3;
+  AuthenticationContext auth_context = 4;
+}
+
+message CallToolResponse {
+  string request_id = 1;
+  repeated ToolResult results = 2;
+  bool is_error = 3;
+  string error_message = 4;
+}
+
+message ToolResult {
+  string type = 1;
+  string text = 2;
+  google.protobuf.Any data = 3;
+  map<string, string> metadata = 4;
+}
+
+// Resource operations
+message ListResourcesRequest {
+  string cursor = 1;
+}
+
+message ListResourcesResponse {
+  repeated Resource resources = 1;
+  string next_cursor = 2;
+}
+
+message Resource {
+  string uri = 1;
+  string name = 2;
+  string description = 3;
+  string mime_type = 4;
+  map<string, string> metadata = 5;
+}
+
+message ReadResourceRequest {
+  string uri = 1;
+  AuthenticationContext auth_context = 2;
+}
+
+message ReadResourceResponse {
+  repeated ResourceContent contents = 1;
+}
+
+message ResourceContent {
+  string uri = 1;
+  string mime_type = 2;
+  bytes data = 3;
+  string text = 4;
+  map<string, string> metadata = 5;
+}
+
+// Notifications
+message SubscribeRequest {
+  string topic = 1;
+}
+
+message NotificationMessage {
+  string method = 1;
+  google.protobuf.Struct params = 2;
+  string id = 3;
+  int64 timestamp = 4;
+}
+
+message NotificationResponse {
+  string id = 1;
+  bool acknowledged = 2;
+}
+
+// Authentication context for secure MCP calls
+message AuthenticationContext {
+  string token_type = 1;
+  string access_token = 2;
+  string refresh_token = 3;
+  int64 expires_at = 4;
+  map<string, string> headers = 5;
+  map<string, string> metadata = 6;
+}

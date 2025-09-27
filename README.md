@@ -1,31 +1,36 @@
-# AMCP v1.4 - Agent Mesh Communication Protocol
+# AMCP v1.5 Enterprise Edition - Agent Mesh Communication Protocol
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Java Version](https://img.shields.io/badge/Java-8%2B-orange.svg)](https://openjdk.java.net/)
+[![Java Version](https://img.shields.io/badge/Java-21%2B-orange.svg)](https://openjdk.java.net/)
 [![Build Status](https://img.shields.io/badge/Build-Passing-green.svg)]()
 [![Coverage](https://img.shields.io/badge/Coverage-95%25-brightgreen.svg)]()
+[![Enterprise Edition](https://img.shields.io/badge/Edition-Enterprise-gold.svg)]()
 
 ## 🚀 Overview
 
-The Agent Mesh Communication Protocol (AMCP) v1.4 is a production-ready framework for building distributed, mobile agent-based systems with enterprise-grade capabilities. Building on the foundation of v1.3's advanced mobility and interoperability features, v1.4 introduces formal enhancements for:
+The Agent Mesh Communication Protocol (AMCP) v1.5 Enterprise Edition is a production-ready framework for building distributed, mobile agent-based systems with enterprise-grade capabilities. Building on the foundation of previous versions, v1.5 introduces enterprise enhancements including:
 
+- **Google Agent-to-Agent (A2A) Protocol Bridge** - Complete bidirectional integration with A2A systems
 - **IBM Aglet-style Strong Mobility** - Agents can move between hosts carrying both code and state
-- **Google Agent-to-Agent (A2A) Protocol Compatibility** - Seamless integration with modern agent ecosystems
+- **CloudEvents 1.0 Compliance** - Standardized event format for enterprise interoperability
 - **Model Context Protocol (MCP) Server Integration** - External tool connectivity with authentication
-- **Pluggable EventBroker System** - In-memory, Kafka, NATS, Solace PubSub+ support
+- **Enhanced Kafka EventBroker** - Production-ready Kafka integration with monitoring
+- **Advanced Security Suite** - mTLS, RBAC, comprehensive authorization
+- **Enterprise Testing Framework** - TestContainers, performance benchmarks, security validation
 - **Cloud-Native Deployment** - Production-ready Kubernetes, Docker, and Istio configurations
-- **Enterprise Security** - OAuth, mTLS, authentication context propagation
 - **Comprehensive Observability** - Prometheus metrics, Jaeger tracing, Grafana dashboards
 
 ## 🏗️ Architecture
 
-AMCP v1.4 provides a complete agent mesh infrastructure:
+AMCP v1.5 Enterprise Edition provides a complete agent mesh infrastructure:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    AMCP v1.4 Architecture                   │
+│               AMCP v1.5 Enterprise Architecture             │
 ├─────────────────────────────────────────────────────────────┤
 │  Agents: MobileAgent, TravelPlanner, WeatherAgent         │
+├─────────────────────────────────────────────────────────────┤
+│  A2A Bridge: Google A2A ↔ AMCP Event conversion           │
 ├─────────────────────────────────────────────────────────────┤
 │  Mobility: dispatch(), clone(), retract(), migrate(),      │
 │           replicate(), federateWith()                      │

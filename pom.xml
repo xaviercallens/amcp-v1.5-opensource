@@ -6,13 +6,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.amcp</groupId>
-    <artifactId>amcp-v1.4-opensource</artifactId>
-    <version>1.4.0</version>
+    <artifactId>amcp-v1.5-enterprise</artifactId>
+    <version>1.5.0</version>
     <packaging>pom</packaging>
 
-    <name>AMCP v1.4 - Agent Mesh Communication Protocol</name>
-    <description>Production-ready framework for building distributed, mobile agent-based systems</description>
-    <url>https://github.com/amcp-project/amcp-v1.4-opensource</url>
+        <name>AMCP v1.5 Enterprise Edition - Agent Mesh Communication Protocol</name>
+    <description>Production-ready distributed agent framework with enterprise-grade A2A protocol bridge, CloudEvents compliance, enhanced security, and comprehensive testing suite</description>
+    <url>https://github.com/xaviercallens/amcp-v1.5-enterprise-edition</url>
 
     <licenses>
         <license>
@@ -24,30 +24,30 @@
 
     <developers>
         <developer>
-            <id>amcp-team</id>
-            <name>AMCP Development Team</name>
-            <email>team@amcp.io</email>
-            <organization>AMCP Project</organization>
-            <organizationUrl>https://amcp.io</organizationUrl>
+            <id>xcallens</id>
+            <name>Xavier Callens</name>
+            <email>xavier.callens@amcp.io</email>
+            <organization>AMCP Enterprise</organization>
+            <organizationUrl>https://github.com/xaviercallens/amcp-enterpriseedition</organizationUrl>
         </developer>
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/amcp-project/amcp-v1.4-opensource.git</connection>
-        <developerConnection>scm:git:ssh://github.com/amcp-project/amcp-v1.4-opensource.git</developerConnection>
-        <url>https://github.com/amcp-project/amcp-v1.4-opensource/tree/main</url>
+        <connection>scm:git:git://github.com/xaviercallens/amcp-enterpriseedition.git</connection>
+        <developerConnection>scm:git:ssh://github.com/xaviercallens/amcp-enterpriseedition.git</developerConnection>
+        <url>https://github.com/xaviercallens/amcp-enterpriseedition/tree/main</url>
     </scm>
 
     <properties>
-        <!-- Java Version -->
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+                <!-- Java Version - LTS -->
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- Core Dependencies -->
-        <slf4j.version>1.7.36</slf4j.version>
-        <logback.version>1.2.12</logback.version>
+        <slf4j.version>2.0.9</slf4j.version>
+        <logback.version>1.4.11</logback.version>
         <jackson.version>2.15.2</jackson.version>
         <guava.version>32.1.1-jre</guava.version>
         
@@ -56,14 +56,24 @@
         <nats.version>2.16.14</nats.version>
         <solace.version>10.19.0</solace.version>
         
+        <!-- MCP Integration -->
+        <grpc.version>1.58.0</grpc.version>
+        <protobuf.version>3.24.4</protobuf.version>
+        
+        <!-- CloudEvents -->
+        <cloudevents.version>2.5.0</cloudevents.version>
+        
         <!-- Security -->
-        <oauth2.version>2.9.0</oauth2.version>
+        <oauth2.version>10.9.1</oauth2.version>
         <jose4j.version>0.9.3</jose4j.version>
+        <spring.version>6.0.12</spring.version>
+        <spring.security.version>6.1.4</spring.security.version>
         
         <!-- Monitoring & Observability -->
         <micrometer.version>1.11.2</micrometer.version>
         <opentracing.version>0.33.0</opentracing.version>
         <jaeger.version>1.8.1</jaeger.version>
+        <opentelemetry.version>1.30.1</opentelemetry.version>
         
         <!-- HTTP Client -->
         <okhttp.version>4.11.0</okhttp.version>
@@ -72,7 +82,8 @@
         <junit.version>5.10.0</junit.version>
         <mockito.version>5.4.0</mockito.version>
         <assertj.version>3.24.2</assertj.version>
-        <testcontainers.version>1.18.3</testcontainers.version>
+        <testcontainers.version>1.19.1</testcontainers.version>
+        <wiremock.version>3.0.1</wiremock.version>
         
         <!-- Plugin Versions -->
         <maven.compiler.plugin.version>3.11.0</maven.compiler.plugin.version>
@@ -83,6 +94,7 @@
         <checkstyle.plugin.version>3.3.0</checkstyle.plugin.version>
         <pmd.plugin.version>3.21.0</pmd.plugin.version>
         <docker.plugin.version>0.43.4</docker.plugin.version>
+        <protobuf.plugin.version>0.6.1</protobuf.plugin.version>
     </properties>
 
     <modules>
@@ -103,6 +115,45 @@
                 <groupId>io.amcp</groupId>
                 <artifactId>amcp-connectors</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+
+            <!-- CloudEvents -->
+            <dependency>
+                <groupId>io.cloudevents</groupId>
+                <artifactId>cloudevents-core</artifactId>
+                <version>${cloudevents.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.cloudevents</groupId>
+                <artifactId>cloudevents-json-jackson</artifactId>
+                <version>${cloudevents.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.cloudevents</groupId>
+                <artifactId>cloudevents-kafka</artifactId>
+                <version>${cloudevents.version}</version>
+            </dependency>
+
+            <!-- gRPC for MCP -->
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-netty-shaded</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-protobuf</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-stub</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf.version}</version>
             </dependency>
 
             <!-- Logging -->
@@ -165,6 +216,21 @@
 
             <!-- Security & OAuth -->
             <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-core</artifactId>
+                <version>${spring.security.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-oauth2-core</artifactId>
+                <version>${spring.security.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-web</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.nimbusds</groupId>
                 <artifactId>oauth2-oidc-sdk</artifactId>
                 <version>${oauth2.version}</version>
@@ -185,6 +251,16 @@
                 <groupId>io.micrometer</groupId>
                 <artifactId>micrometer-registry-prometheus</artifactId>
                 <version>${micrometer.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-api</artifactId>
+                <version>${opentelemetry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-sdk</artifactId>
+                <version>${opentelemetry.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.opentracing</groupId>
@@ -241,6 +317,12 @@
                 <version>${testcontainers.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>com.github.tomakehurst</groupId>
+                <artifactId>wiremock-jre8</artifactId>
+                <version>${wiremock.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -253,8 +335,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven.compiler.plugin.version}</version>
                     <configuration>
-                        <source>8</source>
-                        <target>8</target>
+                        <source>21</source>
+                        <target>21</target>
                         <encoding>UTF-8</encoding>
                         <compilerArgs>
                             <arg>-parameters</arg>
@@ -409,7 +491,7 @@
                     <configuration>
                         <images>
                             <image>
-                                <name>amcp/amcp-v1.4:${project.version}</name>
+                                <name>amcp/amcp-v1.5-enterprise:${project.version}</name>
                                 <build>
                                     <contextDir>${project.basedir}/deploy/docker</contextDir>
                                     <args>
@@ -419,6 +501,26 @@
                             </image>
                         </images>
                     </configuration>
+                </plugin>
+
+                <!-- Protocol Buffer Plugin -->
+                <plugin>
+                    <groupId>org.xolstice.maven.plugins</groupId>
+                    <artifactId>protobuf-maven-plugin</artifactId>
+                    <version>${protobuf.plugin.version}</version>
+                    <configuration>
+                        <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
+                        <pluginId>grpc-java</pluginId>
+                        <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}</pluginArtifact>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>compile</goal>
+                                <goal>compile-custom</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>

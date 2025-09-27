@@ -1,7 +1,8 @@
-# AMCP v1.4 Weather System CLI Demo
+# AMCP v1.5 Enterprise Edition Weather System CLI Guide
 
-## Overview
-The AMCP v1.4 Weather System demonstrates advanced agent-based architecture with real-time weather monitoring, event-driven communication, and agent mobility capabilities.
+## 🌤️ Overview
+
+The Weather System CLI demonstrates AMCP v1.5's distributed agent capabilities through a real-time weather monitoring system. This example showcases:
 
 ## Features
 

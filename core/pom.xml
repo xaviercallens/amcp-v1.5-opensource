@@ -7,8 +7,9 @@
 
     <parent>
         <groupId>io.amcp</groupId>
-        <artifactId>amcp-v1.4-opensource</artifactId>
-        <version>1.4.0</version>
+        <artifactId>amcp-v1.5-enterprise</artifactId>
+        <version>1.5.0</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>amcp-core</artifactId>
@@ -131,23 +132,5 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <!-- Spring Boot Plugin for executable JAR -->
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>2.7.14</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>

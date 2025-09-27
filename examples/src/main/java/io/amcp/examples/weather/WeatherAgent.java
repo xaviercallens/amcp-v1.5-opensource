@@ -349,10 +349,19 @@ abstract class AbstractMobileAgent implements MobileAgent {
         return CompletableFuture.completedFuture(null);
     }
 
+    @Override
     public void onActivate() { setState(AgentLifecycle.ACTIVE); }
+    
+    @Override
     public void onDeactivate() { setState(AgentLifecycle.INACTIVE); }
+    
+    @Override
     public void onDestroy() { setState(AgentLifecycle.DESTROYED); }
+    
+    @Override
     public void onBeforeMigration(String destinationContext) {}
+    
+    @Override
     public void onAfterMigration(String sourceContext) {}
 
     // Simplified mobility operations for demo
