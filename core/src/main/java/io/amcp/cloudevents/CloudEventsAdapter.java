@@ -1,139 +1,235 @@
 package io.amcp.cloudevents;
 
 import io.amcp.core.Event;
-import java.time.Instant;
-import java.util.UUID;
+import io.amcp.core.AgentID;
+import io.amcp.messaging.EventBroker;
+
+import java.net.URI;
+import java.time.OffsetDateTime;
+import java.util.concurrent.CompletableFuture;
 
 /**
- * CloudEventsAdapter provides conversion between AMCP Events and CloudEvents format.
- * This adapter implements the CloudEvents v1.0 specification for interoperability.
+ * CloudEvents-compliant adapter for AMCP EventBroker.
+ * 
+ * <p>This adapter provides bidirectional conversion between AMCP Events
+ * and CloudEvents v1.0 specification, enabling full compliance with
+ * the CloudEvents standard while maintaining AMCP system compatibility.</p>
+ * 
+ * <p><strong>Key Features:</strong></p>
+ * <ul>
+ *   <li>Automatic AMCP Event ↔ CloudEvent conversion</li>
+ *   <li>CloudEvents v1.0 specification validation</li>
+ *   <li>Content-type handling for structured and binary modes</li>
+ *   <li>Extension attribute support for AMCP metadata</li>
+ *   <li>Async processing with CompletableFuture</li>
+ * </ul>
+ * 
+ * <p><strong>Usage Example:</strong></p>
+ * <pre>
+ * EventBroker underlying = new InMemoryEventBroker();
+ * CloudEventsAdapter adapter = new CloudEventsAdapter(underlying);
+ * 
+ * // Publish CloudEvent
+ * CloudEvent event = CloudEvent.builder()
+ *     .type("io.amcp.weather.updated")
+ *     .source("//weather-agent/paris")
+ *     .id("weather-001")
+ *     .data("{\"temperature\": 22.5}")
+ *     .build();
+ * 
+ * adapter.publishCloudEvent(event);
+ * </pre>
+ * 
+ * @author AMCP Development Team
+ * @version 1.5.0
  */
 public class CloudEventsAdapter {
     
-    private static final String AMCP_SOURCE = "amcp://agent-mesh";
-    private static final String CONTENT_TYPE = "application/json";
+    private final EventBroker underlying;
+    private final String defaultSource;
+    
+    /**
+     * Create a CloudEvents adapter with the specified underlying EventBroker.
+     * 
+     * @param underlying The underlying EventBroker implementation
+     */
+    public CloudEventsAdapter(EventBroker underlying) {
+        this(underlying, "//amcp/system");
+    }
+    
+    /**
+     * Create a CloudEvents adapter with a custom default source.
+     * 
+     * @param underlying The underlying EventBroker implementation
+     * @param defaultSource Default source URI for CloudEvents
+     */
+    public CloudEventsAdapter(EventBroker underlying, String defaultSource) {
+        this.underlying = underlying;
+        this.defaultSource = defaultSource;
+    }
+    
+    /**
+     * Publish a CloudEvent through the underlying EventBroker.
+     * 
+     * @param cloudEvent The CloudEvent to publish
+     * @return CompletableFuture that completes when publication is done
+     */
+    public CompletableFuture<Void> publishCloudEvent(CloudEvent cloudEvent) {
+        try {
+            cloudEvent.validate();
+            Event amcpEvent = convertToAMCPEvent(cloudEvent);
+            return underlying.publish(amcpEvent);
+        } catch (Exception e) {
+            return CompletableFuture.failedFuture(e);
+        }
+    }
     
     /**
      * Convert an AMCP Event to a CloudEvent.
      * 
-     * @param event The AMCP event to convert
-     * @return A CloudEvent representation
+     * @param amcpEvent The AMCP Event to convert
+     * @return Corresponding CloudEvent
      */
-    public static CloudEvent toCloudEvent(Event event) {
-        if (event == null) {
-            return null;
+    public CloudEvent convertToCloudEvent(Event amcpEvent) {
+        try {
+            CloudEvent.Builder builder = CloudEvent.builder()
+                .specVersion("1.0")
+                .type("io.amcp.event." + amcpEvent.getTopic().replace(".", "-"))
+                .source(determineSource(amcpEvent))
+                .id(amcpEvent.getId())
+                .time(OffsetDateTime.now())
+                .dataContentType("application/json")
+                .subject(amcpEvent.getTopic());
+            
+            // Add event data
+            if (amcpEvent.getPayload() != null) {
+                builder.data(amcpEvent.getPayload());
+            }
+            
+            // Add AMCP-specific extensions
+            builder.extension("amcp-topic", amcpEvent.getTopic());
+            
+            if (amcpEvent.getSender() != null) {
+                builder.extension("amcp-sender", amcpEvent.getSender().toString());
+            }
+            
+            if (amcpEvent.getTimestamp() != null) {
+                builder.extension("amcp-timestamp", amcpEvent.getTimestamp().toString());
+            }
+            
+            // Add metadata as extensions
+            amcpEvent.getMetadata().forEach((key, value) -> {
+                builder.extension("amcp-meta-" + key, value);
+            });
+            
+            return builder.build();
+            
+        } catch (Exception e) {
+            throw new CloudEventException("Failed to convert AMCP Event to CloudEvent", e);
         }
-        
-        CloudEvent cloudEvent = new CloudEvent();
-        cloudEvent.setId(generateEventId(event));
-        cloudEvent.setSource(AMCP_SOURCE);
-        cloudEvent.setType(event.getTopic());
-        cloudEvent.setDataContentType(CONTENT_TYPE);
-        cloudEvent.setData(event.getPayload());
-        cloudEvent.setTime(Instant.now().toString());
-        
-        // Add AMCP-specific extensions
-        cloudEvent.addExtension("amcp-sender", event.getSender().toString());
-        cloudEvent.addExtension("amcp-timestamp", event.getTimestamp().toString());
-        
-        if (event.getDeliveryOptions() != null) {
-            cloudEvent.addExtension("amcp-delivery-ordered", 
-                                  event.getDeliveryOptions().isOrdered());
-            cloudEvent.addExtension("amcp-delivery-persistent", 
-                                  event.getDeliveryOptions().isPersistent());
-        }
-        
-        return cloudEvent;
     }
     
     /**
      * Convert a CloudEvent to an AMCP Event.
      * 
      * @param cloudEvent The CloudEvent to convert
-     * @return An AMCP Event representation
+     * @return Corresponding AMCP Event
      */
-    public static Event fromCloudEvent(CloudEvent cloudEvent) {
-        if (cloudEvent == null) {
-            return null;
+    public Event convertToAMCPEvent(CloudEvent cloudEvent) {
+        try {
+            Event.Builder builder = Event.builder()
+                .id(cloudEvent.getId())
+                .topic(extractTopic(cloudEvent))
+                .payload(cloudEvent.getData().orElse(null))
+                .timestamp(cloudEvent.getTime().orElse(OffsetDateTime.now()).toLocalDateTime());
+            
+            // Extract sender from extensions
+            cloudEvent.getExtension("amcp-sender")
+                .map(Object::toString)
+                .map(AgentID::named)
+                .ifPresent(builder::sender);
+            
+            // Extract metadata from extensions
+            cloudEvent.getExtensions().forEach((key, value) -> {
+                if (key.startsWith("amcp-meta-")) {
+                    String metaKey = key.substring("amcp-meta-".length());
+                    builder.metadata(metaKey, value.toString());
+                } else if (!key.startsWith("amcp-")) {
+                    // Non-AMCP extensions become metadata
+                    builder.metadata("cloudevent-" + key, value.toString());
+                }
+            });
+            
+            // Add CloudEvent metadata
+            builder.metadata("cloudevent-type", cloudEvent.getType());
+            builder.metadata("cloudevent-source", cloudEvent.getSource().toString());
+            cloudEvent.getSubject().ifPresent(subject -> 
+                builder.metadata("cloudevent-subject", subject));
+            cloudEvent.getDataContentType().ifPresent(contentType -> 
+                builder.metadata("cloudevent-datacontenttype", contentType));
+            
+            return builder.build();
+            
+        } catch (Exception e) {
+            throw new CloudEventException("Failed to convert CloudEvent to AMCP Event", e);
         }
-        
-        Event.Builder builder = Event.builder()
-            .topic(cloudEvent.getType())
-            .payload(cloudEvent.getData())
-            .timestamp(java.time.LocalDateTime.now());
-        
-        // Extract AMCP-specific extensions
-        Object sender = cloudEvent.getExtension("amcp-sender");
-        if (sender != null) {
-            builder.sender(io.amcp.core.AgentID.fromString(sender.toString()));
-        }
-        
-        Object timestamp = cloudEvent.getExtension("amcp-timestamp");
-        if (timestamp instanceof String) {
-            try {
-                builder.timestamp(java.time.LocalDateTime.parse((String) timestamp));
-            } catch (Exception e) {
-                // Use current time if parsing fails
-                builder.timestamp(java.time.LocalDateTime.now());
-            }
-        }
-        
-        // Extract delivery options
-        Object ordered = cloudEvent.getExtension("amcp-delivery-ordered");
-        Object persistent = cloudEvent.getExtension("amcp-delivery-persistent");
-        
-        if (ordered instanceof Boolean || persistent instanceof Boolean) {
-            io.amcp.core.DeliveryOptions.Builder deliveryBuilder = io.amcp.core.DeliveryOptions.builder();
-            if (persistent instanceof Boolean && (Boolean) persistent) {
-                deliveryBuilder.persistent(true);
-            }
-            builder.deliveryOptions(deliveryBuilder.build());
-        }
-        
-        return builder.build();
     }
     
     /**
-     * Generate a unique event ID based on the AMCP event.
+     * Create a CloudEvent from AMCP Event data with automatic type inference.
      * 
-     * @param event The AMCP event
-     * @return A unique event ID
+     * @param topic The event topic
+     * @param payload The event payload
+     * @param sender The sender agent
+     * @return A CloudEvent instance
      */
-    private static String generateEventId(Event event) {
-        if (event.getSender() != null) {
-            return String.format("amcp-%s-%s", 
-                               event.getSender().toString().replaceAll("[^a-zA-Z0-9]", "-"), 
-                               event.getTimestamp().toString().replaceAll("[^a-zA-Z0-9]", "-"));
+    public CloudEvent createCloudEvent(String topic, Object payload, AgentID sender) {
+        return CloudEvent.builder()
+            .type("io.amcp.event." + topic.replace(".", "-"))
+            .source(sender != null ? 
+                URI.create("//amcp/agent/" + sender.toString()) : 
+                URI.create(defaultSource))
+            .id(java.util.UUID.randomUUID().toString())
+            .time(OffsetDateTime.now())
+            .dataContentType("application/json")
+            .subject(topic)
+            .data(payload)
+            .extension("amcp-topic", topic)
+            .extension("amcp-sender", sender != null ? sender.toString() : "system")
+            .build();
+    }
+    
+    /**
+     * Determine the source URI from an AMCP Event.
+     */
+    private URI determineSource(Event amcpEvent) {
+        if (amcpEvent.getSender() != null) {
+            return URI.create("//amcp/agent/" + amcpEvent.getSender().toString());
         }
-        return "amcp-" + UUID.randomUUID().toString();
+        return URI.create(defaultSource);
     }
     
     /**
-     * Check if a CloudEvent is compatible with AMCP.
-     * 
-     * @param cloudEvent The CloudEvent to check
-     * @return true if compatible, false otherwise
+     * Extract the AMCP topic from a CloudEvent.
      */
-    public static boolean isAmcpCompatible(CloudEvent cloudEvent) {
-        return cloudEvent != null 
-            && cloudEvent.getSource() != null
-            && cloudEvent.getType() != null
-            && cloudEvent.getData() != null;
+    private String extractTopic(CloudEvent cloudEvent) {
+        // First try to get the original AMCP topic from extensions
+        return cloudEvent.getExtension("amcp-topic")
+            .map(Object::toString)
+            .orElse(
+                // Fallback: use subject or derive from type
+                cloudEvent.getSubject().orElse(
+                    cloudEvent.getType().startsWith("io.amcp.event.") ?
+                        cloudEvent.getType().substring("io.amcp.event.".length()).replace("-", ".") :
+                        cloudEvent.getType()
+                )
+            );
     }
     
     /**
-     * Validate CloudEvent format compliance.
-     * 
-     * @param cloudEvent The CloudEvent to validate
-     * @return true if valid according to CloudEvents v1.0 spec, false otherwise
+     * Get the underlying EventBroker.
      */
-    public static boolean isValidCloudEvent(CloudEvent cloudEvent) {
-        if (cloudEvent == null) return false;
-        
-        // Required fields according to CloudEvents v1.0
-        return cloudEvent.getId() != null 
-            && cloudEvent.getSource() != null
-            && cloudEvent.getSpecVersion() != null
-            && cloudEvent.getType() != null;
+    public EventBroker getUnderlying() {
+        return underlying;
     }
 }
