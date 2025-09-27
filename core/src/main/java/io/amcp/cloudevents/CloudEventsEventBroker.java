@@ -2,8 +2,8 @@ package io.amcp.cloudevents;
 
 import io.amcp.core.Event;
 import io.amcp.messaging.EventBroker;
-import io.amcp.messaging.EventSubscriber;
 import io.amcp.messaging.impl.InMemoryEventBroker;
+import io.amcp.mobility.BrokerMetrics;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -64,6 +64,11 @@ public class CloudEventsEventBroker implements EventBroker {
     }
     
     @Override
+    public boolean isRunning() {
+        return underlying.isRunning();
+    }
+    
+    @Override
     public CompletableFuture<Void> publish(Event event) {
         if (strictValidation) {
             // Convert to CloudEvent to validate compliance
@@ -89,24 +94,13 @@ public class CloudEventsEventBroker implements EventBroker {
     }
     
     @Override
-    public CompletableFuture<Void> subscribe(String topicPattern, EventSubscriber subscriber) {
+    public CompletableFuture<Void> subscribe(EventSubscriber subscriber, String topicPattern) {
         if (strictValidation) {
             // Wrap subscriber to validate CloudEvents compliance
-            EventSubscriber wrappedSubscriber = event -> {
-                try {
-                    CloudEvent cloudEvent = adapter.convertToCloudEvent(event);
-                    cloudEvent.validate();
-                    subscriber.onEvent(event);
-                } catch (Exception e) {
-                    // Log validation error but continue processing
-                    System.err.println("CloudEvents validation warning for event " + 
-                        event.getId() + ": " + e.getMessage());
-                    subscriber.onEvent(event);
-                }
-            };
-            return underlying.subscribe(topicPattern, wrappedSubscriber);
+            EventSubscriber wrappedSubscriber = new CloudEventsValidatingSubscriber(subscriber, adapter);
+            return underlying.subscribe(wrappedSubscriber, topicPattern);
         } else {
-            return underlying.subscribe(topicPattern, subscriber);
+            return underlying.subscribe(subscriber, topicPattern);
         }
     }
     
@@ -121,21 +115,18 @@ public class CloudEventsEventBroker implements EventBroker {
             String topicPattern, 
             Consumer<CloudEvent> cloudEventConsumer) {
         
-        EventSubscriber subscriber = event -> {
-            try {
-                CloudEvent cloudEvent = adapter.convertToCloudEvent(event);
-                cloudEventConsumer.accept(cloudEvent);
-            } catch (Exception e) {
-                throw new CloudEventException("Failed to convert event to CloudEvent", e);
-            }
-        };
-        
-        return underlying.subscribe(topicPattern, subscriber);
+        EventSubscriber subscriber = new CloudEventConsumerAdapter(cloudEventConsumer, adapter);
+        return underlying.subscribe(subscriber, topicPattern);
     }
     
     @Override
-    public CompletableFuture<Void> unsubscribe(String topicPattern, EventSubscriber subscriber) {
-        return underlying.unsubscribe(topicPattern, subscriber);
+    public CompletableFuture<Void> unsubscribe(EventSubscriber subscriber, String topicPattern) {
+        return underlying.unsubscribe(subscriber, topicPattern);
+    }
+    
+    @Override
+    public BrokerMetrics getMetrics() {
+        return underlying.getMetrics();
     }
     
     /**
@@ -157,5 +148,69 @@ public class CloudEventsEventBroker implements EventBroker {
      */
     public boolean isStrictValidation() {
         return strictValidation;
+    }
+    
+    /**
+     * EventSubscriber wrapper that validates CloudEvents compliance.
+     */
+    private static class CloudEventsValidatingSubscriber implements EventSubscriber {
+        private final EventSubscriber delegate;
+        private final CloudEventsAdapter adapter;
+        
+        public CloudEventsValidatingSubscriber(EventSubscriber delegate, CloudEventsAdapter adapter) {
+            this.delegate = delegate;
+            this.adapter = adapter;
+        }
+        
+        @Override
+        public CompletableFuture<Void> handleEvent(Event event) {
+            try {
+                CloudEvent cloudEvent = adapter.convertToCloudEvent(event);
+                cloudEvent.validate();
+                return delegate.handleEvent(event);
+            } catch (Exception e) {
+                // Log validation error but continue processing
+                System.err.println("CloudEvents validation warning for event " + 
+                    event.getId() + ": " + e.getMessage());
+                return delegate.handleEvent(event);
+            }
+        }
+        
+        @Override
+        public String getSubscriberId() {
+            return "cloudevents-" + delegate.getSubscriberId();
+        }
+    }
+    
+    /**
+     * Adapter to convert CloudEvent consumer into EventSubscriber.
+     */
+    private static class CloudEventConsumerAdapter implements EventSubscriber {
+        private final Consumer<CloudEvent> cloudEventConsumer;
+        private final CloudEventsAdapter adapter;
+        private final String subscriberId;
+        
+        public CloudEventConsumerAdapter(Consumer<CloudEvent> cloudEventConsumer, CloudEventsAdapter adapter) {
+            this.cloudEventConsumer = cloudEventConsumer;
+            this.adapter = adapter;
+            this.subscriberId = "cloudevents-consumer-" + System.nanoTime();
+        }
+        
+        @Override
+        public CompletableFuture<Void> handleEvent(Event event) {
+            return CompletableFuture.runAsync(() -> {
+                try {
+                    CloudEvent cloudEvent = adapter.convertToCloudEvent(event);
+                    cloudEventConsumer.accept(cloudEvent);
+                } catch (Exception e) {
+                    throw new CloudEventException("Failed to convert event to CloudEvent", e);
+                }
+            });
+        }
+        
+        @Override
+        public String getSubscriberId() {
+            return subscriberId;
+        }
     }
 }
