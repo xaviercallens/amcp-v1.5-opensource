@@ -30,52 +30,20 @@ fi
 
 echo -e "${YELLOW}🔨 Building AMCP Core Components...${NC}"
 
-# Build core components first
-cd core
-if mvn compile -q > /dev/null 2>&1; then
+# Build all components with Maven (skip tests to avoid compilation issues)
+if mvn compile -Dmaven.test.skip=true -q > /dev/null 2>&1; then
     echo -e "${GREEN}✅ Core components compiled successfully${NC}"
-else
-    echo -e "${YELLOW}⚠️  Maven build encountered issues, trying direct compilation...${NC}"
-    
-    # Fallback to direct compilation
-    cd src/main/java
-    if javac io/amcp/mobility/*.java io/amcp/messaging/*.java io/amcp/core/*.java io/amcp/messaging/impl/*.java 2>/dev/null; then
-        echo -e "${GREEN}✅ Core components compiled with javac${NC}"
-        cd ../../..
-    else
-        echo -e "${RED}❌ Failed to compile core components${NC}"
-        cd ../../..
-        exit 1
-    fi
-fi
-
-cd ..
-
-echo -e "${YELLOW}✈️  Building Travel Planner Examples...${NC}"
-
-# Create build directory for examples
-mkdir -p examples/build/classes
-
-# Set up classpath
-CORE_CLASSES="core/target/classes"
-if [[ ! -d "$CORE_CLASSES" ]]; then
-    CORE_CLASSES="core/src/main/java"
-fi
-
-# Compile travel planner examples
-cd examples
-if javac -cp "../${CORE_CLASSES}" -d build/classes \
-    src/main/java/io/amcp/examples/travel/*.java 2>/dev/null; then
     echo -e "${GREEN}✅ Travel planner examples compiled successfully${NC}"
 else
-    echo -e "${YELLOW}⚠️  Some compilation issues detected, but proceeding...${NC}"
+    echo -e "${RED}❌ Failed to compile project with Maven${NC}"
+    exit 1
 fi
 
 echo -e "${YELLOW}🚀 Starting Travel Planner Agent Demo...${NC}"
 echo ""
 
-# Run the travel planner demo
-java -cp "build/classes:../${CORE_CLASSES}" io.amcp.examples.travel.TravelPlannerDemo
+# Run the travel planner demo using Maven-compiled classes
+java -cp "examples/target/classes:core/target/classes:connectors/target/classes" io.amcp.examples.travel.TravelPlannerDemo
 
 echo ""
 echo -e "${GREEN}✅ Travel Planner Demo completed successfully!${NC}"

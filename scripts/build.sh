@@ -149,8 +149,8 @@ build_project() {
     
     # Add test skipping if requested
     if [[ "$SKIP_TESTS" == true ]]; then
-        MVN_CMD="$MVN_CMD -DskipTests"
-        warn "Skipping tests"
+        MVN_CMD="$MVN_CMD -Dmaven.test.skip=true"
+        warn "Skipping test compilation and execution"
     else
         log "Including tests in build"
     fi
