@@ -58,7 +58,7 @@ echo "Type 'help' for available commands"
 echo "Press Ctrl+C to stop"
 echo ""
 
-java -cp "$CLASSPATH" io.amcp.examples.TravelPlannerAgent
+java -cp "$CLASSPATH" io.amcp.examples.travel.TravelPlannerAgent
 
 echo ""
 echo "✈️  Travel Planner Demo Complete!"

@@ -29,14 +29,14 @@ com/amcp/messaging/impl/InMemoryEventBroker$InMemorySubscriber.class
 io/amcp/messaging/EventBroker$Subscriber.class
 io/amcp/messaging/EventBroker.class
 io/amcp/core/DeliveryOptions$DeliveryMode.class
-com/amcp/core/impl/DefaultAgentContext.class
+io/amcp/core/DefaultAgentContext.class
 io/amcp/messaging/impl/InMemoryEventBroker$1.class
 io/amcp/core/AgentState.class
-com/amcp/core/impl/DefaultAgentContext$AgentMetadata.class
 com/amcp/messaging/impl/AbstractEventBroker$AbstractSubscriber.class
 io/amcp/messaging/impl/InMemoryEventBroker$InMemoryPublisher.class
 io/amcp/core/AgentState$Builder.class
 io/amcp/core/ControlEvent$1.class
+io/amcp/core/DefaultAgentContext$AgentMetadata.class
 com/amcp/messaging/impl/InMemoryEventBroker$1.class
 io/amcp/messaging/EventBroker$Acknowledgment.class
 io/amcp/messaging/EventBroker$BrokerConfig.class

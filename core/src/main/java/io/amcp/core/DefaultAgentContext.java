@@ -1,4 +1,4 @@
-package com.amcp.core.impl;
+package io.amcp.core;
 
 import io.amcp.core.*;
 import io.amcp.messaging.EventBroker;

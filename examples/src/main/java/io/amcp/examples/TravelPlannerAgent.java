@@ -3,6 +3,7 @@ package io.amcp.examples.travel;
 import io.amcp.core.AbstractAgent;
 import io.amcp.core.AgentID;
 import io.amcp.core.Event;
+import io.amcp.core.impl.SimpleAgentContext;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -594,5 +595,169 @@ public class TravelPlannerAgent extends AbstractAgent {
     
     public boolean hasValidApiToken() {
         return amadeusClient != null && amadeusClient.hasValidToken();
+    }
+    
+    /**
+     * Main method for standalone execution of the Travel Planner Agent.
+     * 
+     * Starts an interactive Travel Planner session with command-line interface.
+     * 
+     * @param args Command line arguments (currently unused)
+     */
+    public static void main(String[] args) {
+        System.out.println("===========================================");
+        System.out.println("   AMCP v1.5 Travel Planner Agent");
+        System.out.println("===========================================");
+        System.out.println();
+        
+        try {
+            // Create the event broker (in-memory for this example)
+            io.amcp.messaging.impl.InMemoryEventBroker broker = new io.amcp.messaging.impl.InMemoryEventBroker();
+            broker.connect(null).get(); // Connect with default config
+            
+            // Initialize the agent context
+            SimpleAgentContext context = new SimpleAgentContext("travel-context");
+            context.start().get(5, java.util.concurrent.TimeUnit.SECONDS);
+            
+            System.out.println("✅ Agent context started: " + context.getContextId());
+            System.out.println();
+            
+            // Create the travel planner agent manually
+            AgentID travelAgentId = new AgentID("travel-planner", "travel-system");
+            TravelPlannerAgent travelAgent = new TravelPlannerAgent(travelAgentId);
+            
+            // Set the context
+            travelAgent.setAgentContext(context);
+            
+            // Activate the agent manually by calling its lifecycle methods
+            travelAgent.onActivate();
+            
+            System.out.println("✅ Travel Planner Agent activated: " + travelAgentId);
+            System.out.println();
+            
+            // Start interactive session
+            runInteractiveSession(travelAgent, context);
+            
+        } catch (Exception e) {
+            System.err.println("❌ Travel Planner failed to start: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+    
+    private static void runInteractiveSession(TravelPlannerAgent agent, SimpleAgentContext context) {
+        java.util.Scanner scanner = new java.util.Scanner(System.in);
+        
+        System.out.println("🚀 Travel Planner Interactive Session");
+        System.out.println("=====================================");
+        System.out.println("Commands available:");
+        System.out.println("  search <origin> <destination> <date>  - Search for flights");
+        System.out.println("  status                                - Show agent status");
+        System.out.println("  help                                  - Show this help");
+        System.out.println("  quit                                  - Exit");
+        System.out.println();
+        
+        boolean running = true;
+        while (running) {
+            System.out.print("travel> ");
+            String input = scanner.nextLine().trim();
+            
+            if (input.isEmpty()) continue;
+            
+            String[] parts = input.split("\\s+");
+            String command = parts[0].toLowerCase();
+            
+            try {
+                switch (command) {
+                    case "search":
+                        if (parts.length >= 4) {
+                            handleSearchCommand(agent, context, parts[1], parts[2], parts[3]);
+                        } else {
+                            System.out.println("❌ Usage: search <origin> <destination> <date>");
+                            System.out.println("   Example: search JFK CDG 2024-02-15");
+                        }
+                        break;
+                        
+                    case "status":
+                        handleStatusCommand(agent);
+                        break;
+                        
+                    case "help":
+                        System.out.println("Commands:");
+                        System.out.println("  search <origin> <destination> <date>  - Search for flights");
+                        System.out.println("  status                                - Show agent status"); 
+                        System.out.println("  help                                  - Show this help");
+                        System.out.println("  quit                                  - Exit");
+                        break;
+                        
+                    case "quit":
+                    case "exit":
+                        System.out.println("✈️ Shutting down Travel Planner...");
+                        running = false;
+                        break;
+                        
+                    default:
+                        System.out.println("❌ Unknown command: " + command + ". Type 'help' for available commands.");
+                        break;
+                }
+            } catch (Exception e) {
+                System.out.println("❌ Error executing command: " + e.getMessage());
+            }
+            
+            System.out.println();
+        }
+        
+        try {
+            context.shutdown().get(5, java.util.concurrent.TimeUnit.SECONDS);
+            System.out.println("✅ Travel Planner shutdown complete");
+        } catch (Exception e) {
+            System.err.println("❌ Error during shutdown: " + e.getMessage());
+        }
+        
+        scanner.close();
+    }
+    
+    private static void handleSearchCommand(TravelPlannerAgent agent, SimpleAgentContext context, String origin, String destination, String date) {
+        System.out.println("🔍 Searching flights from " + origin + " to " + destination + " on " + date + "...");
+        
+        try {
+            // Create a flight search request
+            java.util.Map<String, Object> requestData = new java.util.HashMap<>();
+            requestData.put("origin", origin);
+            requestData.put("destination", destination);
+            requestData.put("departureDate", date);
+            requestData.put("passengers", 1);
+            requestData.put("requestId", "cli-" + System.currentTimeMillis());
+            
+            // Create and publish search event
+            Event searchEvent = Event.builder()
+                    .topic("travel.flight.search")
+                    .payload(requestData)
+                    .sender(new AgentID("cli-user", "localhost"))
+                    .build();
+            
+            // Process the search
+            java.util.concurrent.CompletableFuture<Void> searchFuture = agent.handleEvent(searchEvent);
+            searchFuture.get(10, java.util.concurrent.TimeUnit.SECONDS);
+            
+            System.out.println("✅ Flight search processed (check agent logs for results)");
+            
+        } catch (Exception e) {
+            System.out.println("❌ Flight search failed: " + e.getMessage());
+        }
+    }
+    
+    private static void handleStatusCommand(TravelPlannerAgent agent) {
+        System.out.println("📊 Travel Planner Agent Status");
+        System.out.println("==============================");
+        System.out.println("Agent ID: " + agent.getAgentId());
+        System.out.println("Lifecycle State: " + agent.getLifecycleState());
+        System.out.println("Is Healthy: " + agent.isHealthy());
+        System.out.println("Total Requests: " + agent.getRequestCount());
+        System.out.println("Active Requests: " + agent.getActiveRequestsCount());
+        System.out.println("Cached Results: " + agent.getCachedResultsCount());
+        System.out.println("API Calls Made: " + agent.getApiCallCount());
+        System.out.println("Valid API Token: " + agent.hasValidApiToken());
+        System.out.println("Context: " + "travel-context");
     }
 }

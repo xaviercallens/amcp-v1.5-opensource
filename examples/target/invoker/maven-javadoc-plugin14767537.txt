@@ -1,0 +1,27 @@
+Invoking Maven for the goals: [org.apache.maven.plugins:maven-javadoc-plugin:3.4.1:javadoc] with no properties
+
+M2_HOME=/opt/homebrew/Cellar/maven/3.9.7/libexec
+MAVEN_OPTS=null
+JAVA_HOME=/Library/Java/JavaVirtualMachines/zulu-8.jdk/Contents/Home
+JAVA_OPTS=null
+
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------------< io.amcp:amcp-connectors >-----------------------
+[INFO] Building AMCP Connectors 1.5.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[WARNING] Parameter 'target' is unknown for plugin 'maven-javadoc-plugin:3.4.1:javadoc (default-cli)'
+[INFO] 
+[INFO] >>> javadoc:3.4.1:javadoc (default-cli) > generate-sources @ amcp-connectors >>>
+[INFO] 
+[INFO] <<< javadoc:3.4.1:javadoc (default-cli) < generate-sources @ amcp-connectors <<<
+[INFO] 
+[INFO] 
+[INFO] --- javadoc:3.4.1:javadoc (default-cli) @ amcp-connectors ---
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.579 s
+[INFO] Finished at: 2025-09-27T13:18:02+02:00
+[INFO] ------------------------------------------------------------------------

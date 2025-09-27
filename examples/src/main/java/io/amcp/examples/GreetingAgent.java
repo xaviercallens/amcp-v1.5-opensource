@@ -1,7 +1,7 @@
 package io.amcp.examples;
 
 import io.amcp.core.*;
-import io.amcp.core.impl.DefaultAgentContext;
+import io.amcp.core.impl.SimpleAgentContext;
 import io.amcp.messaging.impl.InMemoryEventBroker;
 import java.util.concurrent.CompletableFuture;
 
@@ -130,7 +130,7 @@ public class GreetingAgent implements Agent {
         broker.connect(null).get(); // Connect with default config
         
         // Create agent context
-        DefaultAgentContext context = new DefaultAgentContext("example", broker);
+        SimpleAgentContext context = new SimpleAgentContext("example");
         context.start().get();
         
         // Create a greeting agent

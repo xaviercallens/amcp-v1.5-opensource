@@ -15,9 +15,10 @@ echo "===================================="
 # Change to project directory
 cd "$PROJECT_DIR"
 
-# Configuration
+# Configuration  
 DEPLOYMENT_TYPE=${1:-"local"}  # local, docker, kubernetes
-VERSION=$(grep -oP '<version>\K[^<]+' pom.xml | head -1)
+# macOS compatible version extraction
+VERSION=$(grep '<version>' pom.xml | head -1 | cut -d'>' -f2 | cut -d'<' -f1)
 
 echo "📋 Deployment Configuration:"
 echo "   • Version: $VERSION"

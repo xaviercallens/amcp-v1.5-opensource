@@ -73,8 +73,8 @@ public class WeatherSystemIntegrationTest {
         
         try {
             // Test AgentID creation
-            com.amcp.core.AgentID collectorId = new com.amcp.core.AgentID("test-collector");
-            com.amcp.core.AgentID consumerId = new com.amcp.core.AgentID("test-consumer");
+            io.amcp.core.AgentID collectorId = new io.amcp.core.AgentID("test-collector", "weather");
+            io.amcp.core.AgentID consumerId = new io.amcp.core.AgentID("test-consumer", "weather");
             
             System.out.println("  🤖 Collector Agent ID: " + collectorId);
             System.out.println("  🤖 Consumer Agent ID: " + consumerId);
