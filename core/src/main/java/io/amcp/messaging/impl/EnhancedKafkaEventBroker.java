@@ -52,9 +52,7 @@ public class EnhancedKafkaEventBroker implements EventBroker {
     private final Properties consumerConfig;
     private final String topicPrefix;
     private final ObjectMapper objectMapper;
-    private final CloudEventsAdapter cloudEventsAdapter;
-    
-    // Producer and Consumer management
+    // Performance and reliability features
     private Producer<String, String> producer;
     private final Map<String, KafkaConsumer<String, String>> consumers = new ConcurrentHashMap<>();
     private final Map<String, Thread> consumerThreads = new ConcurrentHashMap<>();
@@ -93,9 +91,6 @@ public class EnhancedKafkaEventBroker implements EventBroker {
         // Initialize JSON processing
         this.objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule());
-        
-        // Initialize CloudEvents adapter
-        this.cloudEventsAdapter = new CloudEventsAdapter(this);
         
         // Initialize thread pool
         this.executorService = Executors.newCachedThreadPool(r -> {
@@ -198,7 +193,7 @@ public class EnhancedKafkaEventBroker implements EventBroker {
             
             try {
                 // Convert to CloudEvents format for standardization
-                CloudEvent cloudEvent = cloudEventsAdapter.convertToCloudEvent(event);
+                CloudEvent cloudEvent = CloudEventsAdapter.toCloudEvent(event);
                 String messageValue = objectMapper.writeValueAsString(cloudEvent);
                 
                 ProducerRecord<String, String> record = new ProducerRecord<>(
@@ -236,7 +231,7 @@ public class EnhancedKafkaEventBroker implements EventBroker {
     }
     
     @Override
-    public CompletableFuture<Void> subscribe(String topicPattern, EventSubscriber subscriber) {
+    public CompletableFuture<Void> subscribe(EventSubscriber subscriber, String topicPattern) {
         return CompletableFuture.runAsync(() -> {
             try {
                 subscriptions.computeIfAbsent(topicPattern, k -> ConcurrentHashMap.newKeySet())
@@ -255,7 +250,7 @@ public class EnhancedKafkaEventBroker implements EventBroker {
     }
     
     @Override
-    public CompletableFuture<Void> unsubscribe(String topicPattern, EventSubscriber subscriber) {
+    public CompletableFuture<Void> unsubscribe(EventSubscriber subscriber, String topicPattern) {
         return CompletableFuture.runAsync(() -> {
             Set<EventSubscriber> subscribers = subscriptions.get(topicPattern);
             if (subscribers != null) {
@@ -273,7 +268,7 @@ public class EnhancedKafkaEventBroker implements EventBroker {
      * Publishes a CloudEvent directly to Kafka.
      */
     public CompletableFuture<Void> publishCloudEvent(CloudEvent cloudEvent) {
-        Event amcpEvent = cloudEventsAdapter.convertToAMCPEvent(cloudEvent);
+        Event amcpEvent = CloudEventsAdapter.fromCloudEvent(cloudEvent);
         return publish(amcpEvent);
     }
     
@@ -294,13 +289,6 @@ public class EnhancedKafkaEventBroker implements EventBroker {
     @Override
     public boolean isRunning() {
         return running.get();
-    }
-    
-    /**
-     * Gets the CloudEvents adapter for manual conversions.
-     */
-    public CloudEventsAdapter getCloudEventsAdapter() {
-        return cloudEventsAdapter;
     }
     
     // Private helper methods
@@ -365,7 +353,7 @@ public class EnhancedKafkaEventBroker implements EventBroker {
             CloudEvent cloudEvent = objectMapper.readValue(record.value(), CloudEvent.class);
             
             // Convert to AMCP Event
-            Event amcpEvent = cloudEventsAdapter.convertToAMCPEvent(cloudEvent);
+            Event amcpEvent = CloudEventsAdapter.fromCloudEvent(cloudEvent);
             
             // Deliver to subscribers
             Set<EventSubscriber> subscribers = subscriptions.get(topicPattern);

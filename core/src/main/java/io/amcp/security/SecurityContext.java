@@ -115,6 +115,10 @@ public class SecurityContext implements Principal {
         return true;
     }
     
+    public boolean hasRole(String role) {
+        return this.roles.contains(role);
+    }
+    
     public String getSessionId() {
         return sessionId;
     }
