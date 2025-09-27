@@ -13,7 +13,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * AMCP v1.4 Weather System Command Line Interface.
+ * AMCP v1.5 Enterprise Edition Weather System Command Line Interface.
  * 
  * <p>Interactive CLI    // Other AgentContext methods would be implemented here
     @Override
@@ -108,7 +108,7 @@ public class WeatherSystemCLI {
     
     private static final String BANNER = 
         "╔═══════════════════════════════════════════════════════════════╗\n" +
-        "║                AMCP v1.4 Weather System CLI                  ║\n" +
+        "║           AMCP v1.5 Enterprise Edition Weather CLI           ║\n" +
         "║          Agent Mesh Communication Protocol Demo              ║\n" +
         "╚═══════════════════════════════════════════════════════════════╝\n";
         
@@ -413,7 +413,7 @@ public class WeatherSystemCLI {
             scanner.close();
             
             System.out.println("✅ Weather system shutdown complete.");
-            System.out.println("Thank you for using AMCP v1.4 Weather System!");
+            System.out.println("Thank you for using AMCP v1.5 Enterprise Edition Weather System!");
             
         } catch (Exception e) {
             System.err.println("Error during shutdown: " + e.getMessage());
@@ -430,9 +430,62 @@ public class WeatherSystemCLI {
 class AgentContextImpl implements AgentContext {
     private final EventBroker eventBroker;
     private final Map<AgentID, Agent> agents = new HashMap<>();
+    private final String contextId = UUID.randomUUID().toString();
+    private final long startTime = System.currentTimeMillis();
 
     public AgentContextImpl(EventBroker eventBroker) {
         this.eventBroker = eventBroker;
+    }
+
+    @Override
+    public String getContextId() {
+        return contextId;
+    }
+
+    @Override
+    public EventBroker getEventBroker() {
+        return eventBroker;
+    }
+
+    @Override
+    public MobilityManager getMobilityManager() {
+        return new MobilityManager() {
+            @Override
+            public boolean canMigrate(AgentID agentId, String targetContext) {
+                return true; // Simple implementation for demo
+            }
+
+            @Override
+            public boolean migrate(AgentID agentId, String targetContext, MigrationOptions options) {
+                return true; // Simple implementation for demo
+            }
+        };
+    }
+
+    @Override
+    public SecurityManager getSecurityManager() {
+        return System.getSecurityManager(); // Use system security manager
+    }
+
+    @Override
+    public CompletableFuture<Void> registerAgent(Agent agent) {
+        agents.put(agent.getAgentId(), agent);
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
+    public CompletableFuture<Void> unregisterAgent(AgentID agentId) {
+        agents.remove(agentId);
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
+    public CompletableFuture<Void> activateAgent(AgentID agentId) {
+        Agent agent = agents.get(agentId);
+        if (agent != null) {
+            agent.onActivate();
+        }
+        return CompletableFuture.completedFuture(null);
     }
 
     public void activateAgent(Agent agent) {
@@ -440,6 +493,7 @@ class AgentContextImpl implements AgentContext {
         agent.onActivate();
     }
 
+    @Override
     public CompletableFuture<Void> deactivateAgent(AgentID agentId) {
         return CompletableFuture.runAsync(() -> {
             Agent agent = agents.get(agentId);
@@ -448,6 +502,30 @@ class AgentContextImpl implements AgentContext {
                 agents.remove(agentId);
             }
         });
+    }
+
+    @Override
+    public Agent getAgent(AgentID agentId) {
+        return agents.get(agentId);
+    }
+
+    @Override
+    public boolean hasAgent(AgentID agentId) {
+        return agents.containsKey(agentId);
+    }
+
+    @Override
+    public AgentLifecycle getAgentState(AgentID agentId) {
+        return agents.containsKey(agentId) ? AgentLifecycle.ACTIVE : null;
+    }
+
+    @Override
+    public CompletableFuture<Void> routeEvent(Event event) {
+        // Simplified routing - broadcast to all agents
+        for (Agent agent : agents.values()) {
+            agent.handleEvent(event);
+        }
+        return CompletableFuture.completedFuture(null);
     }
 
     @Override
@@ -468,6 +546,48 @@ class AgentContextImpl implements AgentContext {
         return eventBroker.publish(event);
     }
 
+    @Override
+    public CompletableFuture<Void> migrateAgent(AgentID agentId, String destinationContext, MigrationOptions options) {
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
+    public CompletableFuture<AgentID> receiveAgent(byte[] serializedAgent, String sourceContext) {
+        // Simple implementation - would deserialize agent in production
+        return CompletableFuture.completedFuture(AgentID.random());
+    }
+
+    @Override
+    public ContextMetrics getMetrics() {
+        return new ContextMetrics() {
+            @Override
+            public int getActiveAgentCount() {
+                return agents.size();
+            }
+            @Override
+            public long getTotalAgentsCreated() {
+                return agents.size();
+            }
+            @Override
+            public long getTotalEventsProcessed() {
+                return 0;
+            }
+            @Override
+            public double getAverageEventProcessingTime() {
+                return 0.0;
+            }
+            @Override
+            public long getFailedOperations() {
+                return 0;
+            }
+            @Override
+            public long getUptimeMillis() {
+                return System.currentTimeMillis() - startTime;
+            }
+        };
+    }
+
+    @Override
     public CompletableFuture<Void> shutdown() {
         return CompletableFuture.runAsync(() -> {
             try {
@@ -478,12 +598,6 @@ class AgentContextImpl implements AgentContext {
                 System.err.println("Error shutting down event broker: " + e.getMessage());
             }
         });
-    }
-
-    // Other AgentContext methods would be implemented here
-    @Override
-    public CompletableFuture<Void> migrateAgent(AgentID agentId, String destinationContext, MigrationOptions options) {
-        return CompletableFuture.completedFuture(null);
     }
 
     public CompletableFuture<AgentID> cloneAgent(AgentID agentId, String destinationContext) {

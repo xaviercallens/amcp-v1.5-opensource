@@ -133,7 +133,7 @@ public class ATPMessageHandler {
             
             ATPMessage responseMessage = new ATPMessage(
                 ATPMessage.MessageType.HANDSHAKE_RESPONSE,
-                atpManager.localHostId,
+                atpManager.getLocalHostId(),
                 sourceHost,
                 "handshake_response_" + System.currentTimeMillis(),
                 response
@@ -174,7 +174,7 @@ public class ATPMessageHandler {
                 // Send migration response
                 ATPMessage responseMessage = new ATPMessage(
                     ATPMessage.MessageType.MIGRATE_RESPONSE,
-                    atpManager.localHostId,
+                    atpManager.getLocalHostId(),
                     message.getSourceHost(),
                     "migration_response_" + request.getMigrationId(),
                     result
@@ -212,7 +212,7 @@ public class ATPMessageHandler {
             // Send heartbeat response
             ATPMessage heartbeatResponse = new ATPMessage(
                 ATPMessage.MessageType.HEARTBEAT,
-                atpManager.localHostId,
+                atpManager.getLocalHostId(),
                 sourceHost,
                 "heartbeat_response_" + System.currentTimeMillis(),
                 null
@@ -270,7 +270,7 @@ public class ATPMessageHandler {
             
             ATPMessage errorMsg = new ATPMessage(
                 ATPMessage.MessageType.ERROR,
-                atpManager.localHostId,
+                atpManager.getLocalHostId(),
                 targetHost,
                 "error_" + System.currentTimeMillis(),
                 error

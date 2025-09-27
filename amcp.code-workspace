@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"name": "AMCP v1.5 Enterprise Edition",
+			"path": "."
+		}
+	],
+	"settings": {
+		"java.configuration.updateBuildConfiguration": "automatic",
+		"java.compile.nullAnalysis.mode": "automatic"
+	}
+}

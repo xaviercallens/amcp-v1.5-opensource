@@ -246,6 +246,10 @@ public class ATPManager {
         );
     }
     
+    public String getLocalHostId() {
+        return localHostId;
+    }
+    
     /**
      * Shutdown ATP manager and close all connections
      */

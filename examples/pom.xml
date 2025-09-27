@@ -7,8 +7,9 @@
 
     <parent>
         <groupId>io.amcp</groupId>
-        <artifactId>amcp-v1.4-opensource</artifactId>
-        <version>1.4.0</version>
+        <artifactId>amcp-v1.5-enterprise</artifactId>
+        <version>1.5.0</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>amcp-examples</artifactId>
