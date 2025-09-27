@@ -8,6 +8,7 @@ import io.amcp.core.AgentID;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
