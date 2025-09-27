@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+        <groupId>io.amcp</groupId>
+        <artifactId>amcp-parent</artifactId>
+        <version>1.5.0</version>
+    </parent>
+    
+    <artifactId>amcp-examples</artifactId>
+    <packaging>jar</packaging>
+    
+    <name>AMCP Examples</name>
+    <description>Example applications demonstrating AMCP framework capabilities</description>
+    
+    <dependencies>
+        <!-- Core AMCP -->
+        <dependency>
+            <groupId>io.amcp</groupId>
+            <artifactId>amcp-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <!-- Connectors (optional) -->
+        <dependency>
+            <groupId>io.amcp</groupId>
+            <artifactId>amcp-connectors</artifactId>
+            <version>${project.version}</version>
+            <optional>true</optional>
+        </dependency>
+        
+        <!-- Testing -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            
+            <!-- Exec plugin for running examples -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <!-- Greeting Agent -->
+                    <execution>
+                        <id>greeting-agent</id>
+                        <configuration>
+                            <mainClass>io.amcp.examples.GreetingAgent</mainClass>
+                            <options>
+                                <option>-Dfile.encoding=UTF-8</option>
+                            </options>
+                        </configuration>
+                    </execution>
+                    
+                    <!-- Travel Planner Agent -->
+                    <execution>
+                        <id>travel-planner</id>
+                        <configuration>
+                            <mainClass>io.amcp.examples.TravelPlannerAgent</mainClass>
+                            <options>
+                                <option>-Dfile.encoding=UTF-8</option>
+                            </options>
+                        </configuration>
+                    </execution>
+                    
+                    <!-- Weather System Launcher -->
+                    <execution>
+                        <id>weather-system</id>
+                        <configuration>
+                            <mainClass>io.amcp.examples.weather.WeatherSystemLauncher</mainClass>
+                            <options>
+                                <option>-Dfile.encoding=UTF-8</option>
+                            </options>
+                        </configuration>
+                    </execution>
+                    
+                    <!-- Weather Collector Agent -->
+                    <execution>
+                        <id>weather-collector</id>
+                        <configuration>
+                            <mainClass>io.amcp.examples.weather.WeatherCollectorAgent</mainClass>
+                            <options>
+                                <option>-Dfile.encoding=UTF-8</option>
+                            </options>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
