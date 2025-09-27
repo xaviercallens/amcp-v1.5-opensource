@@ -61,6 +61,14 @@ public class AmadeusApiClient {
     }
     
     /**
+     * Helper method to get environment variables with fallback.
+     */
+    private String getEnvironmentVariable(String key, String defaultValue) {
+        String value = System.getenv(key);
+        return (value != null && !value.trim().isEmpty()) ? value.trim() : defaultValue;
+    }
+    
+    /**
      * Search for flight offers using the Amadeus Flight Offers Search API.
      * Follows the same pattern as weather API integration.
      */
@@ -453,13 +461,6 @@ public class AmadeusApiClient {
         return count;
     }
     
-    /**
-     * Gets environment variable with fallback to default value.
-     */
-    private String getEnvironmentVariable(String name, String defaultValue) {
-        String value = System.getenv(name);
-        return value != null && !value.trim().isEmpty() ? value.trim() : defaultValue;
-    }
     
     /**
      * Logging method following the weather agent pattern.

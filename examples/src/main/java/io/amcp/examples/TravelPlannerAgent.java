@@ -47,30 +47,45 @@ public class TravelPlannerAgent extends AbstractAgent {
     public void onActivate() {
         super.onActivate();
         
-        // Initialize Amadeus API client
-        this.amadeusClient = new AmadeusApiClient("travel-agent-" + getAgentId());
-        
-        // Subscribe to travel-related events
-        subscribe(FLIGHT_SEARCH_TOPIC);
-        subscribe(TRAVEL_CONTROL_TOPIC + ".*");
-        
-        log("TravelPlannerAgent activated and subscribed to topics");
-        log("Amadeus API integration: " + amadeusClient.getBaseUrl());
-        log("API Key type: " + amadeusClient.getApiKeyType());
+        try {
+            // Initialize Amadeus API client
+            this.amadeusClient = new AmadeusApiClient("travel-agent-" + getAgentId());
+            
+            // Subscribe to travel-related events
+            subscribe(FLIGHT_SEARCH_TOPIC);
+            subscribe(TRAVEL_CONTROL_TOPIC + ".*");
+            
+            log("TravelPlannerAgent activated and subscribed to topics");
+            log("Amadeus API integration: " + (amadeusClient != null ? amadeusClient.getBaseUrl() : "Not available"));
+            log("API Key type: " + (amadeusClient != null ? amadeusClient.getApiKeyType() : "Not configured"));
+        } catch (Exception e) {
+            log("Error during agent activation: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
     @Override
     public void onDeactivate() {
         log("TravelPlannerAgent deactivating...");
         
-        // Clear cached data
-        cachedResults.clear();
-        activeRequests.clear();
-        
-        // Log statistics
-        logStatistics();
-        
-        super.onDeactivate();
+        try {
+            // Clear cached data
+            cachedResults.clear();
+            activeRequests.clear();
+            
+            // Cleanup API client resources
+            if (amadeusClient != null) {
+                // Add cleanup if AmadeusApiClient has cleanup methods
+                log("Cleaning up API client resources");
+            }
+            
+            // Log statistics
+            logStatistics();
+        } catch (Exception e) {
+            log("Error during agent deactivation: " + e.getMessage());
+        } finally {
+            super.onDeactivate();
+        }
     }
     
     @Override
@@ -132,6 +147,23 @@ public class TravelPlannerAgent extends AbstractAgent {
      */
     private void performFlightSearch(FlightSearchRequest searchRequest, String requestKey, AgentID requestingAgent) {
         try {
+            // Validate search request before making API call
+            String validationError = validateSearchRequest(searchRequest);
+            if (validationError != null) {
+                log("Search request validation failed for " + requestKey + ": " + validationError);
+                activeRequests.remove(requestKey);
+                publishErrorEvent("Invalid search request: " + validationError, requestingAgent, requestKey);
+                return;
+            }
+            
+            // Check if API client is available
+            if (amadeusClient == null) {
+                log("API client not available for request: " + requestKey);
+                activeRequests.remove(requestKey);
+                publishErrorEvent("Travel planning service temporarily unavailable", requestingAgent, requestKey);
+                return;
+            }
+            
             log("Calling Amadeus Flight Offers Search API for request: " + requestKey);
             
             // Make the API call
@@ -143,12 +175,13 @@ public class TravelPlannerAgent extends AbstractAgent {
             // Remove from active requests
             activeRequests.remove(requestKey);
             
-            if (result.isSuccessful()) {
+            if (result != null && result.isSuccessful()) {
                 log("Flight search completed successfully: " + result.getSummary());
                 publishFlightResults(result, requestingAgent, requestKey);
             } else {
-                log("Flight search failed: " + result.getError());
-                publishErrorEvent("Flight search failed: " + result.getError(), requestingAgent, requestKey);
+                String errorMsg = result != null ? result.getError() : "Unknown API error";
+                log("Flight search failed: " + errorMsg);
+                publishErrorEvent("Flight search failed: " + errorMsg, requestingAgent, requestKey);
             }
             
         } catch (IOException e) {
@@ -433,6 +466,74 @@ public class TravelPlannerAgent extends AbstractAgent {
             log("API environment: " + (amadeusClient.isUsingProduction() ? "PRODUCTION" : "TEST"));
         }
         log("=== End Statistics ===");
+    }
+    
+    /**
+     * Validates a flight search request for business logic errors.
+     */
+    private String validateSearchRequest(FlightSearchRequest request) {
+        if (request == null) {
+            return "Search request is null";
+        }
+        
+        // Validate airport codes (basic validation)
+        if (!isValidAirportCode(request.getOrigin())) {
+            return "Invalid origin airport code: " + request.getOrigin();
+        }
+        
+        if (!isValidAirportCode(request.getDestination())) {
+            return "Invalid destination airport code: " + request.getDestination();
+        }
+        
+        // Check if origin and destination are the same
+        if (request.getOrigin().equalsIgnoreCase(request.getDestination())) {
+            return "Origin and destination cannot be the same";
+        }
+        
+        // Validate departure date is not in the past
+        if (request.getDepartureDate().isBefore(LocalDate.now())) {
+            return "Departure date cannot be in the past";
+        }
+        
+        // Validate departure date is not too far in the future (airlines typically limit to ~11 months)
+        if (request.getDepartureDate().isAfter(LocalDate.now().plusMonths(11))) {
+            return "Departure date is too far in the future (max 11 months)";
+        }
+        
+        // Validate return date if provided
+        if (request.getReturnDate() != null) {
+            if (request.getReturnDate().isBefore(request.getDepartureDate())) {
+                return "Return date cannot be before departure date";
+            }
+            if (request.getReturnDate().isAfter(LocalDate.now().plusMonths(11))) {
+                return "Return date is too far in the future (max 11 months)";
+            }
+        }
+        
+        // Validate passenger counts
+        if (request.getAdults() < 1 || request.getAdults() > 9) {
+            return "Adults count must be between 1 and 9";
+        }
+        
+        if (request.getChildren() < 0 || request.getChildren() > 8) {
+            return "Children count must be between 0 and 8";
+        }
+        
+        if (request.getAdults() + request.getChildren() > 9) {
+            return "Total passengers (adults + children) cannot exceed 9";
+        }
+        
+        return null; // No validation errors
+    }
+    
+    /**
+     * Basic airport code validation (3-letter IATA codes).
+     */
+    private boolean isValidAirportCode(String code) {
+        return code != null && 
+               code.length() == 3 && 
+               code.matches("[A-Z]{3}") && 
+               !code.equals("XXX"); // XXX is often used as placeholder
     }
     
     // Helper methods for map parsing

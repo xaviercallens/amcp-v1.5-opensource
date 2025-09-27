@@ -16,7 +16,7 @@ echo "===================================="
 cd "$PROJECT_DIR"
 
 # Check if project is built
-if [ ! -f "target/classes/io/amcp/examples/travel/TravelPlannerAgent.class" ]; then
+if [ ! -f "examples/target/classes/io/amcp/examples/TravelPlannerAgent.class" ]; then
     echo "📦 Project not built. Building now..."
     ./scripts/build-all.sh
 fi
@@ -58,7 +58,7 @@ echo "Type 'help' for available commands"
 echo "Press Ctrl+C to stop"
 echo ""
 
-java -cp "$CLASSPATH" io.amcp.examples.travel.TravelPlannerAgent
+java -cp "$CLASSPATH" io.amcp.examples.TravelPlannerAgent
 
 echo ""
 echo "✈️  Travel Planner Demo Complete!"
