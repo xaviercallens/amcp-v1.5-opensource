@@ -30,10 +30,21 @@ if ! command_exists mvn; then
     exit 1
 fi
 
-# Check Java version
-JAVA_VERSION=$(java -version 2>&1 | grep -oP 'version "([0-9]+)' | grep -oP '([0-9]+)')
-if [ "$JAVA_VERSION" -lt 8 ]; then
-    echo "❌ Java 8 or later required. Found: Java $JAVA_VERSION"
+# Check Java version (macOS compatible)
+JAVA_VERSION_FULL=$(java -version 2>&1 | head -1 | cut -d'"' -f2)
+echo "Detected Java version: $JAVA_VERSION_FULL"
+
+# Handle both Java 8 format (1.8.x) and Java 9+ format (9.x, 11.x, etc.)
+if [[ "$JAVA_VERSION_FULL" == 1.* ]]; then
+    JAVA_MAJOR_VERSION=$(echo "$JAVA_VERSION_FULL" | cut -d'.' -f2)
+else
+    JAVA_MAJOR_VERSION=$(echo "$JAVA_VERSION_FULL" | cut -d'.' -f1)
+fi
+
+echo "Java major version: $JAVA_MAJOR_VERSION"
+
+if [ "$JAVA_MAJOR_VERSION" -lt 8 ]; then
+    echo "❌ Java 8 or later required. Found: Java $JAVA_VERSION_FULL"
     exit 1
 fi
 

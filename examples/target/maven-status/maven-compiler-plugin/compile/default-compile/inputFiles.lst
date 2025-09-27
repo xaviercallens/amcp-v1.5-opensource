@@ -1,10 +1,12 @@
 /Users/xcallens/Downloads/aglets-2.5-gamma.jar_Decompiler.com/amcp-v1.5-opensource/examples/src/main/java/io/amcp/examples/weather/WeatherSystemLauncher.java
+/Users/xcallens/Downloads/aglets-2.5-gamma.jar_Decompiler.com/amcp-v1.5-opensource/examples/src/main/java/io/amcp/examples/AMCP15DemoAgent.java
 /Users/xcallens/Downloads/aglets-2.5-gamma.jar_Decompiler.com/amcp-v1.5-opensource/examples/src/main/java/io/amcp/examples/FlightSearchRequest.java
 /Users/xcallens/Downloads/aglets-2.5-gamma.jar_Decompiler.com/amcp-v1.5-opensource/examples/src/main/java/io/amcp/examples/EnvironmentalWatcherAgent.java
 /Users/xcallens/Downloads/aglets-2.5-gamma.jar_Decompiler.com/amcp-v1.5-opensource/examples/src/main/java/io/amcp/examples/WeatherData.java
 /Users/xcallens/Downloads/aglets-2.5-gamma.jar_Decompiler.com/amcp-v1.5-opensource/examples/src/main/java/io/amcp/examples/weather/StandaloneWeatherCollector.java
 /Users/xcallens/Downloads/aglets-2.5-gamma.jar_Decompiler.com/amcp-v1.5-opensource/examples/src/main/java/io/amcp/examples/FlightOffer.java
 /Users/xcallens/Downloads/aglets-2.5-gamma.jar_Decompiler.com/amcp-v1.5-opensource/examples/src/main/java/io/amcp/examples/weather/WeatherCollectorAgent.java
+/Users/xcallens/Downloads/aglets-2.5-gamma.jar_Decompiler.com/amcp-v1.5-opensource/examples/src/main/java/io/amcp/examples/SimpleTravelPlannerDemo.java
 /Users/xcallens/Downloads/aglets-2.5-gamma.jar_Decompiler.com/amcp-v1.5-opensource/examples/src/main/java/io/amcp/examples/FlightOffersSearchResult.java
 /Users/xcallens/Downloads/aglets-2.5-gamma.jar_Decompiler.com/amcp-v1.5-opensource/examples/src/main/java/io/amcp/examples/AmadeusApiClient.java
 /Users/xcallens/Downloads/aglets-2.5-gamma.jar_Decompiler.com/amcp-v1.5-opensource/examples/src/main/java/io/amcp/examples/weather/WeatherCollectorAgentTest.java
@@ -18,6 +20,7 @@
 /Users/xcallens/Downloads/aglets-2.5-gamma.jar_Decompiler.com/amcp-v1.5-opensource/examples/src/main/java/io/amcp/examples/weather/WeatherRealTimeMonitor.java
 /Users/xcallens/Downloads/aglets-2.5-gamma.jar_Decompiler.com/amcp-v1.5-opensource/examples/src/main/java/io/amcp/examples/WeatherRealTimeMonitor.java
 /Users/xcallens/Downloads/aglets-2.5-gamma.jar_Decompiler.com/amcp-v1.5-opensource/examples/src/main/java/io/amcp/examples/WeatherCollectorAgent.java
+/Users/xcallens/Downloads/aglets-2.5-gamma.jar_Decompiler.com/amcp-v1.5-opensource/examples/src/main/java/io/amcp/examples/AMCP15DemoLauncher.java
 /Users/xcallens/Downloads/aglets-2.5-gamma.jar_Decompiler.com/amcp-v1.5-opensource/examples/src/main/java/io/amcp/examples/StandaloneWeatherCollector.java
 /Users/xcallens/Downloads/aglets-2.5-gamma.jar_Decompiler.com/amcp-v1.5-opensource/examples/src/main/java/io/amcp/examples/weather/WeatherSystemIntegrationTest.java
 /Users/xcallens/Downloads/aglets-2.5-gamma.jar_Decompiler.com/amcp-v1.5-opensource/examples/src/main/java/io/amcp/examples/weather/AgentID.java
