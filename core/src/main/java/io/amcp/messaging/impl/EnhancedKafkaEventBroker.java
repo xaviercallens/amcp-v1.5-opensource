@@ -193,7 +193,8 @@ public class EnhancedKafkaEventBroker implements EventBroker {
             
             try {
                 // Convert to CloudEvents format for standardization
-                CloudEvent cloudEvent = CloudEventsAdapter.toCloudEvent(event);
+                CloudEventsAdapter adapter = new CloudEventsAdapter(this);
+                CloudEvent cloudEvent = adapter.convertToCloudEvent(event);
                 String messageValue = objectMapper.writeValueAsString(cloudEvent);
                 
                 ProducerRecord<String, String> record = new ProducerRecord<>(
@@ -268,7 +269,8 @@ public class EnhancedKafkaEventBroker implements EventBroker {
      * Publishes a CloudEvent directly to Kafka.
      */
     public CompletableFuture<Void> publishCloudEvent(CloudEvent cloudEvent) {
-        Event amcpEvent = CloudEventsAdapter.fromCloudEvent(cloudEvent);
+        CloudEventsAdapter adapter = new CloudEventsAdapter(this);
+        Event amcpEvent = adapter.convertToAMCPEvent(cloudEvent);
         return publish(amcpEvent);
     }
     
@@ -353,7 +355,8 @@ public class EnhancedKafkaEventBroker implements EventBroker {
             CloudEvent cloudEvent = objectMapper.readValue(record.value(), CloudEvent.class);
             
             // Convert to AMCP Event
-            Event amcpEvent = CloudEventsAdapter.fromCloudEvent(cloudEvent);
+            CloudEventsAdapter adapter = new CloudEventsAdapter(this);
+            Event amcpEvent = adapter.convertToAMCPEvent(cloudEvent);
             
             // Deliver to subscribers
             Set<EventSubscriber> subscribers = subscriptions.get(topicPattern);

@@ -7,7 +7,8 @@ import io.amcp.core.DeliveryOptions;
 import io.amcp.messaging.EventBroker;
 import io.amcp.messaging.impl.InMemoryEventBroker;
 import io.amcp.mobility.MobilityManager;
-import io.amcp.mobility.impl.DefaultMobilityManager;
+import io.amcp.core.impl.SimpleAgentContext;
+import io.amcp.mobility.impl.SimpleMobilityManager;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -57,16 +59,18 @@ public class TravelPlannerDemo {
         
         // Initialize components
         eventBroker = new InMemoryEventBroker();
-        mobilityManager = new DefaultMobilityManager(eventBroker);
+        mobilityManager = new SimpleMobilityManager();
         
         // Create agent context
-        agentContext = new AgentContext(eventBroker, mobilityManager);
+        agentContext = new SimpleAgentContext(eventBroker, mobilityManager);
         
         // Create and activate travel agent
         travelAgent = new TravelPlannerAgent(AgentID.named("travel-planner-demo"));
         
         try {
-            travelAgent.activate(agentContext).get(5, TimeUnit.SECONDS);
+            // Register and activate travel agent
+            agentContext.registerAgent(travelAgent).get(5, TimeUnit.SECONDS);
+            agentContext.activateAgent(travelAgent.getAgentId()).get(5, TimeUnit.SECONDS);
             logMessage("Travel planner agent activated successfully");
         } catch (Exception e) {
             logMessage("Failed to activate travel agent: " + e.getMessage());
@@ -286,7 +290,7 @@ public class TravelPlannerDemo {
     private void cleanup() {
         try {
             if (travelAgent != null) {
-                travelAgent.deactivate().get(3, TimeUnit.SECONDS);
+                agentContext.deactivateAgent(travelAgent.getAgentId()).get(3, TimeUnit.SECONDS);
                 logMessage("Travel agent deactivated successfully");
             }
             
@@ -315,37 +319,34 @@ public class TravelPlannerDemo {
     private class DemoEventSubscriber implements EventBroker.EventSubscriber {
         
         @Override
-        public void onEvent(Event event) {
-            String topic = event.getTopic();
-            
-            if (topic.startsWith("travel.")) {
-                System.out.println("\\n📨 Travel Event: " + topic);
-                if (event.getPayload() instanceof Map) {
-                    @SuppressWarnings("unchecked")
-                    Map<String, Object> data = (Map<String, Object>) event.getPayload();
-                    
-                    if (topic.contains("plan.created")) {
-                        System.out.println("   ✅ Travel plan created successfully!");
-                    } else if (topic.contains("plan.updated")) {
-                        System.out.println("   📝 Travel plan updated");
-                    } else if (topic.contains("weather.analyzed")) {
-                        System.out.println("   🌤️  Weather analysis completed");
-                    } else {
-                        System.out.println("   📊 Processing: " + data.getOrDefault("status", "unknown"));
+        public CompletableFuture<Void> handleEvent(Event event) {
+            return CompletableFuture.runAsync(() -> {
+                String topic = event.getTopic();
+                
+                if (topic.startsWith("travel.")) {
+                    System.out.println("\\n📨 Travel Event: " + topic);
+                    if (event.getPayload() instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> data = (Map<String, Object>) event.getPayload();
+                        
+                        if (topic.contains("plan.created")) {
+                            System.out.println("   ✅ Travel plan created successfully!");
+                        } else if (topic.contains("plan.updated")) {
+                            System.out.println("   📝 Travel plan updated");
+                        } else if (topic.contains("weather.analyzed")) {
+                            System.out.println("   🌤️  Weather analysis completed");
+                        } else {
+                            System.out.println("   📊 Processing: " + data.getOrDefault("status", "unknown"));
+                        }
                     }
+                    System.out.print("\\ntravel> ");
                 }
-                System.out.print("\\ntravel> ");
-            }
+            });
         }
         
         @Override
         public String getSubscriberId() {
             return "demo-subscriber";
-        }
-        
-        @Override
-        public boolean isActive() {
-            return running;
         }
     }
 }
