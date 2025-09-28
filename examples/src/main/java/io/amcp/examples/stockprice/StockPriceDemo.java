@@ -1,135 +1,116 @@
 package io.amcp.examples.stockprice;
 
-import io.amcp.core.AgentContext;
-import io.amcp.core.Event;
-import io.amcp.core.DeliveryOptions;
-import io.amcp.core.AgentID;
-import io.amcp.messaging.EventBroker;
-import io.amcp.messaging.impl.InMemoryEventBroker;
-import io.amcp.mobility.MobilityManager;
-import io.amcp.core.impl.SimpleAgentContext;
-import io.amcp.mobility.impl.SimpleMobilityManager;
-
-import java.util.Map;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
+import java.util.Random;
 
 /**
- * AMCP v1.4 Stock Price Demo.
- * Simple demonstration of stock price monitoring agent capabilities.
+ * Standalone Stock Price Demo for AMCP v1.5 Enterprise Edition
  */
 public class StockPriceDemo {
     
+    private static final Random random = new Random();
+    
     public static void main(String[] args) {
-        System.out.println("=== AMCP v1.4 Stock Price Agent Demo ===");
+        System.out.println("╔═══════════════════════════════════════════════════════════════╗");
+        System.out.println("║        AMCP v1.5 Enterprise Edition Stock Price Demo         ║");
+        System.out.println("╚═══════════════════════════════════════════════════════════════╝");
+        System.out.println();
         
         try {
-            // Initialize components
-            EventBroker eventBroker = new InMemoryEventBroker();
-            MobilityManager mobilityManager = new SimpleMobilityManager();
-            
-            // Create agent context
-            AgentContext context = new SimpleAgentContext(eventBroker, mobilityManager);
-            
-            // Create the stock price agent
-            StockPriceAgent stockAgent = new StockPriceAgent();
-            
-            // Register and activate agent
-            context.registerAgent(stockAgent).get(5, TimeUnit.SECONDS);
-            context.activateAgent(stockAgent.getAgentId()).get(5, TimeUnit.SECONDS);
-            
-            System.out.println("Stock Price Agent activated: " + stockAgent.getAgentId());
-            
-            // Simulate adding stocks to portfolio
-            simulatePortfolioManagement(context, stockAgent);
-            
-            // Simulate price requests
-            simulateStockPriceRequests(context, stockAgent);
-            
-            // Let the agent run for demonstration
-            Thread.sleep(10000); // 10 seconds
-            
-            // Clean shutdown
-            context.deactivateAgent(stockAgent.getAgentId());
-            context.shutdown();
-            
-            System.out.println("Demo completed successfully!");
-            
+            demonstrateStockPriceLookup();
+            System.out.println();
+            demonstratePortfolioManagement();
+            System.out.println();
+            demonstrateAvailableSymbols();
+            System.out.println();
+            System.out.println("✅ Demo completed successfully!");
         } catch (Exception e) {
-            System.err.println("Demo failed: " + e.getMessage());
+            System.err.println("❌ Error during demo: " + e.getMessage());
             e.printStackTrace();
         }
     }
     
-    private static void simulatePortfolioManagement(AgentContext context, StockPriceAgent agent) {
-        System.out.println("\n--- Portfolio Management Demo ---");
+    private static void demonstrateStockPriceLookup() {
+        System.out.println("📊 Stock Price Lookup Demonstration:");
+        System.out.println("-".repeat(35));
         
-        try {
-            // Add AAPL to portfolio
-            Map<String, Object> addAAPL = new HashMap<>();
-            addAAPL.put("action", "add");
-            addAAPL.put("symbol", "AAPL");
-            addAAPL.put("shares", 100);
-            addAAPL.put("price", 150.50);
-            
-            Event portfolioEvent1 = Event.builder()
-                .topic("portfolio.add")
-                .payload(addAAPL)
-                .sender(AgentID.named("demo-client"))
-                .build();
-            
-            context.publishEvent(portfolioEvent1);
-            Thread.sleep(1000);
-            
-            // Add GOOGL to portfolio
-            Map<String, Object> addGOOGL = new HashMap<>();
-            addGOOGL.put("action", "add");
-            addGOOGL.put("symbol", "GOOGL");
-            addGOOGL.put("shares", 50);
-            addGOOGL.put("price", 2800.75);
-            
-            Event portfolioEvent2 = Event.builder()
-                .topic("portfolio.add")
-                .payload(addGOOGL)
-                .sender(AgentID.named("demo-client"))
-                .build();
-            
-            context.publishEvent(portfolioEvent2);
-            Thread.sleep(1000);
-            
-            System.out.println("Portfolio positions added");
-            
-        } catch (Exception e) {
-            System.err.println("Error in portfolio simulation: " + e.getMessage());
+        String[] symbols = {"AAPL", "GOOGL", "MSFT", "TSLA", "AMZN"};
+        for (String symbol : symbols) {
+            BigDecimal price = getSimulatedStockPrice(symbol);
+            System.out.printf("%-8s: $%,.2f%n", symbol, price);
         }
     }
     
-    private static void simulateStockPriceRequests(AgentContext context, StockPriceAgent agent) {
-        System.out.println("\n--- Stock Price Request Demo ---");
+    private static void demonstratePortfolioManagement() {
+        System.out.println("💼 Portfolio Management Demonstration:");
+        System.out.println("-".repeat(38));
         
-        try {
-            String[] symbols = {"AAPL", "GOOGL", "MSFT", "TSLA", "AMZN"};
+        Map<String, Integer> portfolio = new HashMap<>();
+        portfolio.put("AAPL", 100);
+        portfolio.put("GOOGL", 50);
+        portfolio.put("MSFT", 75);
+        
+        BigDecimal totalValue = BigDecimal.ZERO;
+        System.out.println("Portfolio Holdings:");
+        
+        for (Map.Entry<String, Integer> holding : portfolio.entrySet()) {
+            String symbol = holding.getKey();
+            int shares = holding.getValue();
+            BigDecimal price = getSimulatedStockPrice(symbol);
+            BigDecimal holdingValue = price.multiply(BigDecimal.valueOf(shares));
+            totalValue = totalValue.add(holdingValue);
             
-            for (String symbol : symbols) {
-                Map<String, Object> priceRequest = new HashMap<>();
-                priceRequest.put("symbol", symbol);
-                priceRequest.put("requestId", "req_" + System.currentTimeMillis());
-                
-                Event priceEvent = Event.builder()
-                    .topic("stock.price.request")
-                    .payload(priceRequest)
-                    .sender(AgentID.named("demo-client"))
-                    .deliveryOptions(DeliveryOptions.reliable())
-                    .build();
-                
-                context.publishEvent(priceEvent);
-                Thread.sleep(500); // Brief pause between requests
-                
-                System.out.println("Requested price for: " + symbol);
-            }
-            
-        } catch (Exception e) {
-            System.err.println("Error in price request simulation: " + e.getMessage());
+            System.out.printf("  %-8s: %3d shares @ $%,.2f = $%,.2f%n", 
+                symbol, shares, price, holdingValue);
         }
+        
+        System.out.println();
+        System.out.printf("Total Portfolio Value: $%,.2f%n", totalValue);
+    }
+    
+    private static void demonstrateAvailableSymbols() {
+        System.out.println("📈 Available Stock Symbols:");
+        System.out.println("-".repeat(28));
+        
+        String[] symbols = {
+            "AAPL", "GOOGL", "MSFT", "TSLA", "AMZN", 
+            "META", "NFLX", "NVDA", "AMD", "INTC"
+        };
+        
+        for (int i = 0; i < symbols.length; i++) {
+            System.out.print(symbols[i]);
+            if (i < symbols.length - 1) {
+                System.out.print(", ");
+            }
+            if ((i + 1) % 5 == 0) {
+                System.out.println();
+            }
+        }
+        if (symbols.length % 5 != 0) {
+            System.out.println();
+        }
+    }
+    
+    private static BigDecimal getSimulatedStockPrice(String symbol) {
+        Map<String, Double> basePrices = new HashMap<>();
+        basePrices.put("AAPL", 175.0);
+        basePrices.put("GOOGL", 140.0);
+        basePrices.put("MSFT", 380.0);
+        basePrices.put("TSLA", 220.0);
+        basePrices.put("AMZN", 155.0);
+        basePrices.put("META", 320.0);
+        basePrices.put("NFLX", 450.0);
+        basePrices.put("NVDA", 480.0);
+        basePrices.put("AMD", 110.0);
+        basePrices.put("INTC", 45.0);
+        
+        double basePrice = basePrices.getOrDefault(symbol, 100.0);
+        double variation = (random.nextGaussian() * 0.05);
+        double finalPrice = basePrice * (1 + variation);
+        
+        return BigDecimal.valueOf(finalPrice).setScale(2, RoundingMode.HALF_UP);
     }
 }

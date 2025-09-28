@@ -15,18 +15,21 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Enhanced AMCP v1.5 Chat Agent with Inter-Agent Communication
+ * Enhanced AMCP v1.5 Chat Agent with OrchestratorAgent Integration
  * 
- * This intelligent orchestrator agent provides:
- * - Natural language conversation with OLLAMA integration
- * - Intelligent routing to specialized agents via AMCP protocol
+ * This intelligent chat orchestrator provides:
+ * - Natural language conversation management
+ * - Integration with OrchestratorAgent for intelligent routing
  * - Multi-agent coordination and response synthesis
  * - Context-aware conversation management
  * - A2A pattern implementation for agent-to-agent communication
+ * 
+ * The EnhancedChatAgent now acts as the user-facing interface while delegating
+ * intelligent routing decisions to the OrchestratorAgent powered by TinyLlama.
  */
 public class EnhancedChatAgent implements Agent {
     
-    private static final String AGENT_TYPE = "ENHANCED_CHAT_ORCHESTRATOR";
+    private static final String AGENT_TYPE = "ENHANCED_CHAT_INTERFACE";
     private static final String VERSION = "1.5.0";
     
     private final AgentID agentId;
@@ -34,10 +37,9 @@ public class EnhancedChatAgent implements Agent {
     private AgentLifecycle lifecycleState = AgentLifecycle.INACTIVE;
     private final Set<String> subscriptions = new CopyOnWriteArraySet<>();
     
-    // Core components
+    // Core orchestration integration
+    private OrchestratorAgent orchestratorAgent;
     private final AgentRegistry agentRegistry;
-    private final PromptManager promptManager;
-    private final OllamaSpringAIConnector ollamaConnector;
     
     // Conversation management
     private final Map<String, ConversationContext> activeConversations = new ConcurrentHashMap<>();
@@ -46,8 +48,6 @@ public class EnhancedChatAgent implements Agent {
     public EnhancedChatAgent() {
         this.agentId = AgentID.named("EnhancedChatAgent");
         this.agentRegistry = new AgentRegistry();
-        this.promptManager = new PromptManager(agentRegistry);
-        this.ollamaConnector = new OllamaSpringAIConnector();
     }
     
     /**
@@ -128,36 +128,45 @@ public class EnhancedChatAgent implements Agent {
     @Override
     public void onActivate() {
         try {
-            logMessage("Activating Enhanced Chat Agent...");
+            logMessage("🎯 Activating Enhanced Chat Agent...");
             lifecycleState = AgentLifecycle.ACTIVE;
             
-            // Activate registry first
+            // Initialize and activate OrchestratorAgent
+            orchestratorAgent = new OrchestratorAgent();
+            orchestratorAgent.setContext(context);
+            orchestratorAgent.onActivate();
+            
+            // Activate registry
             agentRegistry.onActivate();
             
             // Subscribe to chat and response events
             subscriptions.add("chat.request.**");
             subscriptions.add("chat.response.**");
-            subscriptions.add("agent.response.**");
-            subscriptions.add("weather.response.**");
-            subscriptions.add("travel.response.**");
-            subscriptions.add("stock.response.**");
+            subscriptions.add("orchestrator.response.**");
             
             for (String topic : subscriptions) {
                 subscribe(topic);
             }
             
-            logMessage("Enhanced Chat Agent activated with " + subscriptions.size() + " subscriptions");
+            logMessage("✅ Enhanced Chat Agent activated with OrchestratorAgent integration");
+            logMessage("🤖 Ready for intelligent multi-agent conversations");
             
         } catch (Exception e) {
-            logMessage("Failed to activate Enhanced Chat Agent: " + e.getMessage());
+            logMessage("❌ Failed to activate Enhanced Chat Agent: " + e.getMessage());
             throw new RuntimeException("Enhanced Chat Agent activation failed", e);
         }
     }
     
     @Override
     public void onDeactivate() {
-        logMessage("Deactivating Enhanced Chat Agent...");
+        logMessage("🎯 Deactivating Enhanced Chat Agent...");
         lifecycleState = AgentLifecycle.INACTIVE;
+        
+        // Deactivate OrchestratorAgent
+        if (orchestratorAgent != null) {
+            orchestratorAgent.onDeactivate();
+        }
+        
         agentRegistry.onDeactivate();
         subscriptions.clear();
         activeConversations.clear();
@@ -166,7 +175,13 @@ public class EnhancedChatAgent implements Agent {
     
     @Override
     public void onDestroy() {
-        logMessage("Destroying Enhanced Chat Agent...");
+        logMessage("🎯 Destroying Enhanced Chat Agent...");
+        
+        // Destroy OrchestratorAgent
+        if (orchestratorAgent != null) {
+            orchestratorAgent.onDestroy();
+        }
+        
         agentRegistry.onDestroy();
         subscriptions.clear();
         activeConversations.clear();
@@ -228,7 +243,7 @@ public class EnhancedChatAgent implements Agent {
     }
     
     /**
-     * Handles incoming chat requests and orchestrates multi-agent responses
+     * Handles incoming chat requests and orchestrates multi-agent responses using OrchestratorAgent
      */
     private void handleChatRequest(Event event) {
         try {
@@ -237,7 +252,7 @@ public class EnhancedChatAgent implements Agent {
             String message = (String) payload.get("message");
             String conversationId = (String) payload.getOrDefault("conversationId", "default");
             
-            logMessage("Processing chat request: \"" + message + "\"");
+            logMessage("📝 Processing chat request: \"" + message + "\"");
             
             // Get or create conversation context
             ConversationContext conversation = activeConversations.computeIfAbsent(
@@ -245,223 +260,44 @@ public class EnhancedChatAgent implements Agent {
             
             conversation.addMessage("user", message, "user");
             
-            // Route the request using PromptManager
-            promptManager.routeRequest(message)
-                    .thenAccept(result -> processRoutingResult(result, conversation, event))
+            // Use OrchestratorAgent for intelligent routing and processing
+            orchestratorAgent.orchestrateRequest(message, conversationId)
+                    .thenAccept(response -> {
+                        logMessage("✅ Received orchestrated response");
+                        conversation.addMessage("assistant", response, "OrchestratorAgent");
+                        sendFinalResponse(conversation, event, response, "OrchestratorAgent");
+                    })
                     .exceptionally(ex -> {
-                        logMessage("Error in request routing: " + ex.getMessage());
+                        logMessage("❌ Error in orchestration: " + ex.getMessage());
                         handleFallbackResponse(message, conversation, event);
                         return null;
                     });
                     
         } catch (Exception e) {
-            logMessage("Error handling chat request: " + e.getMessage());
+            logMessage("❌ Error handling chat request: " + e.getMessage());
         }
     }
     
     /**
-     * Processes the routing result and delegates to appropriate agents
-     */
-    private void processRoutingResult(PromptManager.RoutingResult result, 
-                                    ConversationContext conversation, Event originalEvent) {
-        
-        logMessage("Routing result: " + result.getIntent() + " -> " + result.getTargetAgent() + 
-                  " (confidence: " + String.format("%.2f", result.getConfidence()) + ")");
-        
-        String correlationId = UUID.randomUUID().toString();
-        
-        if ("ChatAgent".equals(result.getTargetAgent())) {
-            // Handle with OLLAMA directly
-            handleWithOllama(result.getProcessedPrompt(), conversation, originalEvent);
-        } else {
-            // Delegate to specialized agent
-            delegateToAgent(result, conversation, originalEvent, correlationId);
-        }
-    }
-    
-    /**
-     * Delegates request to specialized agents via AMCP events
-     */
-    private void delegateToAgent(PromptManager.RoutingResult result, 
-                                ConversationContext conversation, 
-                                Event originalEvent, String correlationId) {
-        
-        String targetTopic = getAgentTopic(result.getTargetAgent());
-        
-        Map<String, Object> request = new HashMap<>();
-        request.put("query", result.getProcessedPrompt());
-        request.put("parameters", result.getParameters());
-        request.put("conversationId", conversation.getConversationId());
-        request.put("originalQuery", result.getParameters().get("originalInput"));
-        
-        // Create pending request
-        CompletableFuture<String> pendingResponse = new CompletableFuture<>();
-        pendingRequests.put(correlationId, pendingResponse);
-        
-        // Set timeout for agent response
-        pendingResponse.orTimeout(30, TimeUnit.SECONDS)
-                .thenAccept(response -> {
-                    conversation.addAgentResponse(result.getTargetAgent(), response);
-                    sendFinalResponse(conversation, originalEvent, response, result.getTargetAgent());
-                })
-                .exceptionally(ex -> {
-                    logMessage("Agent response timeout or error for " + result.getTargetAgent());
-                    handleFallbackResponse((String) result.getParameters().get("originalInput"), 
-                                        conversation, originalEvent);
-                    return null;
-                });
-        
-        // Send request to target agent
-        publishEvent(Event.builder()
-                .topic(targetTopic)
-                .payload(request)
-                .correlationId(correlationId)
-                .sender(agentId)
-                .build());
-        
-        logMessage("Delegated request to " + result.getTargetAgent() + " via topic: " + targetTopic);
-    }
-    
-    /**
-     * Handles responses from specialized agents
+     * Handles responses from the orchestration system
      */
     private void handleAgentResponse(Event event) {
-        String correlationId = event.getCorrelationId();
-        if (correlationId != null && pendingRequests.containsKey(correlationId)) {
-            
-            CompletableFuture<String> pendingRequest = pendingRequests.remove(correlationId);
-            
-            try {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> payload = event.getPayload(Map.class);
-                String response = (String) payload.get("response");
-                
-                if (response != null) {
-                    pendingRequest.complete(response);
-                    logMessage("Received response from agent: " + event.getTopic());
-                } else {
-                    pendingRequest.complete("I received a response but couldn't process it properly.");
-                }
-                
-            } catch (Exception e) {
-                logMessage("Error processing agent response: " + e.getMessage());
-                pendingRequest.complete("I encountered an error processing the agent response.");
-            }
-        }
+        // This now handles orchestrated responses
+        logMessage("📥 Received orchestration response: " + event.getTopic());
     }
     
     /**
-     * Handles requests directly with OLLAMA for general chat
-     */
-    private void handleWithOllama(String message, ConversationContext conversation, Event originalEvent) {
-        try {
-            // Build context-aware prompt
-            String contextualPrompt = buildContextualPrompt(message, conversation);
-            
-            // Create tool request for OLLAMA
-            Map<String, Object> params = new HashMap<>();
-            params.put("prompt", contextualPrompt);
-            params.put("model", "tinyllama");
-            params.put("conversationId", conversation.getConversationId());
-            
-            io.amcp.tools.ToolRequest toolRequest = new io.amcp.tools.ToolRequest(
-                "ollama-chat", 
-                params,
-                UUID.randomUUID().toString()
-            );
-            
-            ollamaConnector.invoke(toolRequest)
-                    .thenAccept(toolResponse -> {
-                        if (toolResponse.isSuccess()) {
-                            @SuppressWarnings("unchecked")
-                            Map<String, Object> result = (Map<String, Object>) toolResponse.getData();
-                            String response = (String) result.get("response");
-                            conversation.addMessage("assistant", response, "OLLAMA");
-                            sendFinalResponse(conversation, originalEvent, response, "ChatAgent");
-                        } else {
-                            logMessage("OLLAMA tool error: " + toolResponse.getErrorMessage());
-                            handleFallbackResponse(message, conversation, originalEvent);
-                        }
-                    })
-                    .exceptionally(ex -> {
-                        logMessage("OLLAMA processing error: " + ex.getMessage());
-                        handleFallbackResponse(message, conversation, originalEvent);
-                        return null;
-                    });
-                    
-        } catch (Exception e) {
-            logMessage("Error handling with OLLAMA: " + e.getMessage());
-            handleFallbackResponse(message, conversation, originalEvent);
-        }
-    }
-    
-    /**
-     * Builds contextual prompt including conversation history and agent registry info
-     */
-    private String buildContextualPrompt(String message, ConversationContext conversation) {
-        StringBuilder prompt = new StringBuilder();
-        
-        // Enhanced system prompt with agent routing intelligence
-        prompt.append("You are TinyLlama, an AI orchestrator in the AMCP (Agent Mesh Communication Protocol) system. ");
-        prompt.append("Your primary role is to intelligently route user requests to specialized agents and synthesize their responses.\n\n");
-        
-        prompt.append("AVAILABLE AGENTS AND CAPABILITIES:\n");
-        prompt.append("• WeatherAgent: Provides real-time weather data for ANY location worldwide using OpenWeatherMap API\n");
-        prompt.append("  - Handles queries like: 'weather in [LOCATION]', 'temperature in [CITY]', 'forecast for [PLACE]'\n");
-        prompt.append("  - Supports ANY city/location, not just hardcoded ones\n");
-        prompt.append("• StockPriceAgent: Provides live financial market data using real-time APIs\n");
-        prompt.append("  - Handles queries about ANY stock symbol or company name\n");
-        prompt.append("  - Supports: stock prices, market data, trading information\n");
-        prompt.append("• TravelPlannerAgent: Intelligent trip planning and travel coordination\n");
-        prompt.append("  - Route planning, flight search, accommodation, itineraries\n\n");
-        
-        prompt.append("ROUTING INTELLIGENCE:\n");
-        prompt.append("- For weather queries: ALWAYS route to WeatherAgent, extract location from user query\n");
-        prompt.append("- For stock/financial queries: ALWAYS route to StockPriceAgent, extract symbol/company\n");
-        prompt.append("- For travel queries: ALWAYS route to TravelPlannerAgent\n");
-        prompt.append("- Only handle general conversation directly\n\n");
-        
-        prompt.append("LOCATION EXTRACTION:\n");
-        prompt.append("- Extract ANY city, country, or location mentioned in weather queries\n");
-        prompt.append("- Examples: 'weather in Nice' → location: Nice\n");
-        prompt.append("- Examples: 'temperature in London, UK' → location: London, UK\n");
-        prompt.append("- Examples: 'how's the weather in Tokyo today?' → location: Tokyo\n\n");
-        
-        prompt.append("STOCK SYMBOL EXTRACTION:\n");
-        prompt.append("- Extract ANY company name or stock symbol mentioned\n");
-        prompt.append("- Examples: 'Amadeus stock price' → symbol: AMADEUS\n");
-        prompt.append("- Examples: 'Apple stock' → symbol: AAPL\n");
-        prompt.append("- Examples: 'Tesla shares' → symbol: TSLA\n\n");
-        
-        // Add recent conversation history
-        List<ChatMessage> history = conversation.getHistory();
-        if (history.size() > 3) {
-            prompt.append("RECENT CONVERSATION:\n");
-            history.stream()
-                    .skip(Math.max(0, history.size() - 3))
-                    .forEach(msg -> prompt.append(msg.getRole()).append(": ").append(msg.getContent()).append("\n"));
-            prompt.append("\n");
-        }
-        
-        prompt.append("USER REQUEST: ").append(message).append("\n\n");
-        prompt.append("Analyze this request and determine if it should be routed to a specialized agent. ");
-        prompt.append("If routing to an agent, identify the key parameters (location for weather, symbol for stocks). ");
-        prompt.append("If handling directly, provide a helpful response.");
-        
-        return prompt.toString();
-    }
-    
-    /**
-     * Fallback response when specialized agents are unavailable
+     * Fallback response when orchestration fails
      */
     private void handleFallbackResponse(String message, ConversationContext conversation, Event originalEvent) {
-        logMessage("Using fallback response for: " + message);
+        logMessage("⚠️ Using fallback response for: " + message);
         
-        // Try OLLAMA as final fallback
-        handleWithOllama("I understand you're asking about: \"" + message + "\". " +
-                        "However, I'm currently unable to connect with the specialized agents. " +
-                        "Let me try to help you directly with what I know.", 
-                        conversation, originalEvent);
+        String fallbackResponse = "I apologize, but I'm currently experiencing some difficulties processing your request. " +
+                                "The intelligent agent orchestration system is temporarily unavailable. " +
+                                "Please try again in a moment.";
+        
+        conversation.addMessage("assistant", fallbackResponse, "FallbackSystem");
+        sendFinalResponse(conversation, originalEvent, fallbackResponse, "FallbackSystem");
     }
     
     /**
@@ -536,17 +372,25 @@ public class EnhancedChatAgent implements Agent {
     }
     
     /**
-     * Get available agents
+     * Get available agents from the AgentRegistry
      */
     public CompletableFuture<Map<String, String>> getAvailableAgents() {
-        return promptManager.getAvailableAgents();
+        return agentRegistry.discoverAgents()
+            .thenApply(agents -> {
+                Map<String, String> agentMap = new HashMap<>();
+                agents.forEach(agent -> agentMap.put(agent.getAgentId(), agent.getDescription()));
+                return agentMap;
+            });
     }
     
     /**
-     * Get examples for demonstration
+     * Get orchestration statistics
      */
-    public Map<String, List<String>> getAgentExamples() {
-        return promptManager.getAgentExamples();
+    public Map<String, Object> getOrchestrationStats() {
+        if (orchestratorAgent != null) {
+            return orchestratorAgent.getOrchestrationStats();
+        }
+        return Map.of("status", "OrchestratorAgent not initialized");
     }
     
     private void logMessage(String message) {

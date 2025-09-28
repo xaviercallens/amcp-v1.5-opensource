@@ -35,21 +35,51 @@ fi
 
 echo -e "${YELLOW}🔨 Building AMCP Core Components...${NC}"
 
-# Build all components with Maven (skip tests to avoid compilation issues)
-if mvn compile -Dmaven.test.skip=true -q > /dev/null 2>&1; then
+# Build core components first (skip tests to avoid compilation issues)
+if mvn clean compile -pl core,connectors -DskipTests -q > /dev/null 2>&1; then
     echo -e "${GREEN}✅ Core components compiled successfully${NC}"
-    echo -e "${GREEN}✅ Stock price examples compiled successfully${NC}"
 else
-    echo -e "${RED}❌ Failed to compile project with Maven${NC}"
+    echo -e "${RED}❌ Failed to compile core modules${NC}"
     exit 1
 fi
 
-echo -e "${YELLOW}🚀 Starting Stock Price Agent Demo...${NC}"
+# Compile just the stock price demo classes
+echo -e "${YELLOW}🔨 Building Stock Price Demo...${NC}"
+if mvn compile -pl examples -am -DskipTests -Dmaven.compiler.includes="**/stockprice/**" -q > /dev/null 2>&1; then
+    echo -e "${GREEN}✅ Stock price demo compiled successfully${NC}"
+else
+    echo -e "${RED}❌ Failed to compile stock price demo${NC}"
+    echo -e "${YELLOW}📋 Trying alternative compilation approach...${NC}"
+    
+    # Generate dependency classpath for connectors
+    mvn dependency:build-classpath -pl connectors -Dmdep.outputFile=connectors/classpath.txt -q > /dev/null 2>&1
+    
+    # Compile manually with proper classpath
+    mkdir -p examples/target/classes
+    if javac -cp "core/target/classes:connectors/target/classes" \
+        -d examples/target/classes \
+        examples/src/main/java/io/amcp/examples/stockprice/StockPriceDemo.java; then
+        echo -e "${GREEN}✅ Manual compilation successful${NC}"
+    else
+        echo -e "${RED}❌ Manual compilation failed${NC}"
+        echo -e "${RED}❌ Manual compilation failed${NC}"
+        exit 1
+    fi
+fi
+
+echo -e "${GREEN}🚀 Starting Stock Price Agent Demo...${NC}"
 echo ""
 
-# Run the stock price demo using Maven-compiled classes
-java -cp "examples/target/classes:core/target/classes:connectors/target/classes" io.amcp.examples.stockprice.StockPriceDemo
+# Set up basic classpath (no external dependencies needed for this demo)
+DEMO_CLASSPATH="examples/target/classes:core/target/classes:connectors/target/classes"
 
-echo ""
-echo -e "${GREEN}✅ Stock Price Demo completed successfully!${NC}"
-echo -e "${BLUE}Thank you for trying AMCP v1.5 Enterprise Edition Stock Price Demo${NC}"
+# Run the demo
+if java -cp "${DEMO_CLASSPATH}" io.amcp.examples.stockprice.StockPriceDemo; then
+    echo ""
+    echo -e "${GREEN}✅ Stock Price Demo completed successfully!${NC}"
+    echo -e "${BLUE}Thank you for trying AMCP v1.5 Enterprise Edition Stock Price Demo${NC}"
+else
+    echo ""
+    echo -e "${RED}❌ Demo execution failed${NC}"
+    exit 1
+fi
