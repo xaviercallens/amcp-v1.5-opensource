@@ -1,8 +1,6 @@
 package io.amcp.examples.weather;
 
 import io.amcp.core.*;
-import io.amcp.messaging.EventBroker;
-import io.amcp.messaging.impl.InMemoryEventBroker;
 import io.amcp.mobility.*;
 
 import java.time.LocalDateTime;
@@ -32,8 +30,9 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class WeatherAgent extends AbstractMobileAgent {
 
-    private static final String OPENWEATHER_API_KEY = "demo_api_key_replace_with_real";
-    private static final String WEATHER_API_BASE = "http://api.openweathermap.org/data/2.5";
+    // Note: Future integration can use real weather API with proper keys
+    // private static final String OPENWEATHER_API_KEY = "demo_api_key_replace_with_real";
+    // private static final String WEATHER_API_BASE = "http://api.openweathermap.org/data/2.5";
     
     private final Set<String> monitoredCities = new HashSet<>();
     private final Map<String, WeatherData> latestWeatherData = new HashMap<>();
@@ -389,8 +388,10 @@ abstract class AbstractMobileAgent implements MobileAgent {
     @Override
     public CompletableFuture<List<AgentID>> replicate(String... contexts) {
         List<AgentID> replicas = new ArrayList<>();
-        for (String context : contexts) {
-            replicas.add(AgentID.random());
+        for (int i = 0; i < contexts.length; i++) {
+            // Create replica agent for each context
+            AgentID replicaId = AgentID.random();
+            replicas.add(replicaId);
         }
         return CompletableFuture.completedFuture(replicas);
     }

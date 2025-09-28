@@ -4,6 +4,7 @@ import io.amcp.core.*;
 import io.amcp.messaging.EventBroker;
 import io.amcp.mobility.MobilityManager;
 import io.amcp.mobility.MigrationOptions;
+import io.amcp.security.AdvancedSecurityManager;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,7 +23,7 @@ public class SimpleAgentContext implements AgentContext {
     private final String contextId;
     private final EventBroker eventBroker;
     private final MobilityManager mobilityManager;
-    private final SecurityManager securityManager;
+    private final AdvancedSecurityManager securityManager;
     private final ConcurrentHashMap<AgentID, Agent> agents;
     private final ConcurrentHashMap<AgentID, AgentLifecycle> agentStates;
     
@@ -30,7 +31,7 @@ public class SimpleAgentContext implements AgentContext {
         this(eventBroker, mobilityManager, null);
     }
     
-    public SimpleAgentContext(EventBroker eventBroker, MobilityManager mobilityManager, SecurityManager securityManager) {
+    public SimpleAgentContext(EventBroker eventBroker, MobilityManager mobilityManager, AdvancedSecurityManager securityManager) {
         this.contextId = "context-" + contextIdGenerator.getAndIncrement();
         this.eventBroker = eventBroker;
         this.mobilityManager = mobilityManager;
@@ -55,7 +56,7 @@ public class SimpleAgentContext implements AgentContext {
     }
     
     @Override
-    public SecurityManager getSecurityManager() {
+    public AdvancedSecurityManager getAdvancedSecurityManager() {
         return securityManager;
     }
     

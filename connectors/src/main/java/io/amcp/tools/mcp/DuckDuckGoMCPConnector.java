@@ -4,8 +4,9 @@ import io.amcp.tools.ToolConnector;
 import io.amcp.tools.ToolRequest;
 import io.amcp.tools.ToolResponse;
 
-import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URI;
+import java.net.HttpURLConnection;
 import java.net.URLEncoder;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -50,7 +51,7 @@ public class DuckDuckGoMCPConnector implements ToolConnector {
     public CompletableFuture<Boolean> isHealthy() {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                URL url = new URL(API_BASE_URL + "?q=test&format=json&no_html=1&skip_disambig=1");
+                URL url = URI.create(API_BASE_URL + "?q=test&format=json&no_html=1&skip_disambig=1").toURL();
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
                 connection.setConnectTimeout(5000);
@@ -183,7 +184,7 @@ public class DuckDuckGoMCPConnector implements ToolConnector {
     }
     
     private String makeHttpRequest(String urlStr) throws Exception {
-        URL url = new URL(urlStr);
+        URL url = URI.create(urlStr).toURL();
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         
         try {

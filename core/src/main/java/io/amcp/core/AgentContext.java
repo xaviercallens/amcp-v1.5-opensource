@@ -50,11 +50,11 @@ public interface AgentContext {
     MobilityManager getMobilityManager();
 
     /**
-     * Gets the SecurityManager for authentication and authorization.
+     * Gets the AdvancedSecurityManager for authentication and authorization.
      * 
-     * @return the security manager
+     * @return the advanced security manager
      */
-    SecurityManager getSecurityManager();
+    io.amcp.security.AdvancedSecurityManager getAdvancedSecurityManager();
 
     /**
      * Registers an agent with this context.
