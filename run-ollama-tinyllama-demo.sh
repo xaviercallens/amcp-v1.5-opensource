@@ -48,37 +48,18 @@ if [ -z "$RESPONSE" ]; then
 fi
 echo "✅ TinyLlama connectivity test passed: $RESPONSE"
 
-# Build the project
-echo "🔨 Building AMCP project..."
-mvn clean compile -q > /dev/null 2>&1
-if [ $? -ne 0 ]; then
-    echo "❌ Build failed. Running with verbose output:"
-    mvn clean compile
-    exit 1
-fi
-echo "✅ Project built successfully"
-
-# Create temporary classpath with all required dependencies
-echo "🔧 Preparing classpath with dependencies..."
-CLASSPATH="connectors/target/classes:core/target/classes"
-
-# Add Maven dependencies to classpath
-if [ -d "$HOME/.m2/repository" ]; then
-    # Add Jackson dependencies
-    JACKSON_VERSION="2.17.2"
-    JACKSON_CORE="$HOME/.m2/repository/com/fasterxml/jackson/core/jackson-core/$JACKSON_VERSION/jackson-core-$JACKSON_VERSION.jar"
-    JACKSON_DATABIND="$HOME/.m2/repository/com/fasterxml/jackson/core/jackson-databind/$JACKSON_VERSION/jackson-databind-$JACKSON_VERSION.jar"
-    JACKSON_ANNOTATIONS="$HOME/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/$JACKSON_VERSION/jackson-annotations-$JACKSON_VERSION.jar"
-    
-    if [ -f "$JACKSON_CORE" ] && [ -f "$JACKSON_DATABIND" ] && [ -f "$JACKSON_ANNOTATIONS" ]; then
-        CLASSPATH="$CLASSPATH:$JACKSON_CORE:$JACKSON_DATABIND:$JACKSON_ANNOTATIONS"
-        echo "✅ Jackson dependencies found and added to classpath"
-    else
-        echo "❌ Jackson dependencies not found in local Maven repository"
-        echo "Please run: mvn dependency:copy-dependencies first"
+# Build the project if needed
+echo "🔨 Checking build status..."
+if [ ! -d "connectors/target/classes" ]; then
+    echo "Building AMCP project..."
+    mvn clean compile -q > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        echo "❌ Build failed. Running with verbose output:"
+        mvn clean compile
         exit 1
     fi
 fi
+echo "✅ Project ready"
 
 echo "🚀 Starting OLLAMA Chat Agent Demo with TinyLlama 1.1B..."
 echo "================================================="
@@ -96,8 +77,8 @@ echo "   - Perfect for: Basic conversation, ultra-low-end devices"
 echo "   - Speed: Very fast responses due to small size"
 echo ""
 
-# Run the demo
-java -cp "$CLASSPATH" io.amcp.connectors.ollama.OllamaIntegrationDemo
+# Use Maven exec plugin to run with proper dependencies
+cd connectors && mvn exec:java -Dexec.mainClass=io.amcp.connectors.ollama.OllamaIntegrationDemo -q
 
 echo ""
 echo "👋 OLLAMA Chat Agent Demo completed!"
