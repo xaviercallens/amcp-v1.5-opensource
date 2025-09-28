@@ -462,9 +462,14 @@ class AgentContextImpl implements AgentContext {
         };
     }
 
-    @Override
     public SecurityManager getSecurityManager() {
         return System.getSecurityManager(); // Use system security manager
+    }
+
+    @Override
+    public io.amcp.security.AdvancedSecurityManager getAdvancedSecurityManager() {
+        // Simple implementation for demo - return null or create basic instance
+        return null; // Demo doesn't need advanced security
     }
 
     @Override

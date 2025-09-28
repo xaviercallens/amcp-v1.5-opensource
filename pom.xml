@@ -66,8 +66,12 @@
         <!-- Security -->
         <oauth2.version>10.9.1</oauth2.version>
         <jose4j.version>0.9.3</jose4j.version>
-        <spring.version>6.0.12</spring.version>
+        <spring.version>6.1.0</spring.version>
         <spring.security.version>6.1.4</spring.security.version>
+        
+        <!-- AI Integration -->
+        <spring.ai.version>1.0.0-SNAPSHOT</spring.ai.version>
+        <spring.boot.version>3.2.0</spring.boot.version>
         
         <!-- Monitoring & Observability -->
         <micrometer.version>1.11.2</micrometer.version>
