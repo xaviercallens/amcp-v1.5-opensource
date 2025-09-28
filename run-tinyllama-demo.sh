@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Simple OLLAMA TinyLlama Demo Runner for AMCP v1.5
+# Simple OLLAMA TinyLlama Demo Runner for AMCP v1.5 (Maven Version)
 echo "🚀 AMCP OLLAMA TinyLlama 1.1B Demo"
 echo "=================================="
 
@@ -33,14 +33,8 @@ echo "   • /help - Show commands"
 echo "   • /model - Model information"
 echo "   • /exit - Quit demo"
 echo ""
-
-# Build classpath
-CLASSPATH="connectors/target/classes:core/target/classes"
-if [ -d "lib" ]; then
-    CLASSPATH="$CLASSPATH:lib/*"
-fi
-
 echo "🚀 Starting demo..."
 echo ""
 
-java -cp "$CLASSPATH" io.amcp.connectors.ollama.OllamaIntegrationDemo
+# Use Maven to run with proper dependencies
+cd connectors && mvn exec:java -Dexec.mainClass=io.amcp.connectors.ollama.OllamaIntegrationDemo

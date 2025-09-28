@@ -25,10 +25,10 @@ if echo "$response" | grep -q "response"; then
     echo "..."
     echo ""
     echo "🎯 To run full interactive demo:"
-    echo "   cd connectors && mvn exec:java -Dexec.mainClass=io.amcp.connectors.demo.OllamaIntegrationDemo"
+    echo "   ./run-tinyllama-demo.sh"
     echo ""
-    echo "Or use the convenience script:"
-    echo "   ./run-maven-demo.sh"
+    echo "Or direct Maven command:"
+    echo "   cd connectors && mvn exec:java -Dexec.mainClass=io.amcp.connectors.ollama.OllamaIntegrationDemo"
 else
     echo "❌ TinyLlama test failed"
     echo "Response: $response"
