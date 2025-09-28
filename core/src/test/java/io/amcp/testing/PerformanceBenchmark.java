@@ -91,11 +91,21 @@ public class PerformanceBenchmark {
             CountDownLatch completionLatch = new CountDownLatch(targetEventsPerSecond);
             
             // Setup subscription for measuring end-to-end throughput
-            eventBroker.subscribe("throughput.**", event -> {
-                eventsReceived.incrementAndGet();
-                completionLatch.countDown();
-                return CompletableFuture.completedFuture(null);
-            });
+            EventBroker.EventSubscriber throughputSubscriber = new EventBroker.EventSubscriber() {
+                @Override
+                public CompletableFuture<Void> handleEvent(Event event) {
+                    eventsReceived.incrementAndGet();
+                    completionLatch.countDown();
+                    return CompletableFuture.completedFuture(null);
+                }
+
+                @Override
+                public String getSubscriberId() {
+                    return "throughput-benchmark-subscriber";
+                }
+            };
+            
+            eventBroker.subscribe(throughputSubscriber, "throughput.**");
             
             // Calculate inter-event delay for target throughput
             long delayNanos = 1_000_000_000L / targetEventsPerSecond;
