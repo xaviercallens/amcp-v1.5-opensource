@@ -252,27 +252,79 @@ public class PromptManager {
     }
     
     private void extractWeatherParameters(String input, Map<String, Object> parameters) {
-        // Extract location from weather requests
-        String[] locationKeywords = {"in ", "at ", "for ", "of "};
-        for (String keyword : locationKeywords) {
-            int index = input.toLowerCase().indexOf(keyword);
-            if (index != -1) {
-                String location = input.substring(index + keyword.length()).trim();
-                // Clean up location (remove punctuation, extra words)
-                location = location.replaceAll("[.,!?].*", "").trim();
-                if (!location.isEmpty()) {
-                    parameters.put("location", location);
+        // Enhanced location extraction with better pattern matching
+        String location = null;
+        String cleanInput = input.toLowerCase().trim();
+        
+        // Multiple patterns for location extraction
+        String[] locationPatterns = {
+            "weather in ([^,]+(?:,\\s*[^,]+)?)", // "weather in Nice" or "weather in Nice, France"
+            "weather for ([^,]+(?:,\\s*[^,]+)?)", 
+            "weather at ([^,]+(?:,\\s*[^,]+)?)",
+            "temperature in ([^,]+(?:,\\s*[^,]+)?)",
+            "temperature for ([^,]+(?:,\\s*[^,]+)?)",
+            "temperature at ([^,]+(?:,\\s*[^,]+)?)",
+            "forecast for ([^,]+(?:,\\s*[^,]+)?)",
+            "forecast in ([^,]+(?:,\\s*[^,]+)?)",
+            "climate in ([^,]+(?:,\\s*[^,]+)?)",
+            "weather ([a-zA-Z][a-zA-Z\\s,]+?)(?:\\s+today|\\s+tomorrow|\\s+forecast|\\?|!|\\.|$)", // "weather London UK"
+        };
+        
+        for (String pattern : locationPatterns) {
+            java.util.regex.Pattern regex = java.util.regex.Pattern.compile(pattern, java.util.regex.Pattern.CASE_INSENSITIVE);
+            java.util.regex.Matcher matcher = regex.matcher(cleanInput);
+            if (matcher.find()) {
+                location = matcher.group(1).trim();
+                // Clean up common suffixes
+                location = location.replaceAll("\\s+(today|tomorrow|forecast|please|\\?)$", "").trim();
+                // Clean up punctuation
+                location = location.replaceAll("[?!.]$", "").trim();
+                if (!location.isEmpty() && location.length() > 1) {
                     break;
                 }
             }
         }
         
+        // Fallback: look for any location-like words after weather-related keywords
+        if (location == null || location.isEmpty()) {
+            String[] weatherKeywords = {"weather", "temperature", "forecast", "climate"};
+            for (String keyword : weatherKeywords) {
+                int index = cleanInput.indexOf(keyword);
+                if (index != -1) {
+                    String remaining = cleanInput.substring(index + keyword.length()).trim();
+                    // Remove common connector words
+                    remaining = remaining.replaceFirst("^(in|for|at|of)\\s+", "");
+                    // Extract the first meaningful word(s) as location
+                    String[] words = remaining.split("\\s+");
+                    if (words.length > 0 && !words[0].isEmpty()) {
+                        // Take up to 3 words as potential location
+                        StringBuilder locationBuilder = new StringBuilder();
+                        for (int i = 0; i < Math.min(3, words.length); i++) {
+                            if (words[i].matches("[a-zA-Z,]+")) {
+                                if (locationBuilder.length() > 0) locationBuilder.append(" ");
+                                locationBuilder.append(words[i]);
+                            } else {
+                                break;
+                            }
+                        }
+                        location = locationBuilder.toString().trim();
+                        if (!location.isEmpty()) break;
+                    }
+                }
+            }
+        }
+        
+        // Set the extracted location
+        if (location != null && !location.isEmpty()) {
+            parameters.put("location", location);
+        }
+        
         // Extract time frame
-        if (input.contains("tomorrow")) {
+        if (input.toLowerCase().contains("tomorrow")) {
             parameters.put("timeframe", "tomorrow");
-        } else if (input.contains("today")) {
+        } else if (input.toLowerCase().contains("today")) {
             parameters.put("timeframe", "today");
-        } else if (input.contains("forecast")) {
+        } else if (input.toLowerCase().contains("forecast")) {
             parameters.put("timeframe", "forecast");
         }
         
@@ -280,18 +332,66 @@ public class PromptManager {
     }
     
     private void extractStockParameters(String input, Map<String, Object> parameters) {
-        // Extract company/ticker symbols
-        String[] stockKeywords = {"stock price of ", "price of ", "shares of ", "ticker "};
-        for (String keyword : stockKeywords) {
-            int index = input.toLowerCase().indexOf(keyword);
-            if (index != -1) {
-                String symbol = input.substring(index + keyword.length()).trim();
-                symbol = symbol.replaceAll("[.,!?].*", "").trim();
-                if (!symbol.isEmpty()) {
-                    parameters.put("symbol", symbol.toUpperCase());
+        // Enhanced stock symbol extraction
+        String symbol = null;
+        String cleanInput = input.toLowerCase().trim();
+        
+        // Stock extraction patterns
+        String[] stockPatterns = {
+            "stock price of ([a-zA-Z0-9\\s]+?)(?:\\s+stock|\\s+price|\\s+shares|\\?|!|\\.|$)",
+            "price of ([a-zA-Z0-9\\s]+?)(?:\\s+stock|\\s+shares|\\?|!|\\.|$)",
+            "shares of ([a-zA-Z0-9\\s]+?)(?:\\s+stock|\\?|!|\\.|$)",
+            "stock ([a-zA-Z0-9\\s]+?)(?:\\s+price|\\s+shares|\\?|!|\\.|$)",
+            "([a-zA-Z0-9\\s]+?)\\s+stock(?:\\s+price|\\s+shares|\\?|!|\\.|$)",
+            "([a-zA-Z0-9\\s]+?)\\s+shares(?:\\s+price|\\?|!|\\.|$)",
+            "ticker ([a-zA-Z0-9]+)",
+            "symbol ([a-zA-Z0-9]+)"
+        };
+        
+        for (String pattern : stockPatterns) {
+            java.util.regex.Pattern regex = java.util.regex.Pattern.compile(pattern, java.util.regex.Pattern.CASE_INSENSITIVE);
+            java.util.regex.Matcher matcher = regex.matcher(cleanInput);
+            if (matcher.find()) {
+                symbol = matcher.group(1).trim();
+                // Clean up the symbol
+                symbol = symbol.replaceAll("\\s+", " ").trim();
+                symbol = symbol.replaceAll("(price|stock|shares|the)$", "").trim();
+                if (!symbol.isEmpty() && symbol.length() > 1) {
                     break;
                 }
             }
+        }
+        
+        // Fallback: look for company names or symbols after financial keywords
+        if (symbol == null || symbol.isEmpty()) {
+            String[] finKeywords = {"stock", "shares", "price", "market", "trading", "investment"};
+            for (String keyword : finKeywords) {
+                int index = cleanInput.indexOf(keyword);
+                if (index != -1) {
+                    String remaining = cleanInput.substring(index + keyword.length()).trim();
+                    remaining = remaining.replaceFirst("^(of|for|in)\\s+", "");
+                    String[] words = remaining.split("\\s+");
+                    if (words.length > 0 && !words[0].isEmpty()) {
+                        // Take the first 1-2 words as potential symbol/company
+                        StringBuilder symbolBuilder = new StringBuilder();
+                        for (int i = 0; i < Math.min(2, words.length); i++) {
+                            if (words[i].matches("[a-zA-Z0-9]+")) {
+                                if (symbolBuilder.length() > 0) symbolBuilder.append(" ");
+                                symbolBuilder.append(words[i]);
+                            } else {
+                                break;
+                            }
+                        }
+                        symbol = symbolBuilder.toString().trim();
+                        if (!symbol.isEmpty()) break;
+                    }
+                }
+            }
+        }
+        
+        // Set the extracted symbol
+        if (symbol != null && !symbol.isEmpty()) {
+            parameters.put("symbol", symbol.toUpperCase());
         }
         
         parameters.put("originalInput", input);

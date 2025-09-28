@@ -401,19 +401,53 @@ public class EnhancedChatAgent implements Agent {
     private String buildContextualPrompt(String message, ConversationContext conversation) {
         StringBuilder prompt = new StringBuilder();
         
-        prompt.append("You are an AI assistant in the AMCP (Agent Mesh Communication Protocol) system. ");
-        prompt.append("You can coordinate with specialized agents for weather, travel, and stock information. ");
+        // Enhanced system prompt with agent routing intelligence
+        prompt.append("You are TinyLlama, an AI orchestrator in the AMCP (Agent Mesh Communication Protocol) system. ");
+        prompt.append("Your primary role is to intelligently route user requests to specialized agents and synthesize their responses.\n\n");
+        
+        prompt.append("AVAILABLE AGENTS AND CAPABILITIES:\n");
+        prompt.append("• WeatherAgent: Provides real-time weather data for ANY location worldwide using OpenWeatherMap API\n");
+        prompt.append("  - Handles queries like: 'weather in [LOCATION]', 'temperature in [CITY]', 'forecast for [PLACE]'\n");
+        prompt.append("  - Supports ANY city/location, not just hardcoded ones\n");
+        prompt.append("• StockPriceAgent: Provides live financial market data using real-time APIs\n");
+        prompt.append("  - Handles queries about ANY stock symbol or company name\n");
+        prompt.append("  - Supports: stock prices, market data, trading information\n");
+        prompt.append("• TravelPlannerAgent: Intelligent trip planning and travel coordination\n");
+        prompt.append("  - Route planning, flight search, accommodation, itineraries\n\n");
+        
+        prompt.append("ROUTING INTELLIGENCE:\n");
+        prompt.append("- For weather queries: ALWAYS route to WeatherAgent, extract location from user query\n");
+        prompt.append("- For stock/financial queries: ALWAYS route to StockPriceAgent, extract symbol/company\n");
+        prompt.append("- For travel queries: ALWAYS route to TravelPlannerAgent\n");
+        prompt.append("- Only handle general conversation directly\n\n");
+        
+        prompt.append("LOCATION EXTRACTION:\n");
+        prompt.append("- Extract ANY city, country, or location mentioned in weather queries\n");
+        prompt.append("- Examples: 'weather in Nice' → location: Nice\n");
+        prompt.append("- Examples: 'temperature in London, UK' → location: London, UK\n");
+        prompt.append("- Examples: 'how's the weather in Tokyo today?' → location: Tokyo\n\n");
+        
+        prompt.append("STOCK SYMBOL EXTRACTION:\n");
+        prompt.append("- Extract ANY company name or stock symbol mentioned\n");
+        prompt.append("- Examples: 'Amadeus stock price' → symbol: AMADEUS\n");
+        prompt.append("- Examples: 'Apple stock' → symbol: AAPL\n");
+        prompt.append("- Examples: 'Tesla shares' → symbol: TSLA\n\n");
         
         // Add recent conversation history
         List<ChatMessage> history = conversation.getHistory();
-        if (history.size() > 5) {
-            prompt.append("Recent conversation:\n");
+        if (history.size() > 3) {
+            prompt.append("RECENT CONVERSATION:\n");
             history.stream()
-                    .skip(Math.max(0, history.size() - 5))
+                    .skip(Math.max(0, history.size() - 3))
                     .forEach(msg -> prompt.append(msg.getRole()).append(": ").append(msg.getContent()).append("\n"));
+            prompt.append("\n");
         }
         
-        prompt.append("Current request: ").append(message);
+        prompt.append("USER REQUEST: ").append(message).append("\n\n");
+        prompt.append("Analyze this request and determine if it should be routed to a specialized agent. ");
+        prompt.append("If routing to an agent, identify the key parameters (location for weather, symbol for stocks). ");
+        prompt.append("If handling directly, provide a helpful response.");
+        
         return prompt.toString();
     }
     
