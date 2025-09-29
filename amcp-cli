@@ -1,0 +1,377 @@
+#!/bin/bash
+
+# AMCP Interactive CLI Launcher Script
+# Version: 1.5.0
+# Description: Easy startup script for AMCP Interactive CLI with proper environment setup
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
+WHITE='\033[1;37m'
+NC='\033[0m' # No Color
+
+# Script configuration
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+CLI_DIR="$PROJECT_ROOT/cli"
+CORE_DIR="$PROJECT_ROOT/core"
+CONNECTORS_DIR="$PROJECT_ROOT/connectors"
+EXAMPLES_DIR="$PROJECT_ROOT/examples"
+
+# Default settings
+JAVA_OPTS="-Xmx2g -Xms512m"
+MAIN_CLASS="io.amcp.cli.AMCPInteractiveCLI"
+LOG_LEVEL="INFO"
+PROFILE="development"
+
+# Banner function
+print_banner() {
+    echo -e "${CYAN}"
+    echo "  ╔══════════════════════════════════════════════════════════════════╗"
+    echo "  ║                    AMCP Interactive CLI v1.5                     ║"
+    echo "  ║              Agent Mesh Communication Protocol                   ║"
+    echo "  ║                     Enterprise Edition                           ║"
+    echo "  ╚══════════════════════════════════════════════════════════════════╝"
+    echo -e "${NC}"
+}
+
+# Help function
+show_help() {
+    echo -e "${WHITE}AMCP Interactive CLI Launcher${NC}"
+    echo ""
+    echo -e "${YELLOW}Usage:${NC}"
+    echo "  $0 [OPTIONS]"
+    echo ""
+    echo -e "${YELLOW}Options:${NC}"
+    echo -e "  ${GREEN}-h, --help${NC}           Show this help message"
+    echo -e "  ${GREEN}-v, --verbose${NC}        Enable verbose output"
+    echo -e "  ${GREEN}-d, --debug${NC}          Enable debug mode"
+    echo -e "  ${GREEN}-p, --profile PROFILE${NC}  Set profile (development, production)"
+    echo -e "  ${GREEN}-m, --memory SIZE${NC}     Set max memory (e.g., 2g, 1024m)"
+    echo -e "  ${GREEN}-j, --java-opts OPTS${NC}  Additional Java options"
+    echo -e "  ${GREEN}--build${NC}              Build the project before running"
+    echo -e "  ${GREEN}--clean${NC}              Clean build before running"
+    echo -e "  ${GREEN}--no-banner${NC}          Skip the banner display"
+    echo ""
+    echo -e "${YELLOW}Environment Variables:${NC}"
+    echo -e "  ${GREEN}POLYGON_API_KEY${NC}      API key for Polygon.io (stock data)"
+    echo -e "  ${GREEN}OPENWEATHER_API_KEY${NC}  API key for OpenWeatherMap"
+    echo -e "  ${GREEN}JAVA_HOME${NC}            Java installation directory"
+    echo -e "  ${GREEN}AMCP_LOG_LEVEL${NC}       Logging level (DEBUG, INFO, WARN, ERROR)"
+    echo ""
+    echo -e "${YELLOW}Examples:${NC}"
+    echo -e "  ${GREEN}$0${NC}                    # Start with default settings"
+    echo -e "  ${GREEN}$0 --build${NC}           # Build and start"
+    echo -e "  ${GREEN}$0 -m 4g --debug${NC}     # Start with 4GB memory and debug mode"
+    echo -e "  ${GREEN}$0 -p production${NC}     # Start in production profile"
+}
+
+# Logging functions
+log_info() {
+    echo -e "${GREEN}[INFO]${NC} $1"
+}
+
+log_warn() {
+    echo -e "${YELLOW}[WARN]${NC} $1"
+}
+
+log_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+log_debug() {
+    if [ "$VERBOSE" = true ]; then
+        echo -e "${BLUE}[DEBUG]${NC} $1"
+    fi
+}
+
+# Check requirements
+check_requirements() {
+    log_debug "Checking system requirements..."
+    
+    # Check Java
+    if [ -z "$JAVA_HOME" ]; then
+        if command -v java &> /dev/null; then
+            log_info "Java found in PATH"
+        else
+            log_error "Java not found. Please install Java 11+ or set JAVA_HOME"
+            exit 1
+        fi
+    else
+        if [ -f "$JAVA_HOME/bin/java" ]; then
+            log_info "Java found at $JAVA_HOME"
+        else
+            log_error "JAVA_HOME is set but Java not found at $JAVA_HOME/bin/java"
+            exit 1
+        fi
+    fi
+    
+    # Check Maven
+    if [ "$BUILD_PROJECT" = true ] || [ "$CLEAN_BUILD" = true ]; then
+        if ! command -v mvn &> /dev/null; then
+            log_error "Maven not found. Please install Maven or skip build with --no-build"
+            exit 1
+        fi
+        log_info "Maven found"
+    fi
+    
+    # Check project structure
+    if [ ! -d "$PROJECT_ROOT" ]; then
+        log_error "Project root not found: $PROJECT_ROOT"
+        exit 1
+    fi
+    
+    if [ ! -f "$PROJECT_ROOT/pom.xml" ]; then
+        log_error "Maven project not found. Please run from AMCP project directory"
+        exit 1
+    fi
+    
+    log_debug "All requirements satisfied"
+}
+
+# Build project
+build_project() {
+    log_info "Building AMCP project..."
+    
+    cd "$PROJECT_ROOT"
+    
+    if [ "$CLEAN_BUILD" = true ]; then
+        log_info "Cleaning project..."
+        mvn clean
+    fi
+    
+    # Build with appropriate profiles
+    MAVEN_PROFILES=""
+    if [ "$PROFILE" = "development" ]; then
+        MAVEN_PROFILES="-P development"
+    elif [ "$PROFILE" = "production" ]; then
+        MAVEN_PROFILES="-P production"
+    fi
+    
+    if [ "$VERBOSE" = true ]; then
+        mvn compile $MAVEN_PROFILES -X
+    else
+        mvn compile $MAVEN_PROFILES -q
+    fi
+    
+    if [ $? -ne 0 ]; then
+        log_error "Build failed"
+        exit 1
+    fi
+    
+    log_info "Build completed successfully"
+}
+
+# Setup environment
+setup_environment() {
+    log_debug "Setting up environment..."
+    
+    # Set log level from environment or default
+    if [ -n "$AMCP_LOG_LEVEL" ]; then
+        LOG_LEVEL="$AMCP_LOG_LEVEL"
+    fi
+    
+    # Setup Java options
+    JAVA_OPTS="$JAVA_OPTS -Dlog.level=$LOG_LEVEL"
+    JAVA_OPTS="$JAVA_OPTS -Damcp.profile=$PROFILE"
+    JAVA_OPTS="$JAVA_OPTS -Dfile.encoding=UTF-8"
+    JAVA_OPTS="$JAVA_OPTS -Djava.net.useSystemProxies=true"
+    
+    # Add debug options if requested
+    if [ "$DEBUG_MODE" = true ]; then
+        JAVA_OPTS="$JAVA_OPTS -Damcp.debug=true"
+        JAVA_OPTS="$JAVA_OPTS -Dlogging.level.io.amcp=DEBUG"
+        LOG_LEVEL="DEBUG"
+        log_info "Debug mode enabled"
+    fi
+    
+    # Add custom Java options
+    if [ -n "$CUSTOM_JAVA_OPTS" ]; then
+        JAVA_OPTS="$JAVA_OPTS $CUSTOM_JAVA_OPTS"
+    fi
+    
+    # Export API keys if they exist
+    if [ -n "$POLYGON_API_KEY" ]; then
+        export POLYGON_API_KEY
+        log_info "Polygon.io API key loaded"
+    else
+        log_warn "POLYGON_API_KEY not set - stock price agent may not work"
+    fi
+    
+    if [ -n "$OPENWEATHER_API_KEY" ]; then
+        export OPENWEATHER_API_KEY
+        log_info "OpenWeather API key loaded"
+    else
+        log_warn "OPENWEATHER_API_KEY not set - weather agent may not work"
+    fi
+    
+    log_debug "Environment setup completed"
+}
+
+# Build classpath
+build_classpath() {
+    log_debug "Building classpath..."
+    
+    CLASSPATH=""
+    
+    # Add compiled classes
+    if [ -d "$CLI_DIR/target/classes" ]; then
+        CLASSPATH="$CLASSPATH:$CLI_DIR/target/classes"
+    fi
+    
+    if [ -d "$CORE_DIR/target/classes" ]; then
+        CLASSPATH="$CLASSPATH:$CORE_DIR/target/classes"
+    fi
+    
+    if [ -d "$CONNECTORS_DIR/target/classes" ]; then
+        CLASSPATH="$CLASSPATH:$CONNECTORS_DIR/target/classes"
+    fi
+    
+    if [ -d "$EXAMPLES_DIR/target/classes" ]; then
+        CLASSPATH="$CLASSPATH:$EXAMPLES_DIR/target/classes"
+    fi
+    
+    # Add JAR dependencies
+    for jar_dir in "$CLI_DIR/lib" "$CORE_DIR/lib" "$CONNECTORS_DIR/lib" "$EXAMPLES_DIR/lib"; do
+        if [ -d "$jar_dir" ]; then
+            for jar in "$jar_dir"/*.jar; do
+                if [ -f "$jar" ]; then
+                    CLASSPATH="$CLASSPATH:$jar"
+                fi
+            done
+        fi
+    done
+    
+    # Add Maven dependencies if target/lib exists
+    for module in cli core connectors examples; do
+        lib_dir="$PROJECT_ROOT/$module/target/lib"
+        if [ -d "$lib_dir" ]; then
+            for jar in "$lib_dir"/*.jar; do
+                if [ -f "$jar" ]; then
+                    CLASSPATH="$CLASSPATH:$jar"
+                fi
+            done
+        fi
+    done
+    
+    # Remove leading colon
+    CLASSPATH="${CLASSPATH#:}"
+    
+    if [ -z "$CLASSPATH" ]; then
+        log_error "Could not build classpath. Please build the project first with --build"
+        exit 1
+    fi
+    
+    log_debug "Classpath: $CLASSPATH"
+}
+
+# Start CLI
+start_cli() {
+    log_info "Starting AMCP Interactive CLI..."
+    log_debug "Main class: $MAIN_CLASS"
+    log_debug "Java options: $JAVA_OPTS"
+    log_debug "Profile: $PROFILE"
+    
+    if [ "$SHOW_BANNER" = true ]; then
+        print_banner
+    fi
+    
+    # Determine Java command
+    if [ -n "$JAVA_HOME" ]; then
+        JAVA_CMD="$JAVA_HOME/bin/java"
+    else
+        JAVA_CMD="java"
+    fi
+    
+    # Start the application
+    exec "$JAVA_CMD" $JAVA_OPTS -cp "$CLASSPATH" "$MAIN_CLASS" "$@"
+}
+
+# Parse command line arguments
+VERBOSE=false
+DEBUG_MODE=false
+BUILD_PROJECT=false
+CLEAN_BUILD=false
+SHOW_BANNER=true
+CUSTOM_JAVA_OPTS=""
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -h|--help)
+            show_help
+            exit 0
+            ;;
+        -v|--verbose)
+            VERBOSE=true
+            shift
+            ;;
+        -d|--debug)
+            DEBUG_MODE=true
+            VERBOSE=true
+            shift
+            ;;
+        -p|--profile)
+            PROFILE="$2"
+            shift 2
+            ;;
+        -m|--memory)
+            JAVA_OPTS="-Xmx$2 -Xms512m"
+            shift 2
+            ;;
+        -j|--java-opts)
+            CUSTOM_JAVA_OPTS="$2"
+            shift 2
+            ;;
+        --build)
+            BUILD_PROJECT=true
+            shift
+            ;;
+        --clean)
+            CLEAN_BUILD=true
+            BUILD_PROJECT=true
+            shift
+            ;;
+        --no-banner)
+            SHOW_BANNER=false
+            shift
+            ;;
+        *)
+            log_warn "Unknown option: $1"
+            show_help
+            exit 1
+            ;;
+    esac
+done
+
+# Main execution
+main() {
+    # Check if we're in a valid AMCP project
+    if [ ! -f "$PROJECT_ROOT/pom.xml" ] || ! grep -q "amcp-parent" "$PROJECT_ROOT/pom.xml" 2>/dev/null; then
+        log_error "This doesn't appear to be an AMCP project directory"
+        log_error "Please run this script from the AMCP project root"
+        exit 1
+    fi
+    
+    # Execute main workflow
+    check_requirements
+    setup_environment
+    
+    if [ "$BUILD_PROJECT" = true ]; then
+        build_project
+    fi
+    
+    build_classpath
+    start_cli "$@"
+}
+
+# Handle script interruption
+trap 'log_warn "Script interrupted by user"; exit 130' INT TERM
+
+# Run main function
+main "$@"
