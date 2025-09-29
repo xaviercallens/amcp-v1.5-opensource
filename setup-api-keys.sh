@@ -17,8 +17,7 @@ WHITE='\033[1;37m'
 NC='\033[0m' # No Color
 
 # Default API keys (production-ready keys)
-DEFAULT_POLYGON_API_KEY="ZGgVNySPtrCA7u1knnya3wdefCLGpJwd"
-DEFAULT_OPENWEATHER_API_KEY="3bd965f39881ba0f116ee0810fdfd058"
+#remove here
 
 # Environment files
 SHELL_PROFILE=""
