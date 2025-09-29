@@ -2,14 +2,20 @@ package io.amcp.examples.multiagent;
 
 import io.amcp.connectors.ai.EnhancedChatAgent;
 import io.amcp.connectors.ai.AgentRegistry;
-import io.amcp.core.Agent;
+import io.amcp.core.*;
 import io.amcp.core.AgentContext;
+import io.amcp.core.impl.SimpleAgentContext;
+import io.amcp.messaging.EventBroker;
+import io.amcp.messaging.impl.InMemoryEventBroker;
+import io.amcp.mobility.MobilityManager;
+import io.amcp.mobility.impl.SimpleMobilityManager;
 import io.amcp.examples.weather.WeatherAgent;
 import io.amcp.examples.travel.TravelPlannerAgent;
-import io.amcp.connectors.ai.StockPriceAgent;
+import io.amcp.examples.stock.StockPriceAgent;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Interactive Chat Demo - Real-time multi-agent communication
@@ -47,31 +53,50 @@ public class InteractiveChatDemo {
     private void initializeAgents() {
         logMessage("Initializing AMCP agents...");
         
+        // Initialize components following TravelPlannerDemo pattern
+        EventBroker eventBroker = new InMemoryEventBroker();
+        MobilityManager mobilityManager = new SimpleMobilityManager();
+        
         // Create agent context
-        context = new AgentContext("interactive-demo-context");
+        context = new SimpleAgentContext(eventBroker, mobilityManager);
         
         // Create agent registry
-        AgentRegistry registry = new AgentRegistry(context);
+        AgentRegistry registry = new AgentRegistry();
+        registry.setContext(context);
         
-        // Initialize specialized agents
-        weatherAgent = new WeatherAgent();
-        weatherAgent.setContext(context);
-        
-        travelAgent = new TravelPlannerAgent();
-        travelAgent.setContext(context);
-        
-        stockAgent = new StockPriceAgent();
-        stockAgent.setContext(context);
-        
-        // Create enhanced chat agent with OLLAMA integration
-        chatAgent = new EnhancedChatAgent(registry);
-        chatAgent.setContext(context);
-        
-        // Register all agents
-        registry.registerAgent(weatherAgent);
-        registry.registerAgent(travelAgent);
-        registry.registerAgent(stockAgent);
-        registry.registerAgent(chatAgent);
+        try {
+            // Initialize specialized agents
+            weatherAgent = new WeatherAgent();
+            weatherAgent.setContext(context);
+            context.registerAgent(weatherAgent).get(5, TimeUnit.SECONDS);
+            context.activateAgent(weatherAgent.getAgentId()).get(5, TimeUnit.SECONDS);
+            
+            travelAgent = new TravelPlannerAgent();
+            travelAgent.setContext(context);
+            context.registerAgent(travelAgent).get(5, TimeUnit.SECONDS);
+            context.activateAgent(travelAgent.getAgentId()).get(5, TimeUnit.SECONDS);
+            
+            stockAgent = new StockPriceAgent();
+            stockAgent.setContext(context);
+            context.registerAgent(stockAgent).get(5, TimeUnit.SECONDS);
+            context.activateAgent(stockAgent.getAgentId()).get(5, TimeUnit.SECONDS);
+            
+            // Create enhanced chat agent
+            chatAgent = new EnhancedChatAgent();
+            chatAgent.setContext(context);
+            context.registerAgent(chatAgent).get(5, TimeUnit.SECONDS);
+            context.activateAgent(chatAgent.getAgentId()).get(5, TimeUnit.SECONDS);
+            
+            // Activate registry last
+            context.registerAgent(registry).get(5, TimeUnit.SECONDS);
+            context.activateAgent(registry.getAgentId()).get(5, TimeUnit.SECONDS);
+            
+            logMessage("All agents initialized and activated successfully");
+            
+        } catch (Exception e) {
+            logMessage("Failed to initialize agents: " + e.getMessage());
+            throw new RuntimeException("Agent initialization failed", e);
+        }
         
         // Activate agents
         weatherAgent.onActivate();
@@ -139,8 +164,8 @@ public class InteractiveChatDemo {
         try {
             System.out.println("🤖 Processing: \"" + input + "\"");
             
-            // Simulate chat agent processing with intelligent routing
-            String response = chatAgent.processQuery(input);
+            // Use the chat method from EnhancedChatAgent with async handling
+            String response = chatAgent.chat(input, "demo-session").get(10, TimeUnit.SECONDS);
             
             System.out.println("🤖 Response: " + response);
             

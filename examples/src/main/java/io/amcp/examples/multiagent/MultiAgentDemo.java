@@ -8,6 +8,7 @@ import io.amcp.examples.stock.StockPriceAgent;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Multi-Agent Communication Demo (Simplified Version)
@@ -109,11 +110,37 @@ public class MultiAgentDemo {
         logMessage("   • Context-aware conversations");
         logMessage("   • A2A communication patterns");
         
-        Map<String, List<String>> examples = chatAgent.getAgentExamples();
-        examples.forEach((agentName, exampleList) -> {
-            logMessage("\n   " + agentName + " Examples:");
-            exampleList.forEach(example -> logMessage("     • " + example));
-        });
+        // Get available agents and show sample queries
+        try {
+            Map<String, String> availableAgents = chatAgent.getAvailableAgents().get(5, TimeUnit.SECONDS);
+            logMessage("\n   Available Agents and Example Queries:");
+            
+            // Provide example queries for common agent types
+            Map<String, List<String>> agentExamples = Map.of(
+                "Weather Agent", List.of(
+                    "What's the weather in Paris?",
+                    "Will it rain tomorrow in Tokyo?",
+                    "Show me the 5-day forecast for London"
+                ),
+                "Travel Planner", List.of(
+                    "Plan a trip to Rome for 3 days",
+                    "Find flights from NYC to Paris",
+                    "Recommend hotels in Barcelona"
+                ),
+                "Stock Agent", List.of(
+                    "What's the current price of AAPL?",
+                    "Analyze TSLA stock performance",
+                    "Show me tech stock trends"
+                )
+            );
+            
+            agentExamples.forEach((agentName, exampleList) -> {
+                logMessage("\n   " + agentName + " Examples:");
+                exampleList.forEach(example -> logMessage("     • " + example));
+            });
+        } catch (Exception e) {
+            logMessage("   [Unable to load agent examples: " + e.getMessage() + "]");
+        }
         
         logMessage("\n" + "=".repeat(60));
     }
