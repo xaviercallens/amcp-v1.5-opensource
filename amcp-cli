@@ -18,7 +18,7 @@ NC='\033[0m' # No Color
 
 # Script configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+PROJECT_ROOT="$SCRIPT_DIR"
 CLI_DIR="$PROJECT_ROOT/cli"
 CORE_DIR="$PROJECT_ROOT/core"
 CONNECTORS_DIR="$PROJECT_ROOT/connectors"
