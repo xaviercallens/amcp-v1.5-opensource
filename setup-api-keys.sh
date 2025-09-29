@@ -16,9 +16,9 @@ CYAN='\033[0;36m'
 WHITE='\033[1;37m'
 NC='\033[0m' # No Color
 
-# Default demo API keys (these are demo/sandbox keys)
-DEFAULT_POLYGON_API_KEY="demo_key_polygon_replace_with_real_key"
-DEFAULT_OPENWEATHER_API_KEY="demo_key_openweather_replace_with_real_key"
+# Default API keys (production-ready keys)
+DEFAULT_POLYGON_API_KEY="ZGgVNySPtrCA7u1knnya3wdefCLGpJwd"
+DEFAULT_OPENWEATHER_API_KEY="3bd965f39881ba0f116ee0810fdfd058"
 
 # Environment files
 SHELL_PROFILE=""
@@ -62,7 +62,7 @@ show_help() {
     echo -e "${YELLOW}Options:${NC}"
     echo -e "  ${GREEN}-h, --help${NC}           Show this help message"
     echo -e "  ${GREEN}-i, --interactive${NC}    Interactive mode (ask for keys)"
-    echo -e "  ${GREEN}-d, --demo${NC}           Use demo keys (limited functionality)"
+    echo -e "  ${GREEN}-d, --demo${NC}           Use default production keys (full functionality)"
     echo -e "  ${GREEN}-c, --current${NC}        Show current API key status"
     echo -e "  ${GREEN}-r, --reset${NC}          Reset API keys (remove from environment)"
     echo -e "  ${GREEN}--polygon KEY${NC}        Set Polygon.io API key directly"
@@ -75,12 +75,12 @@ show_help() {
     echo -e "  ${GREEN}OpenWeatherMap:${NC}      https://openweathermap.org/api (Free tier available)"
     echo ""
     echo -e "${YELLOW}Examples:${NC}"
-    echo -e "  ${GREEN}$0 --demo${NC}                           # Use demo keys"
+    echo -e "  ${GREEN}$0 --demo${NC}                           # Use default production keys"
     echo -e "  ${GREEN}$0 --interactive${NC}                    # Interactive setup"
     echo -e "  ${GREEN}$0 --polygon abc123 --openweather xyz789${NC}  # Direct key setup"
     echo -e "  ${GREEN}$0 --current${NC}                        # Check current status"
     echo ""
-    echo -e "${YELLOW}Note:${NC} Demo keys provide limited functionality for testing purposes."
+    echo -e "${YELLOW}Note:${NC} Default production keys provide full API functionality."
 }
 
 # Detect shell profile
@@ -110,7 +110,7 @@ check_current_status() {
     # Check Polygon.io
     if [ -n "$POLYGON_API_KEY" ]; then
         if [ "$POLYGON_API_KEY" = "$DEFAULT_POLYGON_API_KEY" ]; then
-            echo -e "🔶 Polygon.io: ${YELLOW}DEMO KEY${NC} (limited functionality)"
+            echo -e "✅ Polygon.io: ${GREEN}CONFIGURED${NC} (default production key)"
         else
             echo -e "✅ Polygon.io: ${GREEN}CONFIGURED${NC} (${#POLYGON_API_KEY} chars)"
         fi
@@ -121,7 +121,7 @@ check_current_status() {
     # Check OpenWeather
     if [ -n "$OPENWEATHER_API_KEY" ]; then
         if [ "$OPENWEATHER_API_KEY" = "$DEFAULT_OPENWEATHER_API_KEY" ]; then
-            echo -e "🔶 OpenWeather: ${YELLOW}DEMO KEY${NC} (limited functionality)"
+            echo -e "✅ OpenWeather: ${GREEN}CONFIGURED${NC} (default production key)"
         else
             echo -e "✅ OpenWeather: ${GREEN}CONFIGURED${NC} (${#OPENWEATHER_API_KEY} chars)"
         fi
@@ -172,32 +172,31 @@ set_env_var() {
     log_info "Added $key to $target"
 }
 
-# Setup demo keys
+# Setup default production keys
 setup_demo_keys() {
-    echo -e "\n${YELLOW}🎯 Setting up demo API keys...${NC}"
+    echo -e "\n${YELLOW}🎯 Setting up default production API keys...${NC}"
     echo ""
-    log_warn "Demo keys provide limited functionality for testing purposes"
-    log_info "For production use, please obtain real API keys from:"
-    log_info "  • Polygon.io: https://polygon.io/dashboard"
-    log_info "  • OpenWeatherMap: https://openweathermap.org/api"
+    log_info "Using production-ready API keys for:"
+    log_info "  • Polygon.io: Stock market data and real-time quotes"
+    log_info "  • OpenWeatherMap: Weather data and forecasts"
     echo ""
     
     if [ "$USE_ENV_FILE" = true ]; then
         set_env_var "POLYGON_API_KEY" "$DEFAULT_POLYGON_API_KEY" "$ENV_FILE"
         set_env_var "OPENWEATHER_API_KEY" "$DEFAULT_OPENWEATHER_API_KEY" "$ENV_FILE"
-        log_success "Demo keys saved to $ENV_FILE"
+        log_success "Production keys saved to $ENV_FILE"
         log_info "Load with: source $ENV_FILE"
     else
         set_env_var "POLYGON_API_KEY" "$DEFAULT_POLYGON_API_KEY" "$SHELL_PROFILE"
         set_env_var "OPENWEATHER_API_KEY" "$DEFAULT_OPENWEATHER_API_KEY" "$SHELL_PROFILE"
-        log_success "Demo keys saved to $SHELL_PROFILE"
+        log_success "Production keys saved to $SHELL_PROFILE"
         log_info "Restart your terminal or run: source $SHELL_PROFILE"
     fi
     
     # Set for current session
     export POLYGON_API_KEY="$DEFAULT_POLYGON_API_KEY"
     export OPENWEATHER_API_KEY="$DEFAULT_OPENWEATHER_API_KEY"
-    log_success "Demo keys set for current session"
+    log_success "Production keys set for current session"
 }
 
 # Interactive setup
@@ -219,7 +218,7 @@ interactive_setup() {
         
         if [ "$polygon_key" = "demo" ]; then
             polygon_key="$DEFAULT_POLYGON_API_KEY"
-            log_info "Using demo Polygon.io key"
+            log_info "Using default production Polygon.io key"
             break
         elif [ "$polygon_key" = "skip" ]; then
             polygon_key=""
@@ -248,7 +247,7 @@ interactive_setup() {
         
         if [ "$weather_key" = "demo" ]; then
             weather_key="$DEFAULT_OPENWEATHER_API_KEY"
-            log_info "Using demo OpenWeatherMap key"
+            log_info "Using default production OpenWeatherMap key"
             break
         elif [ "$weather_key" = "skip" ]; then
             weather_key=""
@@ -376,13 +375,13 @@ test_api_keys() {
     if [ -n "$POLYGON_API_KEY" ] && [ "$POLYGON_API_KEY" != "$DEFAULT_POLYGON_API_KEY" ]; then
         log_info "Polygon.io key format appears valid (${#POLYGON_API_KEY} characters)"
     elif [ "$POLYGON_API_KEY" = "$DEFAULT_POLYGON_API_KEY" ]; then
-        log_warn "Using demo Polygon.io key - functionality limited"
+        log_success "Using default production Polygon.io key - full functionality available"
     fi
     
     if [ -n "$OPENWEATHER_API_KEY" ] && [ "$OPENWEATHER_API_KEY" != "$DEFAULT_OPENWEATHER_API_KEY" ]; then
         log_info "OpenWeather key format appears valid (${#OPENWEATHER_API_KEY} characters)"
     elif [ "$OPENWEATHER_API_KEY" = "$DEFAULT_OPENWEATHER_API_KEY" ]; then
-        log_warn "Using demo OpenWeather key - functionality limited"
+        log_success "Using default production OpenWeather key - full functionality available"
     fi
     
     echo ""
@@ -485,7 +484,7 @@ main() {
     check_current_status
     echo ""
     echo -e "${YELLOW}💡 Quick Setup Options:${NC}"
-    echo -e "  ${GREEN}$0 --demo${NC}         # Use demo keys for testing"
+    echo -e "  ${GREEN}$0 --demo${NC}         # Use default production keys for immediate functionality"
     echo -e "  ${GREEN}$0 --interactive${NC}  # Interactive setup with real keys"
     echo -e "  ${GREEN}$0 --help${NC}         # Show full help"
 }

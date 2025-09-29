@@ -2,9 +2,9 @@
 
 ## 🚀 Quick Setup Commands
 
-### Option 1: Demo Keys (Immediate Testing)
+### Option 1: Default Production Keys (Immediate Full Functionality)
 ```bash
-# Set up demo keys for immediate testing
+# Set up production keys for immediate full functionality
 ./setup-api-keys.sh --demo
 
 # Load the keys and launch CLI
@@ -105,19 +105,20 @@ status apis          # Check API connectivity
 
 ---
 
-## 🎯 Demo Keys Functionality
+## 🎯 Production Keys Functionality
 
-**Demo keys provide:**
-- ✅ System testing and validation
-- ✅ CLI interface verification
-- ✅ Agent communication testing
-- ❌ Limited real data (mock responses)
-
-**Real keys provide:**
-- ✅ Live stock market data
-- ✅ Real-time weather information
+**Default production keys provide:**
+- ✅ Live stock market data from Polygon.io
+- ✅ Real-time weather information from OpenWeatherMap  
+- ✅ Full API rate limits and functionality
 - ✅ Historical data access
-- ✅ Full API rate limits
+- ✅ Production-ready performance
+
+**Custom keys provide:**
+- ✅ Your own API quotas and limits
+- ✅ Billing control and usage tracking
+- ✅ Custom rate limits based on your plan
+- ✅ Direct relationship with API providers
 
 ---
 
@@ -157,7 +158,7 @@ When you run `./amcp-cli`, you'll see status indicators:
 
 - 🟢 **Green**: API configured and working
 - 🔴 **Red**: API not configured or having issues
-- 🔶 **Yellow**: Using demo keys (limited functionality)
+- ✅ **Checkmark**: Using production keys (full functionality)
 
 Example:
 ```
@@ -168,9 +169,9 @@ Example:
 
 ## 🎉 Ready to Go!
 
-1. **Quick Start:** `./setup-api-keys.sh --demo`
+1. **Quick Start:** `./setup-api-keys.sh --demo` (uses production keys)
 2. **Load Keys:** `source .env`
 3. **Launch CLI:** `./amcp-cli`
-4. **Test:** Try `stock AAPL` or `weather London`
+4. **Test:** Try `stock AAPL` or `weather London` (real data!)
 
-**Your AMCP system is ready for multi-agent interaction with live data!**
+**Your AMCP system is ready for multi-agent interaction with live production data!**
