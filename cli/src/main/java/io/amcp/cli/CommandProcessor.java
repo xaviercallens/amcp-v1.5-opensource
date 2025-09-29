@@ -8,6 +8,7 @@ import io.amcp.examples.stockprice.StockPriceAgent;
 import io.amcp.examples.weather.WeatherAgent;
 
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -346,8 +347,34 @@ public class CommandProcessor {
                 } else {
                     // Default to price lookup
                     String symbol = args[0].toUpperCase();
-                    return CommandResult.info("Fetching stock price for " + symbol + "...\n" +
-                        "Use the stock agent's interactive interface for full functionality.");
+                    
+                    try {
+                        CompletableFuture<StockPriceAgent.StockData> future = spa.getStockPrice(symbol);
+                        StockPriceAgent.StockData stockData = future.get(10, TimeUnit.SECONDS);
+                        
+                        if (stockData != null) {
+                            Map<String, Object> result = new HashMap<>();
+                            result.put("Symbol", stockData.getSymbol());
+                            result.put("Close Price", String.format("$%.2f", stockData.getClosePrice()));
+                            result.put("Open Price", String.format("$%.2f", stockData.getOpenPrice()));
+                            result.put("High Price", String.format("$%.2f", stockData.getHighPrice()));
+                            result.put("Low Price", String.format("$%.2f", stockData.getLowPrice()));
+                            result.put("Change", String.format("$%.2f (%.2f%%)", stockData.getChange(), stockData.getChangePercent()));
+                            result.put("Volume", String.format("%,d", stockData.getVolume()));
+                            result.put("Updated", new Date(stockData.getTimestamp()).toString());
+                            
+                            return CommandResult.success("Stock data for " + symbol, result);
+                        } else {
+                            return CommandResult.error("Could not fetch stock data for " + symbol + ". Please check the symbol.");
+                        }
+                    } catch (TimeoutException e) {
+                        return CommandResult.error("Timeout waiting for stock data for " + symbol);
+                    } catch (ExecutionException e) {
+                        return CommandResult.error("Error fetching stock data: " + e.getCause().getMessage());
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        return CommandResult.error("Stock data fetch was interrupted");
+                    }
                 }
             }
         } catch (Exception e) {
@@ -368,8 +395,32 @@ public class CommandProcessor {
         }
         
         String location = String.join(" ", args);
-        return CommandResult.info("Getting weather for " + location + "...\n" +
-            "Use the weather agent's interactive interface for full functionality.");
+        
+        try {
+            if (weatherAgent instanceof WeatherAgent) {
+                WeatherAgent wa = (WeatherAgent) weatherAgent;
+                WeatherAgent.WeatherData weatherData = wa.getWeatherForLocation(location);
+                
+                if (weatherData != null) {
+                    Map<String, Object> result = new HashMap<>();
+                    result.put("Location", weatherData.city);
+                    result.put("Temperature", String.format("%.1f°C", weatherData.temperature));
+                    result.put("Humidity", String.format("%.1f%%", weatherData.humidity));
+                    result.put("Pressure", String.format("%.1f hPa", weatherData.pressure));
+                    result.put("Condition", weatherData.description);
+                    result.put("Wind Speed", String.format("%.1f m/s", weatherData.windSpeed));
+                    result.put("Updated", weatherData.timestamp.toString());
+                    
+                    return CommandResult.success("Weather for " + location, result);
+                } else {
+                    return CommandResult.error("Could not fetch weather data for " + location + ". Please check the location name.");
+                }
+            } else {
+                return CommandResult.error("Weather agent type not supported");
+            }
+        } catch (Exception e) {
+            return CommandResult.error("Error fetching weather data: " + e.getMessage());
+        }
     }
     
     private CommandResult handleTravel(String[] args) {

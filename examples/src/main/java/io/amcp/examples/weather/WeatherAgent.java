@@ -30,8 +30,10 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class WeatherAgent extends AbstractMobileAgent {
 
-    // OpenWeatherMap API configuration with default key
-    private static final String OPENWEATHER_API_KEY = "b6907d289e10d714a6e88b30761fae22"; // Default key for demo
+    // OpenWeatherMap API configuration - reads from environment or uses default
+    private static final String OPENWEATHER_API_KEY = System.getenv("OPENWEATHER_API_KEY") != null 
+        ? System.getenv("OPENWEATHER_API_KEY") 
+        : "3bd965f39881ba0f116ee0810fdfd058"; // Production key as fallback
     private static final String WEATHER_API_BASE = "https://api.openweathermap.org/data/2.5";
     
     private final Set<String> monitoredCities = new HashSet<>();
@@ -421,6 +423,10 @@ public class WeatherAgent extends AbstractMobileAgent {
 
     public Map<String, WeatherData> getLatestWeatherData() {
         return new HashMap<>(latestWeatherData);
+    }
+
+    public WeatherData getWeatherForLocation(String location) {
+        return callOpenWeatherMapAPI(location);
     }
 
     public long getDataCollectionCount() {

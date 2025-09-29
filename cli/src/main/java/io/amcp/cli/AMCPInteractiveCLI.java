@@ -1,7 +1,7 @@
 package io.amcp.cli;
 
 import io.amcp.examples.travel.TravelPlannerAgent;
-import io.amcp.examples.stock.StockPriceAgent;
+import io.amcp.examples.stockprice.StockPriceAgent;
 import io.amcp.examples.weather.WeatherAgent;
 import io.amcp.connectors.ai.EnhancedChatAgent;
 import io.amcp.examples.multiagent.MultiAgentDemo;

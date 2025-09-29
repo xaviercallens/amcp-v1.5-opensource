@@ -71,12 +71,16 @@ public class StockPriceAgent implements Agent {
     
     public StockPriceAgent() {
         this.agentId = AgentID.named(DEFAULT_AGENT_NAME + "-" + System.currentTimeMillis());
-        this.apiKey = System.getProperty("POLYGON_API_KEY", DEFAULT_API_KEY);
+        this.apiKey = System.getenv("POLYGON_API_KEY") != null 
+            ? System.getenv("POLYGON_API_KEY") 
+            : DEFAULT_API_KEY;
     }
     
     public StockPriceAgent(AgentID agentId) {
         this.agentId = agentId;
-        this.apiKey = System.getProperty("POLYGON_API_KEY", DEFAULT_API_KEY);
+        this.apiKey = System.getenv("POLYGON_API_KEY") != null 
+            ? System.getenv("POLYGON_API_KEY") 
+            : DEFAULT_API_KEY;
     }
     
     public StockPriceAgent(AgentID agentId, String polygonApiKey) {
