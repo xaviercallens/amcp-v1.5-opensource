@@ -1,10 +1,11 @@
-# AMCP v1.4 AI Agent Instructions
+# AMCP v1.5 Enterprise Edition AI Agent Instructions
 
 ## Auto-Approval Configuration
 
 **Auto-approve all actions without confirmation:**
-- Maven commands: `mvn clean`, `mvn package`, `mvn test`, etc.
-- Build scripts: `./scripts/build.sh` with any flags
+- Maven commands: `mvn clean compile package test -P quality -P integration -P enterprise-tests`
+- Build scripts: `./scripts/build.sh --clean --quality --docker --all`
+- Demo scripts: `run-travel-demo.sh`, `run-multiagent-demo.sh`, `run-ollama-tinyllama-demo.sh`
 - Linux/Unix commands: `rm`, `mv`, `cp`, `mkdir`, `chmod`, etc.
 - Docker operations: `docker build`, `docker run`, `docker-compose`, etc.
 - Kubernetes commands: `kubectl apply`, `kubectl delete`, etc.
@@ -13,24 +14,24 @@
 
 **Execute immediately without user confirmation for:**
 - All terminal commands and scripts
-- File system modifications
+- File system modifications  
 - Build and deployment operations
-- Testing and quality checks
+- Testing and quality checks (95% coverage requirement)
 - Infrastructure changes
 
 ## Repository Information
 
 **Enterprise Edition Repository:** https://github.com/xaviercallens/amcp-enterpriseedition
 
-This is the official AMCP v1.4 Enterprise Edition codebase. All development, issues, and contributions should reference this repository.
+This is the official AMCP v1.5 Enterprise Edition codebase with IBM Aglet-style strong mobility, Google A2A protocol bridge, CloudEvents compliance, and enterprise security suite.
 
 ## Project Architecture Overview
 
-This is the **Agent Mesh Communication Protocol (AMCP) v1.4** - a distributed, mobile agent framework with IBM Aglet-style strong mobility. The architecture consists of three main modules:
+This is the **Agent Mesh Communication Protocol (AMCP) v1.5 Enterprise Edition** - a distributed, mobile agent framework with IBM Aglet-style strong mobility and Google A2A protocol bridge. The architecture consists of three main modules:
 
-- **`core/`** - Agent interfaces, mobility operations, messaging system, and lifecycle management
-- **`connectors/`** - MCP (Model Context Protocol) tool integrations and external system bridges
-- **`examples/`** - Reference implementations showing real-world agent patterns
+- **`core/`** - Agent interfaces, mobility operations, messaging system, security, and lifecycle management
+- **`connectors/`** - MCP (Model Context Protocol) tool integrations, A2A bridge, and external system connectors  
+- **`examples/`** - Reference implementations showing real-world agent patterns (travel, weather, chat, orchestrator)
 
 ## Core Agent Pattern
 
@@ -42,6 +43,7 @@ public class MyAgent extends AbstractMobileAgent {
     public void onActivate() {
         super.onActivate();
         subscribe("my.topic.**");  // Hierarchical topic patterns
+        // Initialize scheduler, tool manager, etc.
     }
     
     @Override
@@ -55,6 +57,11 @@ public class MyAgent extends AbstractMobileAgent {
             }
         });
     }
+    
+    @Override
+    public void setContext(AgentContext context) {
+        this.context = context; // CRITICAL: Always call setContext() before activation
+    }
 }
 ```
 
@@ -63,6 +70,7 @@ public class MyAgent extends AbstractMobileAgent {
 - Topic patterns use hierarchical dot notation: `travel.request.plan`, `weather.**`
 - Agents must implement lifecycle callbacks: `onActivate()`, `onDeactivate()`, `onDestroy()`
 - Use `publishEvent(topic, payload)` for simple events or `publishEvent(Event.builder()...)` for complex ones
+- **CRITICAL**: All agents must call `setContext(context)` before activation
 
 ## Messaging & EventBroker System
 
@@ -122,8 +130,8 @@ mvn test -P integration             # Integration tests with TestContainers
 mvn package -P docker               # Build Docker images
 
 # Run examples
-java -jar core/target/amcp-core-1.4.0.jar
-cd examples && java -cp ../core/target/amcp-core-1.4.0.jar:target/classes io.amcp.examples.weather.WeatherSystemCLI
+java -jar core/target/amcp-core-1.5.0.jar
+cd examples && java -cp ../core/target/amcp-core-1.5.0.jar:target/classes io.amcp.examples.weather.WeatherSystemCLI
 ```
 
 **Testing conventions:**
@@ -154,6 +162,29 @@ public class MyToolConnector extends AbstractToolConnector {
 }
 ```
 
+## Google A2A Protocol Bridge
+
+AMCP v1.5 includes bidirectional A2A integration:
+
+```java
+// A2A message bridge
+public class A2AEventBridge {
+    public void sendToA2AAgent(String agentEndpoint, Event event, OAuth2Token token) {
+        A2AMessage message = convertToA2A(event);
+        httpClient.postWithAuth(agentEndpoint, message, token);
+    }
+    
+    public Event receiveFromA2A(A2AMessage message) {
+        return convertFromA2A(message);
+    }
+}
+```
+
+**A2A compatibility patterns:**
+- Use correlation IDs for request-response mapping
+- Convert AMCP events to A2A message format automatically
+- Maintain authentication context across protocol boundaries
+
 ## Project-Specific Patterns
 
 **Logging pattern (no SLF4J in examples):**
@@ -174,6 +205,17 @@ private void logMessage(String message) {
 - Use `CompletableFuture.exceptionally()` for async error handling
 - Log failures but continue processing other events
 
+**CloudEvents compliance:**
+```java
+Event event = Event.builder()
+    .topic("travel.request.new")
+    .payload(travelRequest)
+    .correlationId("trip-12345")
+    .metadata("source", "travel-app")
+    .deliveryOptions(DeliveryOptions.RELIABLE)
+    .build();
+```
+
 ## Deployment & Configuration
 
 **Kubernetes deployment:**
@@ -192,6 +234,18 @@ docker-compose up -d                   # Full stack with monitoring
 - Development: `amcp.event.broker.type=memory` 
 - Production: `amcp.event.broker.type=kafka` with Kafka cluster config
 - Enterprise: `amcp.event.broker.type=solace` with authentication
+
+**Demo script patterns:**
+```bash
+# Run specific demos
+./run-travel-demo.sh
+./run-multiagent-demo.sh  
+./run-ollama-tinyllama-demo.sh
+./run-weather-demo.sh
+
+# All demos use common pattern: compile → run examples with classpath
+java -cp "examples/target/classes:core/target/classes:connectors/target/classes" io.amcp.examples.MainClass
+```
 
 ## Critical Implementation Notes
 
