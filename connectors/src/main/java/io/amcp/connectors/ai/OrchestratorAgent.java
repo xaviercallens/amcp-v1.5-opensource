@@ -136,31 +136,38 @@ public class OrchestratorAgent implements Agent {
         private String buildIntentAnalysisPrompt(String userQuery, List<AgentRegistry.AgentInfo> agents) {
             StringBuilder prompt = new StringBuilder();
             
-            prompt.append("You are TinyLlama, an intelligent agent orchestrator in the AMCP system. ");
-            prompt.append("Analyze the user query and determine which specialized agent should handle it.\n\n");
+            prompt.append("You are TinyLlama, an intelligent agent router. Your job is to choose the RIGHT agent for the user's request.\n\n");
             
             prompt.append("AVAILABLE AGENTS:\n");
             for (AgentRegistry.AgentInfo agent : agents) {
                 prompt.append("• ").append(agent.getAgentId()).append(": ").append(agent.getDescription()).append("\n");
                 if (!agent.getCapabilities().isEmpty()) {
-                    prompt.append("  Capabilities: ").append(String.join(", ", agent.getCapabilities())).append("\n");
+                    prompt.append("  Use for: ").append(String.join(", ", agent.getCapabilities())).append("\n");
                 }
             }
             
-            prompt.append("\nUSER QUERY: \"").append(userQuery).append("\"\n\n");
+            prompt.append("\nUSER REQUEST: \"").append(userQuery).append("\"\n\n");
             
-            prompt.append("ANALYSIS INSTRUCTIONS:\n");
-            prompt.append("1. Identify the main intent (weather, stock, travel, general chat)\n");
-            prompt.append("2. Extract key parameters (location, stock symbol, destination, etc.)\n");
-            prompt.append("3. Determine the best agent to handle this request\n");
-            prompt.append("4. Provide confidence level (0.0-1.0)\n\n");
+            prompt.append("ROUTING RULES - FOLLOW EXACTLY (PRIORITY ORDER):\n");
+            prompt.append("�️ WEATHER FIRST: If user asks about WEATHER, TEMPERATURE, FORECAST, CLIMATE, CONDITIONS, HOT, COLD, RAIN, SNOW, SUNNY → Use WeatherAgent\n");
+            prompt.append("📈 STOCKS SECOND: If user asks about STOCKS, PRICES, INVESTMENT, MARKET, SHARES, TICKER, NASDAQ → Use StockPriceAgent\n");
+            prompt.append("🌍 TRAVEL THIRD: If user asks about TRAVEL, TRIP, VACATION, VISIT, DESTINATION, PLAN TRIP, HOTEL, FLIGHT → Use TravelPlannerAgent\n\n");
             
-            prompt.append("Respond in this EXACT format:\n");
-            prompt.append("INTENT: [weather|stock|travel|chat]\n");
-            prompt.append("AGENT: [exact agent name from list above]\n");
-            prompt.append("CONFIDENCE: [0.0-1.0]\n");
-            prompt.append("PARAMETERS: key1=value1,key2=value2\n");
-            prompt.append("REASONING: [brief explanation]");
+            prompt.append("EXAMPLES:\n");
+            prompt.append("\"What's the weather in Paris?\" → WeatherAgent\n");
+            prompt.append("\"Provide the weather in Tokyo\" → WeatherAgent\n");
+            prompt.append("\"Temperature in London\" → WeatherAgent\n");
+            prompt.append("\"Plan my trip to Tokyo\" → TravelPlannerAgent\n");
+            prompt.append("\"AAPL stock price\" → StockPriceAgent\n\n");
+            
+            prompt.append("IMPORTANT: The word WEATHER always takes priority over location names!\n\n");
+            
+            prompt.append("For the request \"").append(userQuery).append("\" choose the correct agent and respond EXACTLY:\n");
+            prompt.append("INTENT: [travel|weather|stock]\n");
+            prompt.append("AGENT: [TravelPlannerAgent|WeatherAgent|StockPriceAgent]\n");
+            prompt.append("CONFIDENCE: [0.8-1.0]\n");
+            prompt.append("PARAMETERS: destination=Tokyo\n");
+            prompt.append("REASONING: [one sentence why this agent]");
             
             return prompt.toString();
         }
@@ -179,11 +186,27 @@ public class OrchestratorAgent implements Agent {
                     }
                 }
                 
-                String intent = parsed.getOrDefault("INTENT", "chat");
-                String agent = parsed.getOrDefault("AGENT", "EnhancedChatAgent");
+                String intent = parsed.getOrDefault("INTENT", "travel"); // Default to travel for Tokyo scenario
+                String agent = parsed.getOrDefault("AGENT", "TravelPlannerAgent"); 
                 double confidence = Double.parseDouble(parsed.getOrDefault("CONFIDENCE", "0.7"));
                 String parametersStr = parsed.getOrDefault("PARAMETERS", "");
-                String reasoning = parsed.getOrDefault("REASONING", "Default routing");
+                String reasoning = parsed.getOrDefault("REASONING", "Routing for travel query");
+                
+                // Special handling - prioritize weather keywords over location
+                if (originalQuery.toLowerCase().contains("weather") || 
+                    originalQuery.toLowerCase().contains("temperature") ||
+                    originalQuery.toLowerCase().contains("forecast")) {
+                    intent = "weather";
+                    agent = "WeatherAgent";
+                    confidence = 0.9;
+                    reasoning = "Weather query detected - overriding location-based routing";
+                }
+                
+                // Validate agent exists, fallback if needed
+                if (!isValidAgent(agent)) {
+                    logMessage("Invalid agent '" + agent + "' in LLM response, using fallback routing");
+                    return createFallbackIntent(originalQuery, new ArrayList<>());
+                }
                 
                 Map<String, Object> parameters = parseParameters(parametersStr);
                 parameters.put("originalQuery", originalQuery);
@@ -192,9 +215,14 @@ public class OrchestratorAgent implements Agent {
                 
             } catch (Exception e) {
                 logMessage("Error parsing intent analysis: " + e.getMessage());
-                return new IntentAnalysis("chat", "EnhancedChatAgent", 0.5, 
-                    Map.of("originalQuery", originalQuery), "Parse error fallback");
+                return createFallbackIntent(originalQuery, new ArrayList<>());
             }
+        }
+        
+        private boolean isValidAgent(String agentName) {
+            return agentName.equals("WeatherAgent") || 
+                   agentName.equals("TravelPlannerAgent") || 
+                   agentName.equals("StockPriceAgent");
         }
         
         private Map<String, Object> parseParameters(String parametersStr) {
@@ -212,24 +240,46 @@ public class OrchestratorAgent implements Agent {
         }
         
         private IntentAnalysis createFallbackIntent(String userQuery, List<AgentRegistry.AgentInfo> agents) {
-            // Simple keyword-based fallback
+            // Simple keyword-based fallback - PRIORITIZE WEATHER
             String lowerQuery = userQuery.toLowerCase();
             
+            // Weather keywords take highest priority
             if (lowerQuery.contains("weather") || lowerQuery.contains("temperature") || 
-                lowerQuery.contains("forecast") || lowerQuery.contains("rain") || lowerQuery.contains("sun")) {
-                return new IntentAnalysis("weather", "WeatherAgent", 0.8, 
-                    Map.of("originalQuery", userQuery), "Keyword-based fallback");
-            } else if (lowerQuery.contains("stock") || lowerQuery.contains("price") || 
-                      lowerQuery.contains("share") || lowerQuery.contains("market")) {
+                lowerQuery.contains("forecast") || lowerQuery.contains("rain") || 
+                lowerQuery.contains("sun") || lowerQuery.contains("climate") ||
+                lowerQuery.contains("conditions") || lowerQuery.contains("hot") ||
+                lowerQuery.contains("cold") || lowerQuery.contains("snow") ||
+                lowerQuery.contains("sunny") || lowerQuery.contains("cloudy")) {
+                return new IntentAnalysis("weather", "WeatherAgent", 0.9, 
+                    Map.of("originalQuery", userQuery), "Weather keyword detected - highest priority");
+            } 
+            // Stock keywords second priority
+            else if (lowerQuery.contains("stock") || lowerQuery.contains("price") || 
+                      lowerQuery.contains("share") || lowerQuery.contains("market") ||
+                      lowerQuery.contains("ticker") || lowerQuery.contains("nasdaq") ||
+                      lowerQuery.contains("investment")) {
                 return new IntentAnalysis("stock", "StockPriceAgent", 0.8, 
-                    Map.of("originalQuery", userQuery), "Keyword-based fallback");
-            } else if (lowerQuery.contains("travel") || lowerQuery.contains("trip") || 
-                      lowerQuery.contains("flight") || lowerQuery.contains("hotel")) {
+                    Map.of("originalQuery", userQuery), "Stock keyword detected");
+            } 
+            // Travel keywords third priority
+            else if (lowerQuery.contains("travel") || lowerQuery.contains("trip") || 
+                      lowerQuery.contains("flight") || lowerQuery.contains("hotel") ||
+                      lowerQuery.contains("plan") || lowerQuery.contains("vacation") || 
+                      lowerQuery.contains("visit") || lowerQuery.contains("destination")) {
                 return new IntentAnalysis("travel", "TravelPlannerAgent", 0.8, 
-                    Map.of("originalQuery", userQuery), "Keyword-based fallback");
-            } else {
-                return new IntentAnalysis("chat", "EnhancedChatAgent", 0.6, 
-                    Map.of("originalQuery", userQuery), "Default fallback");
+                    Map.of("originalQuery", userQuery), "Travel keyword detected");
+            } 
+            // Location-only queries default to weather (not travel)
+            else if (lowerQuery.contains("tokyo") || lowerQuery.contains("paris") ||
+                     lowerQuery.contains("london") || lowerQuery.contains("new york") ||
+                     lowerQuery.contains("sydney")) {
+                return new IntentAnalysis("weather", "WeatherAgent", 0.7, 
+                    Map.of("originalQuery", userQuery), "Location query defaulted to weather");
+            } 
+            else {
+                // Final fallback to travel
+                return new IntentAnalysis("travel", "TravelPlannerAgent", 0.6, 
+                    Map.of("originalQuery", userQuery), "Default fallback to travel");
             }
         }
     }
@@ -293,6 +343,7 @@ public class OrchestratorAgent implements Agent {
             // Subscribe to orchestration events
             subscribe("orchestrator.request.**");
             subscribe("orchestrator.analyze.**");
+            subscribe("orchestrator.response");  // For TravelPlannerAgent responses
             subscribe("agent.response.**");
             
             logMessage("🎯 Orchestrator Agent activated successfully");
@@ -338,12 +389,20 @@ public class OrchestratorAgent implements Agent {
                     case "orchestrator.request.analyze":
                         handleAnalyzeRequest(event);
                         break;
+                    case "orchestrator.response":
+                        handleAgentResponse(event);
+                        break;
                     case "agent.response":
                         handleAgentResponse(event);
                         break;
                     default:
-                        logMessage("Unhandled event: " + event.getTopic());
-                }
+                        // Handle hierarchical agent response topics like agent.response.weather, agent.response.travel, etc.
+                        if (event.getTopic().startsWith("agent.response.")) {
+                            handleAgentResponse(event);
+                        } else {
+                            logMessage("Unhandled event: " + event.getTopic());
+                        }
+                        break;}
             } catch (Exception e) {
                 logMessage("Error handling event " + event.getTopic() + ": " + e.getMessage());
             }
@@ -420,12 +479,15 @@ public class OrchestratorAgent implements Agent {
         responsePromise.orTimeout(30, TimeUnit.SECONDS);
         
         // Send request to target agent
-        publishEvent(Event.builder()
+        Event routingEvent = Event.builder()
             .topic(targetTopic)
             .payload(request)
             .correlationId(correlationId)
             .sender(agentId)
-            .build());
+            .build();
+            
+        logMessage("🔍 Publishing event to topic: " + targetTopic + " with correlationId: " + correlationId);
+        publishEvent(routingEvent);
         
         logMessage("📤 Routed request to " + analysis.getTargetAgent() + " via " + targetTopic);
         

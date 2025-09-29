@@ -5,8 +5,6 @@ import io.amcp.core.AgentContext;
 import io.amcp.core.AgentID;
 import io.amcp.core.AgentLifecycle;
 import io.amcp.core.Event;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -23,8 +21,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * via the AMCP protocol with A2A patterns.
  */
 public class AgentRegistry implements Agent {
-    
-    private static final Logger logger = LoggerFactory.getLogger(AgentRegistry.class);
     
     private final AgentID agentId;
     private AgentContext context;
@@ -80,7 +76,7 @@ public class AgentRegistry implements Agent {
             logMessage("Agent Registry activated with " + subscriptions.size() + " subscriptions");
             
         } catch (Exception e) {
-            logger.error("Failed to activate Agent Registry", e);
+            logMessage("❌ Failed to activate Agent Registry: " + e.getMessage());
             throw new RuntimeException("Agent Registry activation failed", e);
         }
     }
@@ -204,7 +200,7 @@ public class AgentRegistry implements Agent {
                 }
                 
             } catch (Exception e) {
-                logger.error("Failed to handle event: " + event.getTopic(), e);
+                logMessage("❌ Failed to handle event: " + event.getTopic() + ": " + e.getMessage());
             }
         });
     }
@@ -243,7 +239,7 @@ public class AgentRegistry implements Agent {
             ));
             
         } catch (Exception e) {
-            logger.error("Failed to register agent", e);
+            logMessage("❌ Failed to register agent: " + e.getMessage());
         }
     }
     

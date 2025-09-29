@@ -143,7 +143,7 @@ public class WeatherAgent extends AbstractMobileAgent {
                 responseData.put("weatherData", weatherData);
                 
                 publishEvent(Event.builder()
-                    .topic("agent.response")
+                    .topic("agent.response.weather")
                     .payload(responseData)
                     .correlationId(event.getCorrelationId())
                     .sender(getAgentId())
@@ -157,7 +157,7 @@ public class WeatherAgent extends AbstractMobileAgent {
                 errorResponse.put("error", "No location specified");
                 
                 publishEvent(Event.builder()
-                    .topic("agent.response")
+                    .topic("agent.response.weather")
                     .payload(errorResponse)
                     .correlationId(event.getCorrelationId())
                     .sender(getAgentId())
