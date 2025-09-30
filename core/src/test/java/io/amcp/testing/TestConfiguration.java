@@ -530,4 +530,25 @@ public class TestConfiguration {
             .testTimeout(600) // 10 minutes for comprehensive tests
             .build();
     }
+    
+    /**
+     * Create default test configuration
+     */
+    public static TestConfiguration defaultConfig() {
+        return new Builder()
+            .enableTestContainers(false) // Disabled by default for faster testing
+            .enablePerformanceTests(true)
+            .enableSecurityTests(false)
+            .enableChaosTests(false)
+            .enableParallelExecution(true)
+            .maxConcurrentThreads(4)
+            .performanceTestDuration(60)
+            .maxEventsPerSecond(1000)
+            .latencyTestSamples(100)
+            .testTimeout(120) // 2 minutes default timeout
+            .retryAttempts(2)
+            .failFast(false)
+            .generateReports(true)
+            .build();
+    }
 }

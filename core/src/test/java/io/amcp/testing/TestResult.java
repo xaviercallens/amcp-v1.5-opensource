@@ -244,6 +244,11 @@ public class TestResult {
             return this;
         }
         
+        public Builder success() {
+            this.status = TestStatus.PASSED;
+            return this;
+        }
+        
         public TestResult build() {
             return new TestResult(this);
         }

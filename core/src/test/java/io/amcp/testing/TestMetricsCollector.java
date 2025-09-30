@@ -97,13 +97,21 @@ public class TestMetricsCollector {
      * Get current test metrics
      */
     public TestMetrics getMetrics() {
+        Map<String, Long> categoryMetricsConverted = new ConcurrentHashMap<>();
+        categoryMetrics.forEach((category, metrics) -> 
+            categoryMetricsConverted.put(category, metrics.getTotalTests()));
+        
+        Map<String, Double> performanceMetricsConverted = new ConcurrentHashMap<>();
+        performanceMetrics.forEach((name, value) -> 
+            performanceMetricsConverted.put(name, (double) value.get()));
+        
         return TestMetrics.builder()
             .totalTests(totalTestsExecuted.get())
             .passedTests(totalTestsPassed.get())
             .failedTests(totalTestsFailed.get())
             .totalExecutionTime(Duration.ofMillis(totalExecutionTime.get()))
-            .categoryMetrics(new ConcurrentHashMap<>(categoryMetrics))
-            .performanceMetrics(new ConcurrentHashMap<>(performanceMetrics))
+            .categoryMetrics(categoryMetricsConverted)
+            .performanceMetrics(performanceMetricsConverted)
             .uptime(Duration.between(startTime, Instant.now()))
             .build();
     }
@@ -177,13 +185,13 @@ public class TestMetricsCollector {
         report.append(String.format("Uptime: %ds\n", metrics.getUptime().getSeconds()));
         
         report.append("\nCategory Breakdown:\n");
-        metrics.getCategoryMetrics().forEach((category, catMetrics) -> {
+        categoryMetrics.forEach((category, catMetrics) -> {
             report.append(String.format("  %s: %d tests, %.1f%% success rate\n",
                 category, catMetrics.getTotalTests(), catMetrics.getSuccessRate()));
         });
         
         report.append("\nPerformance Metrics:\n");
-        metrics.getPerformanceMetrics().forEach((name, value) -> {
+        performanceMetrics.forEach((name, value) -> {
             report.append(String.format("  %s: %d\n", name, value.get()));
         });
         

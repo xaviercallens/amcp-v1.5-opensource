@@ -2,7 +2,7 @@ package io.amcp.testing.demo;
 
 import io.amcp.testing.*;
 import io.amcp.messaging.EventBroker;
-import io.amcp.messaging.InMemoryEventBroker;
+import io.amcp.messaging.impl.InMemoryEventBroker;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -92,7 +92,7 @@ public class TestingFrameworkDemo {
             
             // Display results with metrics
             displayResults("Performance Benchmarks", result);
-            displayPerformanceMetrics(framework.getMetrics());
+            displayPerformanceMetrics(framework.getMetricsCollector());
             
             // Cleanup
             framework.shutdown();
@@ -123,7 +123,7 @@ public class TestingFrameworkDemo {
             
             // Display results with security metrics
             displayResults("Security Validation", result);
-            displaySecurityMetrics(framework.getMetrics());
+            displaySecurityMetrics(framework.getMetricsCollector());
             
             // Cleanup
             framework.shutdown();
@@ -155,7 +155,7 @@ public class TestingFrameworkDemo {
             
             // Display results with chaos metrics
             displayResults("Chaos Engineering", result);
-            displayChaosMetrics(framework.getMetrics());
+            displayChaosMetrics(framework.getMetricsCollector());
             
             // Cleanup
             framework.shutdown();
@@ -187,7 +187,7 @@ public class TestingFrameworkDemo {
             
             // Display comprehensive results
             displayResults("Comprehensive Test Suite", result);
-            displayComprehensiveMetrics(framework.getMetrics());
+            displayComprehensiveMetrics(framework.getMetricsCollector());
             
             // Generate detailed report
             logger.info("\n📊 Generating detailed test report...");
@@ -453,7 +453,7 @@ public class TestingFrameworkDemo {
             
             // Display results
             displayResults(testName + " Test Suite", result);
-            displayComprehensiveMetrics(framework.getMetrics());
+            displayComprehensiveMetrics(framework.getMetricsCollector());
             
             // Cleanup
             framework.shutdown();

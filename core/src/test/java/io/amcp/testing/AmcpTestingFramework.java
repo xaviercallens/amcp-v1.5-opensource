@@ -356,6 +356,13 @@ public class AmcpTestingFramework {
     }
     
     /**
+     * Get the metrics collector for detailed analysis
+     */
+    public TestMetricsCollector getMetricsCollector() {
+        return metricsCollector;
+    }
+    
+    /**
      * Shutdown testing framework and cleanup resources
      */
     public void shutdown() {

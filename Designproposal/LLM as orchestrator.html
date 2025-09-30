@@ -1,0 +1,340 @@
+
+Proposed Extension: Agent Orchestration in AMCP v1.5
+Building on the patterns above, we propose extending AMCP (Agent Mesh Communication Protocol) v1.5 Enterprise Edition with a full agent orchestration capability. The extension will introduce a set of new components and protocols to enable any AMCP agent to call on other agents and coordinate complex tasks via natural language instructions. The centerpiece is an Orchestrator Agent powered by an LLM (using Ollama for local LLM integration). Below we outline the architecture and components of this extension:
+Architectural Overview
+In the enhanced AMCP, we introduce an Orchestration Layer above the existing agent mesh. This layer comprises the Orchestrator agent and supporting services (like an agent registry), which operate alongside regular agents. The core AMCP pub/sub event bus remains the communication backbone. All orchestrated interactions are modeled as asynchronous events – preserving AMCP’s decoupled design – with some additional conventions to handle directed requests and responses (the A2A protocol adaptation for AMCP).
+The diagram below illustrates the main components involved:
+<style>
+        :root {
+        --accent: #464feb;
+        --timeline-ln: linear-gradient(to bottom, transparent 0%, #b0beff 15%, #b0beff 85%, transparent 100%);
+        --timeline-border: #ffffff;
+        --bg-card: #f5f7fa;
+        --bg-hover: #ebefff;
+        --text-title: #424242;
+        --text-accent: var(--accent);
+        --text-sub: #424242;
+        --radius: 12px;
+        --border: #e0e0e0;
+        --shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+        --hover-shadow: 0 4px 14px rgba(39, 16, 16, 0.1);
+        --font: "Segoe Sans", "Segoe UI", "Segoe UI Web (West European)", -apple-system, "system-ui", Roboto, "Helvetica Neue", sans-serif;
+        --overflow-wrap: break-word;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --accent: #7385ff;
+            --timeline-ln: linear-gradient(to bottom, transparent 0%, transparent 3%, #6264a7 30%, #6264a7 50%, transparent 97%, transparent 100%);
+            --timeline-border: #424242;
+            --bg-card: #1a1a1a;
+            --bg-hover: #2a2a2a;
+            --text-title: #ffffff;
+            --text-sub: #ffffff;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            --hover-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+            --border: #3d3d3d;
+        }
+    }
+
+    @media (prefers-contrast: more),
+    (forced-colors: active) {
+        :root {
+            --accent: ActiveText;
+            --timeline-ln: ActiveText;
+            --timeline-border: Canvas;
+            --bg-card: Canvas;
+            --bg-hover: Canvas;
+            --text-title: CanvasText;
+            --text-sub: CanvasText;
+            --shadow: 0 2px 10px Canvas;
+            --hover-shadow: 0 4px 14px Canvas;
+            --border: ButtonBorder;
+        }
+    }
+
+    .insights-container {
+        display: grid;
+        grid-template-columns: repeat(2,minmax(240px,1fr));
+        padding: 0px 16px 0px 16px;
+        gap: 16px;
+        margin: 0 0;
+        font-family: var(--font);
+    }
+
+    .insight-card:last-child:nth-child(odd){
+        grid-column: 1 / -1;
+    }
+
+    .insight-card {
+        background-color: var(--bg-card);
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        min-width: 220px;
+        padding: 16px 20px 16px 20px;
+    }
+
+    .insight-card:hover {
+        background-color: var(--bg-hover);
+    }
+
+    .insight-card h4 {
+        margin: 0px 0px 8px 0px;
+        font-size: 1.1rem;
+        color: var(--text-accent);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .insight-card .icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        font-size: 1.1rem;
+        color: var(--text-accent);
+    }
+
+    .insight-card p {
+        font-size: 0.92rem;
+        color: var(--text-sub);
+        line-height: 1.5;
+        margin: 0px;
+        overflow-wrap: var(--overflow-wrap);
+    }
+
+    .insight-card p b, .insight-card p strong {
+        font-weight: 600;
+    }
+
+    .metrics-container {
+        display:grid;
+        grid-template-columns:repeat(2,minmax(210px,1fr));
+        font-family: var(--font);
+        padding: 0px 16px 0px 16px;
+        gap: 16px;
+    }
+
+    .metric-card:last-child:nth-child(odd){
+        grid-column:1 / -1; 
+    }
+
+    .metric-card {
+        flex: 1 1 210px;
+        padding: 16px;
+        background-color: var(--bg-card);
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .metric-card:hover {
+        background-color: var(--bg-hover);
+    }
+
+    .metric-card h4 {
+        margin: 0px;
+        font-size: 1rem;
+        color: var(--text-title);
+        font-weight: 600;
+    }
+
+    .metric-card .metric-card-value {
+        margin: 0px;
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: var(--text-accent);
+    }
+
+    .metric-card p {
+        font-size: 0.85rem;
+        color: var(--text-sub);
+        line-height: 1.45;
+        margin: 0;
+        overflow-wrap: var(--overflow-wrap);
+    }
+
+    .timeline-container {
+        position: relative;
+        margin: 0 0 0 0;
+        padding: 0px 16px 0px 56px;
+        list-style: none;
+        font-family: var(--font);
+        font-size: 0.9rem;
+        color: var(--text-sub);
+        line-height: 1.4;
+    }
+
+    .timeline-container::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: calc(-40px + 56px);
+        width: 2px;
+        height: 100%;
+        background: var(--timeline-ln);
+    }
+
+    .timeline-container > li {
+        position: relative;
+        margin-bottom: 16px;
+        padding: 16px 20px 16px 20px;
+        border-radius: var(--radius);
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+    }
+
+    .timeline-container > li:last-child {
+        margin-bottom: 0px;
+    }
+
+    .timeline-container > li:hover {
+        background-color: var(--bg-hover);
+    }
+
+    .timeline-container > li::before {
+        content: "";
+        position: absolute;
+        top: 18px;
+        left: -40px;
+        width: 14px;
+        height: 14px;
+        background: var(--accent);
+        border: var(--timeline-border) 2px solid;
+        border-radius: 50%;
+        transform: translateX(-50%);
+        box-shadow: 0px 0px 2px 0px #00000012, 0px 4px 8px 0px #00000014;
+    }
+
+    .timeline-container > li h4 {
+        margin: 0 0 5px;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--accent);
+    }
+
+    .timeline-container > li h4 em {
+        margin: 0 0 5px;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--accent);
+        font-style: normal;       
+    }
+
+    .timeline-container > li * {
+        margin: 0;
+        font-size: 0.9rem;
+        color: var(--text-sub);
+        line-height: 1.4;
+    }
+
+    .timeline-container > li * b, .timeline-container > li * strong {
+        font-weight: 600;
+    }
+        @media (max-width:600px){
+      .metrics-container,
+      .insights-container{
+        grid-template-columns:1fr;
+      }
+    }
+</style>
+<div class="insights-container">
+  <div class="insight-card">
+    <h4>LLM Orchestrator Agent</h4>
+    <p>A special agent responsible for <b>task planning and delegation</b>. It receives high-level goals (in natural language) and uses an LLM to interpret and break them into actionable tasks. The orchestrator then issues events to other agents to perform those tasks, and later assembles their results. In AMCP, this agent can be implemented as a Java agent that calls an LLM (via Ollama API) internally for its reasoning.</p>
+  </div>
+  <div class="insight-card">
+    <h4>Agent Registry & Discovery</h4>
+    <p>A <b>directory service</b> (could be an AMCP agent or a built-in context service) that keeps track of available agents, their IDs, and advertised capabilities (skills). When new agents start, they register their skills here. The orchestrator (and other agents) query the registry to discover which agent can handle a given task type. This enables dynamic, plug-and-play extensibility.</p>
+  </div>
+  <div class="insight-card">
+    <h4>Enhanced A2A Protocol</h4>
+    <p>On top of AMCP’s event system, we define a <b>convention for Agent-to-Agent calls</b>. This includes standardized event schemas for requests, responses, and error signals, plus use of metadata like <code>correlationId</code> to match replies. Agents can send a request event (with a designated target capability or agent) and expect a corresponding response event. The orchestrator leverages this to delegate tasks methodically.</p>
+  </div>
+  <div class="insight-card">
+    <h4>Ollama LLM Integration</h4>
+    <p>The orchestrator uses <b>Ollama</b> to run LLM inference locally. Ollama provides a REST API (on <code>localhost:11434</code>) to generate text from a given model. The orchestrator agent will incorporate an <strong>LLM Connector</strong> that calls Ollama’s <code>/api/generate</code> endpoint with appropriate prompts. This keeps all AI reasoning on-premise and under enterprise control.</p>
+  </div>
+  <div class="insight-card">
+    <h4>Agent Gateway (Optional)</h4>
+    <p>Similar to Solace’s gateway, an optional <b>Gateway agent</b> can be added to AMCP to handle external input/output. It would translate user-facing requests (HTTP, chat messages) into internal AMCP events for the orchestrator, and deliver the orchestrator’s responses back to the user. This gateway would also enforce authentication and high-level authorization for incoming requests.</p>
+  </div>
+
+
+How It Works: When a user or system issues a high-level request, the following sequence ensues (mirroring the timeline given earlier for Solace, but now in AMCP terms):
+
+Request Ingestion: The request arrives as an event in the system. For example, the Gateway agent (if used) publishes an event on a well-known topic like requests.inbound with payload {"request": "<user's query>", "user": "...", "reqId": 123}. Alternatively, an existing AMCP agent could directly formulate a request event to the orchestrator if the request originates internally (e.g., a scheduled job triggers an orchestrated workflow).
+Orchestrator Planning: The Orchestrator agent, subscribed to incoming requests, receives the event. Its logic constructs a prompt combining the user’s query with contextual info: possibly the user’s role, and a list of known agent capabilities from the Registry (e.g., “Available agents: Database(Q&A), ReportGen(format reports), WeatherInfo(fetch weather)…”). It then calls the Ollama LLM API with this prompt. For instance, an HTTP POST to http://localhost:11434/api/generate with JSON:
+
+{ "model": "llama2-13b",
+  "prompt": "User asks: '<request>'. Capabilities: ... Plan the best way to solve this by delegating to agents." }
+
+Ollama (running a local LLM like Llama2) returns a completion suggesting a plan. The orchestrator parses the LLM’s output (e.g., as a sequence of steps or an XML/JSON that the prompt asked it to format).
+> Technical detail: The LLM prompt template can be engineered to produce a structured plan, for example: “Think step by step. First, which agent to use and what to ask it? Then how to combine results? Respond in JSON with a list of tasks.” This structured output makes it easier for the Orchestrator agent to interpret the LLM’s decision. The LLM essentially serves as a planner, leveraging its knowledge to route tasks (similar to how HuggingGPT’s 4-stage process plans, selects models, executes, and composes result).
+
+Task Delegation via A2A: For each subtask in the plan, the orchestrator issues an event targeted at the responsible agent:It determines the appropriate topic or address. In AMCP, we can leverage topic hierarchies for capabilities. For example, a Database agent might subscribe to agent.db.query events. Alternatively, if the Agent Registry stores the unique AgentID for a “DatabaseAgent”, the orchestrator can address it specifically by including a metadata like {"to": "<AgentID>"} and have that agent filter events for itself.
+The event payload contains the necessary details of the subtask (e.g., for a data fetch task: {"action": "query", "parameters": "...SQL..."}).
+A correlation ID is attached to each request event to tie it to the original query (and to match with replies)4. This could be the reqId from step 1 or a new unique UUID.
+The orchestrator may also set a reply topic (e.g. include {"replyTopic": "responses.123"} in metadata), so that agents know where to send their results. In practice, orchestrator itself can simply listen for responses tagged with the correlation ID (since AMCP allows subscribers to filter or handlers to check metadata).
+With these conventions, we effectively implement an RPC-like mechanism over AMCP events: agent calls and responses. This is analogous to typical microservice request/reply messaging patterns, but here managed through the orchestrator’s coordination.
+
+Agent Execution and Inter-Agent Calls: Each target agent (already running in some AMCP context) receives the request event and performs its function. Agents in AMCP v1.5 already handle events asynchronously via their handleEvent logic. The only addition is that now they recognize certain events as task requests. We can define a base interface or convention — e.g., agents can implement a method onAgentRequest(RequestEvent e) to separate these calls from other event handling. Using AMCP’s existing features, agents can also themselves publish events if they need help from yet another agent. For example, if an agent needs a piece of information it doesn’t have, it could either directly query the known agent (if it has the capability info) or simply return an error or partial result for the orchestrator to handle. For advanced flexibility, we allow agents to call other agents directly by following the same A2A protocol: e.g., the Database agent could itself publish an event to ask a CacheAgent first. In such cases, the orchestrator might not be in that direct loop (though it could be informed or have set up the chain). The architecture supports both orchestrator-mediated delegation and peer-to-peer delegation (much as the reference architecture suggests optional direct agent communication for efficiency when appropriate44). Initially, however, we expect most interactions to be orchestrator-mediated.
+Responses and Aggregation: When an agent completes its task, it publishes a response event. By convention, it will include the same correlationId and possibly a field indicating success or failure plus the result data. The orchestrator, listening for responses (either on a specific topic like responses.123 or by filtering events with that correlationId), gathers these messages. If any agent signals an error or inability to complete the task, the orchestrator can decide to either fail the whole request or attempt an alternate approach (for example, ask a different agent if available, or prompt the LLM for a fallback plan). Assuming all required subtasks succeed, the orchestrator now holds all pieces needed for the final answer55.
+Final Synthesis: The orchestrator might use the LLM again to compose a user-friendly response. It can supply the LLM with a summary of the collected results (“Data agent said X, analysis agent said Y”) and ask it to form a coherent answer or report. Alternatively, for structured outputs (like a generated chart file or a database record), the orchestrator could bypass the LLM and directly package the outputs (the orchestrator code might have templates for known scenarios). In many cases though, using the LLM ensures the final response is well-written in natural language, especially if multiple text outputs need merging. This mirrors how the orchestrator initially interpreted the question, but now in reverse: turning data into an explanation or advice. This step can also incorporate any dynamic content embedding – e.g., if the orchestrator wants to embed a chart image or a live data snippet, it can do so as described by SAM’s dynamic embeds feature3.
+Returning the Result: The orchestrator publishes the final result event, which the Gateway or requesting entity will catch. For instance, the orchestrator could post an event on request.123.completed with the answer. The Gateway agent (subscribed to *.completed or specifically to that request ID if it set up a subscription) then transmits it back to the user (e.g., sends the answer text to the chat, or the HTTP response to the waiting client). If the orchestrator is invoked internally by another system component, the response event could be consumed directly by that component (for example, another agent that started the process gets the answer to continue some process).
+Throughout this flow, AMCP’s enterprise features remain in play. The event broker (which could be Kafka, NATS, etc., as configured) ensures that even if some agents are distributed across nodes, the messages get delivered3. If using Kafka with a retention, the history of requests and responses is stored for audit. The orchestrator agent can be scaled horizontally: multiple orchestrators could subscribe to incoming requests and load-balance (with an affinity to particular users if necessary to maintain context). The Agent Registry ensures that if new agents join on the fly, the orchestrators become aware of them (the registry can broadcast an “agent added” event or orchestrators periodically query the registry). The Agent Registry itself could be a simple in-memory list in the orchestrator (updated by listening to “agent.register” events each agent sends when up), or a dedicated small database service that agents call. In this spec, we lean towards a lightweight approach: when an agent starts, it publishes agent.register with its name, ID, and capabilities; the orchestrator catches these and updates an internal map of capabilities->agent. This avoids adding a separate centralized service and leverages the event bus for discovery (similar to how SAM enables dynamic discovery of peer agents via the broker3).
+Finally, security and permissions can be layered in: since AMCP v1.5 didn’t yet have a full RBAC, we suggest basic enforcement via the Gateway and orchestrator. The Gateway can attach the user’s roles/scopes in the request event metadata. The orchestrator can consult a policy (perhaps a config or a simple rule base) to filter which agents can be invoked for that user. For example, if the request is from Finance, perhaps only finance-related agents and data should be accessible. If the LLM tries to invoke an agent outside the user’s allowed scope, the orchestrator can refuse and adjust the plan (maybe by returning an apology or partial answer). This approach follows Solace’s model where the orchestrator “controls access to agents based on authorization scopes”7. In future iterations, this could be enhanced with an Authorization Agent or integration with OPA (Open Policy Agent), but initially, simple checks suffice.
+Component Details and Responsibilities
+The table below summarizes the major components of the proposed extension, their roles, and implementation specifics:
+
+Component	Role in Orchestration	Implementation Notes		
+Orchestrator Agent	Central planner that interprets requests and delegates tasks to other agents using LLM reasoning. Aggregates results and produces final responses25.	Runs as an AMCP agent (Java). Internally uses an Ollama LLM Connector (HTTP client) to call local LLM. Contains prompt templates for planning and synthesis. Manages a map of active agents/capabilities (updated via registry events). Could be made fault-tolerant by having hot-standby orchestrator instances (only one handles a given request ID).		
+Agent Registry	Directory of agents, their capabilities (skills), and locations/IDs. Facilitates dynamic discovery so Orchestrator or any agent can find the right peer for a task14.	Can be a simple Registry Agent that maintains a list/dictionary. Agents send register (and deregister on shutdown) events. The registry stores entries like: "WeatherAgent -> capabilities: weather.info, id: Agent123" etc. Orchestrator queries this on each new request (or subscribes to updates to keep a local copy fresh). Ensures loosely-coupled addition of new agent types.		
+A2A Messaging Protocol	Standardized event schema and routing for agent calls and replies (request/response). Enables an agent to “call” another as a service44.	Implemented via AMCP topics and metadata: e.g., use topics prefixed with agent. for requests (like agent.<capability>.<action>) and agent.response or request-specific topics for replies. Each request event includes a correlationId and possibly a target agent ID or capability tag. Response events include the same ID and the result or error. Optionally define JSON schema for payloads (to enforce structure). This protocol would be documented for developers to create new agents that can be called by others uniformly.		
+Ollama LLM Connector	Integration layer for LLM access. Allows the orchestrator (or any agent needing LLM) to query a local model via natural language prompts.	Could be implemented as an AMCP Tool Connector (similar to how AMCP v1.5 provides connectors for external APIs). For instance, define a connector that exposes a function callLLM(prompt). Under the hood, it does an HTTP POST to ollama and waits for the response\8\8. The connector might run in a separate thread or use async IO to not block the agent's event loop while waiting for the LLM. By using Ollama, no internet call is needed – models are served locally, respecting enterprise data policies.		
+Specialist Agents	The existing or new AMCP agents that perform specific tasks (data retrieval, computations, content creation, etc.). They are the “workers” that the orchestrator coordinates33.	Each agent must be enhanced to handle task request events (according to the A2A protocol). This means understanding a request payload, performing the action, and sending a well-formed response event. In many cases, these agents will leverage AMCP’s connectors to do their work (e.g., a DataAgent might use a JDBC connector to query a database, a WebSearchAgent might use an HTTP connector to call an API). The agents remain autonomous – the orchestrator does not invoke them via function calls, only via messaging, preserving loose coupling.		
+Agent Gateway (entry point)	Handles external interactions and security. Receives user queries (through REST, chat, etc.) and injects them into the AMCP mesh. Later sends the orchestrator’s response back to the user or calling system72.	Could be built as an extension of AMCP’s web connector or as a lightweight web server subscribed to orchestrator results. For example, a REST endpoint /query when hit by a user will create an AMCP event for the orchestrator and then block (or use WebSocket to stream) until the result event comes back. It also can perform user authentication (e.g., verifying a JWT) and include user roles in the event metadata. This is optional for the core orchestration but recommended for a complete enterprise solution.		
+
+A few points on Ollama integration: Ollama allows running LLMs like Llama2 locally via a consistent API9. By using it, we avoid reliance on cloud LLM services, which aligns with enterprise needs for data privacy. The orchestrator simply needs the URL (default http://localhost:11434) and the desired model name (which could be set in a config file or even selected dynamically per task). For example, one could configure the Orchestrator to use a bigger model for complex planning and a smaller model for straightforward tasks to save resources (this is analogous to the Semantic Router pattern: use an inexpensive classifier and fall back to an LLM for complex cases44, though initially we may always use the main LLM for planning until further optimization). The latency of calling a local model will impact overall response time; we should consider running the orchestrator’s LLM calls asynchronously (so the Orchestrator agent doesn’t stall its event loop). AMCP’s event model supports this: the agent can spawn a future or separate thread for the LLM call, and in the meantime handle other events if needed. Since orchestrator primarily deals with one request at a time (if we design it that way), it might be okay to let it focus on that until done, especially if we spin up multiple orchestrator agents for load.
+Example Workflow in AMCP with Orchestration
+To solidify understanding, consider a concrete example with the extended AMCP:
+Use Case: "Generate an expense report for the last quarter."
+
+There are three specialized agents available:<Agent Database> – has capability "finance.db.query" (it can run SQL queries on a finance database).
+<Agent Analysis> – capability "finance.analysis" (can compute summaries or statistics from data).
+<Agent ReportGen> – capability "document.report" (can create a PDF or formatted text report from given content).
+The Orchestrator agent knows of these capabilities (through registration events when they started).
+A manager uses a web UI to request the expense report. The Gateway agent receives this and publishes event:
+Topic: requests.financial.reports Payload: { "text": "Generate an expense report for last quarter.", "user": "alice", "reqId": "REQ42" } The requests.financial.reports topic is one the Orchestrator subscribes to (or it could subscribe to all requests.# topics).
+
+Orchestrator Planning: Orchestrator receives the event and prompts the LLM. The LLM returns a plan, for example:
+
+{
+  "plan": [
+    {"action": "query_db", "agentCapability": "finance.db.query", 
+     "details": "retrieve expenses for last quarter by department"},
+    {"action": "analyze_data", "agentCapability": "finance.analysis", 
+     "details": "calculate total and per-department breakdown"},
+    {"action": "generate_report", "agentCapability": "document.report", 
+     "details": "format the analysis into Q4 expense report"}
+  ]
+}
+
+ The orchestrator parses this JSON.
+
+Delegation:It publishes an event to topic agent.finance.db.query with payload {"query": "...SQL for Q4 expenses...", "reqId": "REQ42"} and correlationId: "REQ42". By convention, the Database agent is listening on agent.finance.db.query and will recognize the task.
+The Database agent executes the SQL (maybe via a JDBC connector) and then responds on agent.response.finance.db (or simply sends back on a generic response channel with the correlationId). The response payload might be {"result": [ ...rows of data... ], "reqId": "REQ42"}.
+The Orchestrator receives the DB result. It then publishes an event to agent.finance.analysis with payload {"data": <result from DB>, "reqId": "REQ42"}.
+The Analysis agent computes totals and breakdowns, returns on (for example) agent.response.finance.analysis with payload {"summary": {...}, "reqId": "REQ42"}.
+Orchestrator takes that summary, then publishes to agent.document.report with {"content": <summary>, "template": "finance_quarterly", "reqId": "REQ42"}.
+The ReportGen agent creates a nicely formatted report (maybe it even returns a PDF file stored in SharePoint or a link). It replies with {"reportUrl": "http://files/ReportQ4.pdf", "reqId": "REQ42"}.
+Aggregation: The orchestrator now has all needed pieces: or it could have pipelined them (in this case it waited for each step sequentially because each depended on the previous result). With the final output (the report link or content), it formulates the final response: perhaps "The Q4 expense report is ready. Download here: \[ReportQ4.pdf]. Total expenses: $X, broken down by dept in the report."
+Response: Orchestrator publishes to requests.REQ42.completed the final message. The Gateway, which has been awaiting this (it might have a subscription for REQ42 specifically, set up when the request came in), delivers the message back to Alice (e.g., in the web UI, it shows the link and summary).
+This scenario shows end-to-end how agents call each other under orchestrator guidance. Each agent’s interface is abstracted to an event contract (no direct code coupling), and adding a new capability (say a "BudgetForecastAgent") would simply mean the orchestrator’s LLM could now incorporate that into plans when relevant, and tasks can be routed to it if it registers accordingly
