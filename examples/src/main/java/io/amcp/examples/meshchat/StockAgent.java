@@ -27,6 +27,7 @@ public class StockAgent implements MobileAgent {
     
     // Topic patterns for financial services
     private static final String STOCK_REQUEST_TOPIC = "stock.request.**";
+    private static final String STOCK_REQUEST_EXACT = "stock.request";
     private static final String FINANCE_REQUEST_TOPIC = "finance.request.**";
     private static final String ORCHESTRATOR_RESPONSE_TOPIC = "orchestrator.response";
     
@@ -98,6 +99,7 @@ public class StockAgent implements MobileAgent {
             
             // Subscribe to finance-related topics
             subscribe(STOCK_REQUEST_TOPIC);
+            subscribe(STOCK_REQUEST_EXACT);
             subscribe(FINANCE_REQUEST_TOPIC);
             subscribe("orchestrator.task.finance.**");
             subscribe("orchestrator.task.stock.**");

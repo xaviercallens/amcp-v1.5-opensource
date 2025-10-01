@@ -9,6 +9,7 @@ import io.amcp.mobility.impl.SimpleMobilityManager;
 import io.amcp.connectors.ai.OrchestratorAgent;
 import io.amcp.examples.weather.WeatherAgent;
 import io.amcp.examples.meshchat.TravelPlannerAgent;
+import io.amcp.examples.meshchat.StockAgent;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -62,6 +63,7 @@ public class MeshChatCLI {
     private OrchestratorAgent orchestrator;
     private TravelPlannerAgent travelAgent;
     private WeatherAgent weatherAgent;
+    private StockAgent stockAgent;
     private boolean realOrchestrationEnabled;
     
     public MeshChatCLI() {
@@ -125,12 +127,18 @@ public class MeshChatCLI {
             agentContext.registerAgent(weatherAgent).get(); // Register first
             weatherAgent.onActivate();
             
+            // Initialize and activate the StockAgent
+            stockAgent = new StockAgent();
+            stockAgent.setContext(agentContext);
+            agentContext.registerAgent(stockAgent).get(); // Register first
+            stockAgent.onActivate();
+            
             // Give agents a moment to initialize
             Thread.sleep(2000);
             
             realOrchestrationEnabled = true;
             logMessage("✅ Real orchestration enabled with TinyLlama AI and active agents");
-            System.out.println("🎯 AI Orchestration: ENABLED (TinyLlama + Live TravelPlannerAgent + WeatherAgent)");
+            System.out.println("🎯 AI Orchestration: ENABLED (TinyLlama + Live TravelPlannerAgent + WeatherAgent + StockAgent)");
             
         } catch (Exception e) {
             logMessage("⚠️ Real orchestration initialization failed: " + e.getMessage());
@@ -355,6 +363,9 @@ public class MeshChatCLI {
             }
             if (weatherAgent != null) {
                 weatherAgent.onDeactivate();
+            }
+            if (stockAgent != null) {
+                stockAgent.onDeactivate();
             }
             if (orchestrator != null) {
                 orchestrator.onDeactivate();
