@@ -33,14 +33,12 @@
             <version>1.5.0</version>
         </dependency>
         
-        <!-- Temporarily disabled due to compilation issues in connectors module -->
-        <!--
+        <!-- AMCP Connectors for AI and orchestration features -->
         <dependency>
             <groupId>io.amcp</groupId>
             <artifactId>amcp-connectors</artifactId>
             <version>1.5.0</version>
         </dependency>
-        -->
         
         <!-- Example Agents -->
         <dependency>

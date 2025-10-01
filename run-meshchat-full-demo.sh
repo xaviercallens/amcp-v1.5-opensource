@@ -133,23 +133,60 @@ EOF
     
     print_success "Demo configuration created"
     
-    # Build classpath
-    CLASSPATH="$CORE_JAR"
+    # Build comprehensive classpath including all dependencies
+    print_info "Building classpath with dependencies..."
+    
+    # Generate dependency classpath from connectors module (includes Jackson)
+    cd connectors
+    mvn dependency:build-classpath -Dmdep.outputFile=../maven-dependencies.txt -q 2>/dev/null || true
+    cd ..
+    
+    # Build base classpath
+    CLASSPATH=""
+    
+    # Add core classes/jar
+    if [ -f "$CORE_JAR" ]; then
+        CLASSPATH="$CORE_JAR"
+    else
+        CLASSPATH="core/target/classes"
+    fi
+    
+    # Add examples classes/jar
     if [ -f "$EXAMPLES_JAR" ]; then
         CLASSPATH="$CLASSPATH:$EXAMPLES_JAR"
     else
         CLASSPATH="$CLASSPATH:examples/target/classes"
     fi
+    
+    # Add connectors classes/jar
     if [ -f "$CONNECTORS_JAR" ]; then
         CLASSPATH="$CLASSPATH:$CONNECTORS_JAR"
     else
         CLASSPATH="$CLASSPATH:connectors/target/classes"
     fi
     
+    # Add Maven dependency classpath (includes Jackson and other dependencies)
+    if [ -f "maven-dependencies.txt" ] && [ -s "maven-dependencies.txt" ]; then
+        MAVEN_CLASSPATH=$(cat maven-dependencies.txt)
+        CLASSPATH="$CLASSPATH:$MAVEN_CLASSPATH"
+        print_success "Maven dependencies added to classpath"
+    else
+        # Fallback: manually add Jackson JARs from local maven repo
+        print_info "Maven classpath not available, adding Jackson JARs manually..."
+        JACKSON_VERSION="2.15.2"
+        M2_REPO="${HOME}/.m2/repository"
+        CLASSPATH="$CLASSPATH:$M2_REPO/com/fasterxml/jackson/core/jackson-core/$JACKSON_VERSION/jackson-core-$JACKSON_VERSION.jar"
+        CLASSPATH="$CLASSPATH:$M2_REPO/com/fasterxml/jackson/core/jackson-databind/$JACKSON_VERSION/jackson-databind-$JACKSON_VERSION.jar"
+        CLASSPATH="$CLASSPATH:$M2_REPO/com/fasterxml/jackson/core/jackson-annotations/$JACKSON_VERSION/jackson-annotations-$JACKSON_VERSION.jar"
+        CLASSPATH="$CLASSPATH:$M2_REPO/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/$JACKSON_VERSION/jackson-datatype-jsr310-$JACKSON_VERSION.jar"
+        print_success "Fallback Jackson JARs added"
+    fi
+    
     export AMCP_CLASSPATH="$CLASSPATH"
     export AMCP_CONFIG="demo-session.properties"
     
     print_success "Environment variables set"
+    print_info "Classpath length: $(echo $CLASSPATH | wc -c) characters"
     echo
 }
 
@@ -309,6 +346,10 @@ cleanup_demo() {
     
     # Remove temporary files
     rm -f demo-session.properties
+    rm -f maven-dependencies.txt
+    rm -f classpath.txt
+    rm -f connectors-classpath.txt
+    rm -f JacksonTest.java JacksonTest.class
     
     print_success "Demo environment cleaned up"
     echo

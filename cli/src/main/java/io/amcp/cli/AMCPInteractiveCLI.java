@@ -3,9 +3,9 @@ package io.amcp.cli;
 import io.amcp.examples.travel.TravelPlannerAgent;
 import io.amcp.examples.stockprice.StockPriceAgent;
 import io.amcp.examples.weather.WeatherAgent;
-// import io.amcp.connectors.ai.EnhancedChatAgent; // Commented out due to compilation issues
+import io.amcp.connectors.ai.EnhancedChatAgent; // Re-enabled with connectors dependency
 import io.amcp.examples.multiagent.MultiAgentDemo;
-// import io.amcp.connectors.ai.OrchestratorAgent; // Commented out due to compilation issues
+import io.amcp.connectors.ai.OrchestratorAgent; // Re-enabled with connectors dependency
 
 import io.amcp.core.AgentContext;
 import io.amcp.core.AgentID;
@@ -173,16 +173,16 @@ public class AMCPInteractiveCLI {
             agentRegistry.registerAgent("weather", WeatherAgent::new, 
                 "Weather information with OpenWeatherMap API integration");
             
-            // Temporarily disabled enhanced AI agents due to compilation issues
-            // agentRegistry.registerAgent("chat", EnhancedChatAgent::new, 
-            //     "Enhanced conversational agent with AI capabilities");
+            // Re-enabled enhanced AI agents with connectors dependency
+            agentRegistry.registerAgent("chat", EnhancedChatAgent::new, 
+                "Enhanced conversational agent with AI capabilities");
             
             // Note: MultiAgentDemo is a demo runner, not an agent, so we skip registration
             // The EnhancedChatAgent already provides multi-agent coordination capabilities
             
-            // Temporarily disabled orchestrator agent due to compilation issues
-            // agentRegistry.registerAgent("orchestrator", OrchestratorAgent::new, 
-            //     "Master orchestrator for complex multi-agent workflows");
+            // Re-enabled orchestrator agent with connectors dependency
+            agentRegistry.registerAgent("orchestrator", OrchestratorAgent::new, 
+                "Master orchestrator for complex multi-agent workflows");
             
             System.out.println("✅ Agent registry initialized with " + agentRegistry.getRegisteredAgentCount() + " agents");
             
