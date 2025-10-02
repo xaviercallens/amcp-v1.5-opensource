@@ -60,8 +60,11 @@ run_demo() {
     echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}"
     echo ""
     
+    # Check in both old and new locations for backward compatibility
     if [ -f "$demo_script" ]; then
         bash "$demo_script"
+    elif [ -f "scripts/demos/$(basename $demo_script)" ]; then
+        bash "scripts/demos/$(basename $demo_script)"
     else
         echo -e "${RED}❌ Demo script not found: $demo_script${NC}"
         read -p "Press Enter to continue..."
@@ -324,28 +327,28 @@ while true; do
             show_demo_info 1
             read -p "Press Enter to start demo, or 'b' to go back: " confirm
             if [ "$confirm" != "b" ]; then
-                run_demo "./run-weather-demo.sh" "Weather Agent Demo"
+                run_demo "scripts/demos/run-weather-demo.sh" "Weather Agent Demo"
             fi
             ;;
         2)
             show_demo_info 2
             read -p "Press Enter to start demo, or 'b' to go back: " confirm
             if [ "$confirm" != "b" ]; then
-                run_demo "./run-meshchat-demo.sh" "MeshChat AI Demo"
+                run_demo "scripts/demos/run-meshchat-demo.sh" "MeshChat AI Demo"
             fi
             ;;
         3)
             show_demo_info 3
             read -p "Press Enter to start demo, or 'b' to go back: " confirm
             if [ "$confirm" != "b" ]; then
-                run_demo "./run-orchestrator-demo.sh" "LLM Orchestration Demo"
+                run_demo "scripts/demos/run-orchestrator-demo.sh" "LLM Orchestration Demo"
             fi
             ;;
         4)
             show_demo_info 4
             read -p "Press Enter to start CLI, or 'b' to go back: " confirm
             if [ "$confirm" != "b" ]; then
-                run_demo "./run-meshchat-cli.sh" "Interactive CLI"
+                run_demo "scripts/demos/run-meshchat-cli.sh" "Interactive CLI"
             fi
             ;;
         5)

@@ -168,7 +168,7 @@ read -p "Would you like to run the Weather Agent demo now? (y/n): " run_demo
 
 if [ "$run_demo" = "y" ]; then
     echo -e "\n${GREEN}🚀 Launching Weather Agent Demo...${NC}\n"
-    ./run-weather-demo.sh
+    scripts/demos/run-weather-demo.sh
 fi
 
 # Summary
@@ -184,10 +184,10 @@ echo -e "${NC}"
 
 echo -e "${CYAN}📚 What's Next?${NC}\n"
 echo -e "${YELLOW}1. Try the demos:${NC}"
-echo "   ./amcp-demos.sh                    # Interactive demo launcher"
-echo "   ./run-weather-demo.sh              # Weather agent"
-echo "   ./run-meshchat-demo.sh             # AI chat agent"
-echo "   ./run-orchestrator-demo.sh         # LLM orchestration"
+echo "   ./amcp-demos.sh                        # Interactive demo launcher"
+echo "   scripts/demos/run-weather-demo.sh      # Weather agent"
+echo "   scripts/demos/run-meshchat-demo.sh     # AI chat agent"
+echo "   scripts/demos/run-orchestrator-demo.sh # LLM orchestration"
 echo ""
 echo -e "${YELLOW}2. Read the guides:${NC}"
 echo "   cat QUICK_START.md                 # 5-minute quick start"
