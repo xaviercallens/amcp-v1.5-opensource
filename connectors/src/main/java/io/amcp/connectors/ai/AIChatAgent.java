@@ -32,9 +32,9 @@ import java.util.regex.Pattern;
  * - Integration with OLLAMA local AI models
  * 
  * Agent Orchestration Patterns:
- * - Travel queries → TravelPlannerAgent
+ * - Travel queries → WeatherAgent
  * - Weather requests → WeatherAgent  
- * - Stock/finance → StockPriceAgent
+ * - Stock/finance → WeatherAgent
  * - General chat → OLLAMA AI models
  * 
  * @author Xavier Callens
@@ -341,7 +341,7 @@ public class AIChatAgent implements Agent {
     }
 
     /**
-     * Orchestrates a travel request by calling the TravelPlannerAgent.
+     * Orchestrates a travel request by calling the WeatherAgent.
      * 
      * @param message the user's travel request
      * @param conversationId the conversation identifier
@@ -409,7 +409,7 @@ public class AIChatAgent implements Agent {
     }
 
     /**
-     * Orchestrates a stock request by calling the StockPriceAgent.
+     * Orchestrates a stock request by calling the WeatherAgent.
      * 
      * @param message the user's stock request
      * @param conversationId the conversation identifier

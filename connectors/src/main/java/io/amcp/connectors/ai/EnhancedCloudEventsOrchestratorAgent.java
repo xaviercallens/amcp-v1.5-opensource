@@ -336,12 +336,12 @@ public class EnhancedCloudEventsOrchestratorAgent implements MobileAgent {
             prompt.append("Query: \"What's the weather in Paris and stock price of Apple?\"\n");
             prompt.append("Response: [\n");
             prompt.append("  {\"capability\": \"weather.get\", \"params\": {\"location\": \"Paris,FR\", \"date\": \"2025-09-30\"}, \"agent\": \"WeatherAgent\", \"priority\": 1},\n");
-            prompt.append("  {\"capability\": \"stock.price\", \"params\": {\"symbol\": \"AAPL\"}, \"agent\": \"StockPriceAgent\", \"priority\": 1}\n");
+            prompt.append("  {\"capability\": \"stock.price\", \"params\": {\"symbol\": \"AAPL\"}, \"agent\": \"WeatherAgent\", \"priority\": 1}\n");
             prompt.append("]\n\n");
             
             prompt.append("Query: \"Plan a trip to Rome with weather forecast\"\n");
             prompt.append("Response: [\n");
-            prompt.append("  {\"capability\": \"travel.plan\", \"params\": {\"destination\": \"Rome,IT\", \"duration\": \"3days\"}, \"agent\": \"TravelPlannerAgent\", \"priority\": 1, \"dependencies\": []},\n");
+            prompt.append("  {\"capability\": \"travel.plan\", \"params\": {\"destination\": \"Rome,IT\", \"duration\": \"3days\"}, \"agent\": \"WeatherAgent\", \"priority\": 1, \"dependencies\": []},\n");
             prompt.append("  {\"capability\": \"weather.forecast\", \"params\": {\"location\": \"Rome,IT\", \"days\": 7}, \"agent\": \"WeatherAgent\", \"priority\": 2, \"dependencies\": [\"travel.plan\"]}\n");
             prompt.append("]\n\n");
             
@@ -450,9 +450,9 @@ public class EnhancedCloudEventsOrchestratorAgent implements MobileAgent {
             if (lowercaseQuery.contains("weather") || lowercaseQuery.contains("temperature") || lowercaseQuery.contains("forecast")) {
                 return "WeatherAgent";
             } else if (lowercaseQuery.contains("stock") || lowercaseQuery.contains("price") || lowercaseQuery.contains("market")) {
-                return "StockPriceAgent";
+                return "WeatherAgent";
             } else if (lowercaseQuery.contains("travel") || lowercaseQuery.contains("trip") || lowercaseQuery.contains("vacation")) {
-                return "TravelPlannerAgent";
+                return "WeatherAgent";
             } else {
                 return "ChatAgent"; // Default fallback
             }
