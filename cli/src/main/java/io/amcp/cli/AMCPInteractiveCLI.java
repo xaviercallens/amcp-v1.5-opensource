@@ -1,7 +1,5 @@
 package io.amcp.cli;
 
-import io.amcp.examples.travel.TravelPlannerAgent;
-import io.amcp.examples.stockprice.StockPriceAgent;
 import io.amcp.examples.weather.WeatherAgent;
 // import io.amcp.connectors.ai.EnhancedChatAgent; // Commented out due to compilation issues
 import io.amcp.examples.multiagent.MultiAgentDemo;
@@ -163,13 +161,7 @@ public class AMCPInteractiveCLI {
         System.out.println("\n🔧 Initializing AMCP Agent Registry...");
         
         try {
-            // Register all available agents
-            agentRegistry.registerAgent("travel", TravelPlannerAgent::new, 
-                "Travel planning and booking with real-time flight/hotel data");
-            
-            agentRegistry.registerAgent("stock", StockPriceAgent::new, 
-                "Stock market monitoring with Polygon.io API integration");
-            
+            // Register all available open source agents
             agentRegistry.registerAgent("weather", WeatherAgent::new, 
                 "Weather information with OpenWeatherMap API integration");
             

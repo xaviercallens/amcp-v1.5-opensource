@@ -1,32 +1,30 @@
-# AMCP v1.5 Enterprise Edition - Agent Mesh Communication Protocol
+# AMCP v1.5 Open Source Edition - Agent Mesh Communication Protocol
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Java Version](https://img.shields.io/badge/Java-21%2B-orange.svg)](https://openjdk.java.net/)
 [![Build Status](https://img.shields.io/badge/Build-Passing-green.svg)]()
 [![Coverage](https://img.shields.io/badge/Coverage-95%25-brightgreen.svg)]()
-[![Enterprise Edition](https://img.shields.io/badge/Edition-Enterprise-gold.svg)]()
-[![Multi-Repository](https://img.shields.io/badge/Multi--Repository-Supported-purple.svg)]()
+[![Open Source](https://img.shields.io/badge/Open%20Source-Community-brightgreen.svg)]()
+[![Developer Friendly](https://img.shields.io/badge/Developer-Friendly-blue.svg)]()
 
-## 🚀 Enterprise Overview
+## 🚀 Open Source Overview
 
-**AMCP v1.5 Enterprise Edition** is the flagship production-ready framework for building sophisticated, distributed agent-based systems with enterprise-grade capabilities. This release represents a quantum leap in multi-agent orchestration, combining IBM Aglet-style strong mobility with Google A2A protocol compatibility, LLM-powered orchestration, and comprehensive enterprise features.
+**AMCP v1.5 Open Source Edition** is a powerful, developer-friendly framework for building distributed agent-based systems. Designed for developers, startups, and the open source community, this edition provides the core capabilities of AMCP without enterprise complexity, making it perfect for learning, prototyping, and building innovative multi-agent applications.
 
-### 🏢 Enterprise Value Proposition
+### � Open Source Value Proposition
 
 - **🧠 LLM-Powered Orchestration** - TinyLlama/Ollama integration for intelligent agent coordination
-- **🔒 Advanced Security Suite** - Multi-factor authentication, mTLS, RBAC, comprehensive audit trails
 - **🌐 Multi-Protocol Integration** - Google A2A bridge, CloudEvents 1.0 compliance, OAuth2/JWT
-- **🚀 Production-Ready Architecture** - Kubernetes-native, horizontal scaling, service mesh integration
-- **📊 Enterprise Observability** - Prometheus, Grafana, Jaeger with custom dashboards
-- **🧪 Comprehensive Testing** - TestContainers, performance benchmarks, chaos engineering
-- **💰 Real-Time Financial Integration** - Live stock data, market analysis, investment insights
-- **✈️ Intelligent Travel Services** - Multi-destination planning, weather integration, budget optimization
-- **🛡️ Mission-Critical Reliability** - 95% test coverage, formal verification, enterprise SLA support
+- **🚀 Developer-Ready Architecture** - Docker support, easy local development, minimal setup
+- **📊 Built-in Observability** - Prometheus, Grafana integration for monitoring
+- **🧪 Comprehensive Testing** - TestContainers, performance benchmarks
+- **� Interactive Agent Examples** - MeshChat conversational AI, weather services
+- **🛡️ Production-Ready** - 95% test coverage, formal verification, scalable design
 
-## 🎯 Enterprise Features & Demonstrations
+## 🎯 Open Source Features & Demonstrations
 
 ### 🧠 **LLM-Powered Agent Orchestration**
-**NEW in v1.5**: Revolutionary AI-powered multi-agent coordination with on-premise LLM integration.
+**Open Source Innovation**: Revolutionary AI-powered multi-agent coordination with local LLM integration.
 
 ```bash
 # Experience intelligent orchestration
@@ -40,8 +38,8 @@
 # • Context-aware decision making
 ```
 
-### 💬 **MeshChat - Enterprise Conversational AI**
-**Production-ready** conversational AI system showcasing enterprise multi-agent orchestration.
+### 💬 **MeshChat - Open Source Conversational AI**
+**Community-driven** conversational AI system showcasing multi-agent orchestration for developers.
 
 ```bash
 # Launch comprehensive demo
@@ -109,32 +107,39 @@ AuthenticationResult result = securityManager.authenticate(username, password, t
 SecurityContext context = securityManager.createSecurityContext(result.getUser(), tenantId);
 ```
 
-## 🏗️ Enterprise Architecture
+## 🏗️ Open Source Architecture
 
-AMCP v1.5 Enterprise Edition delivers a complete production-ready agent mesh infrastructure:
+AMCP v1.5 Open Source Edition delivers a developer-friendly agent mesh infrastructure:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                    AMCP v1.5 Enterprise Architecture                        │
+│                    AMCP v1.5 Open Source Architecture                       │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │  🧠 LLM Orchestration: TinyLlama, Ollama Integration, AI-Powered Routing    │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│  🤖 Enterprise Agents: MeshChat, Travel, Financial, Weather, Orchestrator   │
+│  🤖 Open Agents: MeshChat, Weather, Orchestrator                           │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │  🔗 Protocol Bridges: Google A2A ↔ AMCP, CloudEvents 1.0, OAuth2/JWT       │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │  🚀 Strong Mobility: dispatch(), clone(), retract(), migrate(),             │
 │                     replicate(), federateWith() - IBM Aglet-style          │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│  📨 Enterprise Messaging: Multi-Broker Support                             │
+│  📨 Multi-Broker Support: Pluggable Message Brokers                        │
 │            ├─ InMemoryBroker (Development)                                 │
 │            ├─ KafkaBroker (Production)                                     │
-│            ├─ NATSBroker (Lightweight)                                     │
-│            └─ SolaceBroker (Enterprise)                                    │
+│            └─ NATSBroker (Lightweight)                                     │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │  🔌 Tool Integration: MCP Protocol, External APIs                          │
-│              ├─ Financial APIs (Polygon.io, Alpha Vantage)                 │
 │              ├─ Weather APIs (OpenWeatherMap, WeatherAPI)                  │
+│              └─ AI Services (Ollama, OpenAI, Azure OpenAI)                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  📊 Open Observability: Prometheus, Grafana, Custom Metrics               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  🧪 Testing Framework: TestContainers, Performance Testing                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  🏢 Open Platform: Docker, Local Development                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
 │              ├─ Travel APIs (Amadeus, TripAdvisor)                         │
 │              └─ AI Services (Ollama, OpenAI, Azure OpenAI)                 │
 ├─────────────────────────────────────────────────────────────────────────────┤
@@ -148,36 +153,51 @@ AMCP v1.5 Enterprise Edition delivers a complete production-ready agent mesh inf
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### � Enterprise Project Structure
+### 🏗️ Open Source Project Structure
 
 ```
-amcp-v1.5-enterprise-edition/
-├── 🧠 core/                          # Enterprise Core Framework
+amcp-v1.5-opensource/
+├── 🧠 core/                          # Open Source Core Framework
 │   ├── src/main/java/io/amcp/
 │   │   ├── core/                      # Agent interfaces, lifecycle, discovery
 │   │   ├── mobility/                  # IBM Aglet-style strong mobility
 │   │   ├── messaging/                 # Multi-broker EventBroker system
-│   │   ├── security/                  # Advanced Security Suite
 │   │   ├── memory/                    # Conversation memory system
 │   │   ├── registry/                  # Dynamic agent registry
-│   │   └── util/                      # Enterprise utilities
+│   │   └── util/                      # Core utilities
 │   └── src/test/java/                 # Comprehensive testing framework
-├── 🔌 connectors/                     # Enterprise Tool Connectors
+├── 🔌 connectors/                     # Open Source Tool Connectors
 │   ├── src/main/java/io/amcp/connectors/
 │   │   ├── ai/                        # LLM/AI service connectors
-│   │   ├── financial/                 # Financial data APIs
 │   │   ├── weather/                   # Weather service APIs
-│   │   ├── travel/                    # Travel planning APIs
+│   │   ├── mcp/                       # Model Context Protocol integration
+│   │   ├── ollama/                    # Ollama LLM integration
 │   │   └── a2a/                       # Google A2A protocol bridge
 │   └── src/test/java/                 # Connector integration tests
-├── 🎯 examples/                       # Enterprise Agent Examples
+├── 🎯 examples/                       # Open Source Agent Examples
 │   ├── src/main/java/io/amcp/examples/
 │   │   ├── meshchat/                  # Conversational AI system
-│   │   ├── travel/                    # Travel planning agents
-│   │   ├── financial/                 # Stock analysis agents
 │   │   ├── weather/                   # Weather monitoring agents
 │   │   ├── orchestrator/              # LLM orchestration agents
-│   │   └── stock/                     # Financial market agents
+│   │   └── multiagent/                # Multi-agent coordination examples
+│   └── src/test/java/                 # Example tests and scenarios
+├── 🚀 deploy/                         # Open Source Deployment
+│   ├── docker/                        # Container orchestration
+│   │   ├── Dockerfile                 # Multi-stage build
+│   │   ├── docker-compose.yml         # Local stack with monitoring
+│   │   └── entrypoint.sh              # Development entrypoint
+│   └── monitoring/                   # Open source observability
+│       ├── prometheus/                # Metrics collection
+│       └── grafana/                   # Community dashboards
+├── 📚 docs/                          # Community Documentation
+│   ├── QUICK_START.md                 # Getting started guide
+│   ├── ARCHITECTURE.md               # System architecture
+│   ├── API_REFERENCE.md              # Developer API docs
+│   └── CONTRIBUTING.md               # Contribution guidelines
+├── 🔧 scripts/                       # Build and deployment scripts
+├── pom.xml                           # Maven configuration
+└── LICENSE                           # Apache 2.0 license
+```
 │   └── src/test/java/                 # Example tests and scenarios
 ├── 🚀 deploy/                         # Enterprise Deployment
 │   ├── docker/                        # Container orchestration
@@ -215,37 +235,30 @@ amcp-v1.5-enterprise-edition/
 └── LICENSE                           # Apache 2.0 license
 ```
 
-## 🚀 Enterprise Quick Start
+## 🚀 Open Source Quick Start
 
 ### 🔧 Prerequisites
 
 - **Java 21+** (OpenJDK or Oracle JDK)
 - **Maven 3.8+** for build management
 - **Docker 20.10+** (for containerized deployment)
-- **Kubernetes 1.24+** (for production deployment)
 - **Ollama** (for LLM integration) - [Install Guide](https://ollama.ai/)
 
-### ⚡ Rapid Enterprise Deployment
+### ⚡ Rapid Open Source Deployment
 
 ```bash
-# Clone enterprise repository
-git clone https://github.com/xaviercallens/amcp-enterpriseedition.git
-cd amcp-v1.5-enterprise-edition
+# Clone open source repository
+git clone https://github.com/xaviercallens/amcp-v1.5-opensource.git
+cd amcp-v1.5-opensource
 
-# Quick enterprise demo (all features)
-./run-full-demo.sh
+# Quick open source demo (core features)
+./run-meshchat-demo.sh
 
 # Interactive MeshChat with LLM orchestration
-./run-meshchat-full-demo.sh
-
-# Financial services demo
-./run-stockprice-demo.sh
-
-# Travel planning demo
-./run-travel-demo.sh
-
-# LLM orchestrator demo
 ./run-orchestrator-demo.sh
+
+# Weather services demo
+./run-weather-demo.sh
 ```
 
 ### 🏗️ Local Development

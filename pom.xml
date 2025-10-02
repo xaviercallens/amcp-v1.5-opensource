@@ -10,9 +10,9 @@
     <version>1.5.0</version>
     <packaging>pom</packaging>
 
-        <name>AMCP v1.5 Enterprise Edition - Agent Mesh Communication Protocol</name>
-    <description>Production-ready distributed agent framework with enterprise-grade A2A protocol bridge, CloudEvents compliance, enhanced security, and comprehensive testing suite</description>
-    <url>https://github.com/xaviercallens/amcp-v1.5-enterprise-edition</url>
+    <name>AMCP v1.5 Open Source Edition - Agent Mesh Communication Protocol</name>
+    <description>Open source distributed agent framework for developers and startups with A2A protocol bridge, CloudEvents compliance, LLM orchestration, and comprehensive testing suite</description>
+    <url>https://github.com/xaviercallens/amcp-v1.5-opensource</url>
 
     <licenses>
         <license>
@@ -27,15 +27,15 @@
             <id>xcallens</id>
             <name>Xavier Callens</name>
             <email>xavier.callens@amcp.io</email>
-            <organization>AMCP Enterprise</organization>
-            <organizationUrl>https://github.com/xaviercallens/amcp-enterpriseedition</organizationUrl>
+            <organization>AMCP Open Source</organization>
+            <organizationUrl>https://github.com/xaviercallens/amcp-v1.5-opensource</organizationUrl>
         </developer>
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/xaviercallens/amcp-enterpriseedition.git</connection>
-        <developerConnection>scm:git:ssh://github.com/xaviercallens/amcp-enterpriseedition.git</developerConnection>
-        <url>https://github.com/xaviercallens/amcp-enterpriseedition/tree/main</url>
+        <connection>scm:git:git://github.com/xaviercallens/amcp-v1.5-opensource.git</connection>
+        <developerConnection>scm:git:ssh://github.com/xaviercallens/amcp-v1.5-opensource.git</developerConnection>
+        <url>https://github.com/xaviercallens/amcp-v1.5-opensource/tree/main</url>
     </scm>
 
     <properties>
