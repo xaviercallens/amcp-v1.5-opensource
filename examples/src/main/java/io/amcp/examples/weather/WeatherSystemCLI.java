@@ -413,7 +413,7 @@ public class WeatherSystemCLI {
             scanner.close();
             
             System.out.println("✅ Weather system shutdown complete.");
-            System.out.println("Thank you for using AMCP v1.5 Enterprise Edition Weather System!");
+            System.out.println("Thank you for using AMCP v1.5 Open Source Edition Weather System!");
             
         } catch (Exception e) {
             System.err.println("Error during shutdown: " + e.getMessage());

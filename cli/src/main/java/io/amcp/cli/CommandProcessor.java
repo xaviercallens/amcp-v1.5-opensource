@@ -237,19 +237,19 @@ public class CommandProcessor {
     
     private CommandResult handleVersion(String[] args) {
         return CommandResult.info("""
-            AMCP Interactive CLI v1.5.0-ENTERPRISE
+            AMCP Interactive CLI v1.5.0-OPENSOURCE
             
-            🏗️  Build: Enterprise Edition
+            🏗️  Build: Open Source Edition
             ☕ Java: """ + System.getProperty("java.version") + """
             
             🏠 OS: """ + System.getProperty("os.name") + """
             
             📦 Components:
             • Agent Mesh Communication Protocol v1.5
-            • Multi-Agent Chat System with Orchestration
-            • Real-time API Integration (Polygon.io, OpenWeather)
+            • LLM-Powered Orchestration (TinyLlama/Ollama)
+            • Multi-Agent Coordination and Messaging
             • Interactive CLI with Session Management
-            • Troubleshooting and Monitoring Tools
+            • Real-time Monitoring and Event Streaming
             """);
     }
     

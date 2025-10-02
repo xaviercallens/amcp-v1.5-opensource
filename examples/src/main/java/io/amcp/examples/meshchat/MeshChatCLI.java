@@ -494,7 +494,7 @@ public class MeshChatCLI {
      */
     public void testTokyoTravelScenario() {
         try {
-            System.out.println("🧪 Testing Tokyo Travel Scenario for AMCP v1.5 Enterprise Edition");
+            System.out.println("🧪 Testing Tokyo Travel Scenario for AMCP v1.5 Open Source Edition");
             System.out.println("═══════════════════════════════════════════════════════════════");
             
             // Initialize orchestration if not already done

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# AMCP v1.5 Enterprise Edition - Demo Launcher
+# AMCP v1.5 Open Source Edition - Demo Launcher
 # Quick launcher for common demo scenarios
 
 set -e
@@ -24,7 +24,7 @@ show_menu() {
     ██║  ██║██║ ╚═╝ ██║╚██████╗██║          ╚████╔╝ ███████╗███████║
     ╚═╝  ╚═╝╚═╝     ╚═╝ ╚═════╝╚═╝           ╚═══╝  ╚══════╝╚══════╝
     
-    AMCP v1.5 Enterprise Edition - Demo Launcher
+    AMCP v1.5 Open Source Edition - Demo Launcher
     
 EOF
     echo -e "${NC}"
@@ -104,7 +104,7 @@ main() {
                 run_demo "./run-full-demo.sh $custom_args" "Custom Demo Configuration"
                 ;;
             0)
-                echo -e "\n${GREEN}Thank you for exploring AMCP v1.5 Enterprise Edition!${NC}"
+                echo -e "\n${GREEN}Thank you for exploring AMCP v1.5 Open Source Edition!${NC}"
                 echo -e "${CYAN}For more information, see DEMO_GUIDE.md${NC}\n"
                 exit 0
                 ;;

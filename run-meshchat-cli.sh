@@ -33,7 +33,7 @@ warn() {
 # Check if we're in the correct directory
 if [[ ! -f "pom.xml" ]] || [[ ! -d "examples" ]]; then
     error "Please run this script from the AMCP project root directory"
-    error "Expected structure: amcp-v1.5-enterprise-edition/run-meshchat-cli.sh"
+    error "Expected structure: amcp-v1.5-opensource-edition/run-meshchat-cli.sh"
     exit 1
 fi
 

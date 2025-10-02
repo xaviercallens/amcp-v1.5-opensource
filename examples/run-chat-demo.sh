@@ -85,7 +85,7 @@ echo ""
 if java -cp "${CHAT_CLASSPATH}" io.amcp.examples.chat.EnhancedChatCLI "$@"; then
     echo ""
     echo -e "${GREEN}✅ Enhanced Chat CLI session completed successfully!${NC}"
-    echo -e "${BLUE}Thank you for using AMCP v1.5 Enterprise Edition${NC}"
+    echo -e "${BLUE}Thank you for using AMCP v1.5 Open Source Edition${NC}"
 else
     echo ""
     echo -e "${RED}❌ Chat CLI execution failed${NC}"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# AMCP v1.5 Enterprise Edition - Comprehensive MeshChat Demo
+# AMCP v1.5 Open Source Edition - Comprehensive MeshChat Demo
 # This script demonstrates the complete MeshChat ecosystem with human-to-AI conversation
 # orchestration across multiple specialist agents (Travel, Stock, Chat) with TinyLlama integration
 
@@ -301,7 +301,7 @@ show_technical_highlights() {
     
     cat << 'EOF'
     🔧 Core Framework:
-    • AMCP v1.5 Enterprise Edition
+    • AMCP v1.5 Open Source Edition
     • Event-driven publish/subscribe messaging
     • Asynchronous CompletableFuture operations
     • MobileAgent interface with strong mobility

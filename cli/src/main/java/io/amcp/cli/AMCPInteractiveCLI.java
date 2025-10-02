@@ -24,15 +24,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.stream.Collectors;
 
 /**
- * AMCP v1.5 Enterprise Edition Interactive CLI
+ * AMCP v1.5 Open Source Edition Interactive CLI
  * 
  * Comprehensive real-time live interaction interface with all available agents:
- * - Travel Planner Agent with booking capabilities
- * - Stock Price Agent with Polygon.io API integration
  * - Weather Agent with OpenWeather API integration
- * - Simple Chat Agent for basic conversations
- * - Enhanced Multi-Agent Chat System with orchestration
- * - Orchestrator Agent for complex multi-agent workflows
+ * - MeshChat Agent for conversational AI
+ * - Orchestrator Agent for LLM-powered multi-agent workflows
  * 
  * Features:
  * - Interactive command-line interface with autocompletion
@@ -45,7 +42,7 @@ import java.util.stream.Collectors;
  */
 public class AMCPInteractiveCLI {
     
-    private static final String CLI_VERSION = "1.5.0-ENTERPRISE";
+    private static final String CLI_VERSION = "1.5.0-OPENSOURCE";
     private static final String CLI_TITLE = "AMCP Interactive CLI";
     private static final String HISTORY_FILE = System.getProperty("user.home") + "/.amcp_cli_history";
     private static final String SESSION_DIR = System.getProperty("user.home") + "/.amcp_cli_sessions";
@@ -142,7 +139,7 @@ public class AMCPInteractiveCLI {
         System.out.println("""
         ╔══════════════════════════════════════════════════════════════════════════════╗
         ║                         AMCP Interactive CLI v1.5                           ║
-        ║                           Enterprise Edition                                 ║
+        ║                        Open Source Edition                                  ║
         ║                                                                              ║
         ║    🤖 Real-time Multi-Agent Communication and Control Interface             ║
         ║    🌐 Live API Integration with External Services                           ║

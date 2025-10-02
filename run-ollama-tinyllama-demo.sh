@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# OLLAMA Chat Agent Test Script for AMCP v1.5 Enterprise Edition
+# OLLAMA Chat Agent Test Script for AMCP v1.5 Open Source Edition
 # Tests the OLLAMA integration with TinyLlama 1.1B model
 
 echo "🚀 AMCP OLLAMA Integration Test with TinyLlama 1.1B"

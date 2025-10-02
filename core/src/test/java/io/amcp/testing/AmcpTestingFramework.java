@@ -100,7 +100,7 @@ public class AmcpTestingFramework {
      * Initialize testing framework and validate infrastructure
      */
     public void initialize() {
-        logger.info("🚀 Initializing AMCP Enterprise Testing Framework");
+        logger.info("🚀 Initializing AMCP Testing Framework");
         
         // Validate container health
         validateContainerHealth();

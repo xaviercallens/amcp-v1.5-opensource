@@ -32,7 +32,7 @@ public class CloudEventsDemo {
     public static void main(String[] args) {
         System.out.println("╔════════════════════════════════════════════════════════════════╗");
         System.out.println("║           AMCP v1.5 CloudEvents 1.0 Compliance Demo           ║");
-        System.out.println("║              Enterprise Event System Demonstration             ║");
+        System.out.println("║          CloudEvents 1.0 Compliant Event Demonstration         ║");
         System.out.println("╚════════════════════════════════════════════════════════════════╝\n");
         
         CloudEventsDemo demo = new CloudEventsDemo();

@@ -29,7 +29,7 @@ print_banner() {
     echo "  ╔══════════════════════════════════════════════════════════════════╗"
     echo "  ║                    AMCP API Keys Setup v1.5                     ║"
     echo "  ║                 Stock & Weather Configuration                    ║"
-    echo "  ║                     Enterprise Edition                           ║"
+    echo "  ║                     Open Source Edition                           ║"
     echo "  ╚══════════════════════════════════════════════════════════════════╝"
     echo -e "${NC}"
 }

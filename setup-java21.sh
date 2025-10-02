@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# AMCP v1.5 Enterprise Edition - Java 21 Environment Setup
+# AMCP v1.5 Open Source Edition - Java 21 Environment Setup
 # This script ensures the correct Java environment for AMCP development
 
 # Colors for output
@@ -9,7 +9,7 @@ BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}🔧 Setting up Java 21 environment for AMCP v1.5 Enterprise Edition...${NC}"
+echo -e "${BLUE}🔧 Setting up Java 21 environment for AMCP v1.5 Open Source Edition...${NC}"
 
 # Set Java 21 environment
 export JAVA_HOME="/opt/homebrew/Cellar/openjdk@21/21.0.8/libexec/openjdk.jdk/Contents/Home"

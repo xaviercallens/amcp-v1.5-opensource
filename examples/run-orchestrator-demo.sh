@@ -60,7 +60,7 @@ fi
 echo ""
 echo "🔧 System Configuration:"
 echo "  Java Version: $(java -version 2>&1 | head -n 1)"
-echo "  AMCP Version: v1.5 Enterprise Edition"
+echo "  AMCP Version: v1.5 Open Source Edition"
 echo "  OrchestratorAgent: Active"
 echo "  TinyLlama Integration: Available"
 echo ""
