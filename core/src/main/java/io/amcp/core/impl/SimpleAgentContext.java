@@ -4,14 +4,14 @@ import io.amcp.core.*;
 import io.amcp.messaging.EventBroker;
 import io.amcp.mobility.MobilityManager;
 import io.amcp.mobility.MigrationOptions;
-import io.amcp.security.AdvancedSecurityManager;
+import io.amcp.security.SecurityContext;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Simple implementation of AgentContext for AMCP v1.5 Enterprise Edition.
+ * Simple implementation of AgentContext for AMCP v1.5 Open Source Edition.
  * 
  * <p>This implementation provides basic context management functionality
  * suitable for single-node deployments and testing scenarios.</p>
@@ -23,7 +23,7 @@ public class SimpleAgentContext implements AgentContext {
     private final String contextId;
     private final EventBroker eventBroker;
     private final MobilityManager mobilityManager;
-    private final AdvancedSecurityManager securityManager;
+    private final SecurityContext securityContext;
     private final ConcurrentHashMap<AgentID, Agent> agents;
     private final ConcurrentHashMap<AgentID, AgentLifecycle> agentStates;
     
@@ -31,11 +31,11 @@ public class SimpleAgentContext implements AgentContext {
         this(eventBroker, mobilityManager, null);
     }
     
-    public SimpleAgentContext(EventBroker eventBroker, MobilityManager mobilityManager, AdvancedSecurityManager securityManager) {
+    public SimpleAgentContext(EventBroker eventBroker, MobilityManager mobilityManager, SecurityContext securityContext) {
         this.contextId = "context-" + contextIdGenerator.getAndIncrement();
         this.eventBroker = eventBroker;
         this.mobilityManager = mobilityManager;
-        this.securityManager = securityManager;
+        this.securityContext = securityContext;
         this.agents = new ConcurrentHashMap<>();
         this.agentStates = new ConcurrentHashMap<>();
     }
@@ -56,8 +56,8 @@ public class SimpleAgentContext implements AgentContext {
     }
     
     @Override
-    public AdvancedSecurityManager getAdvancedSecurityManager() {
-        return securityManager;
+    public SecurityContext getSecurityContext() {
+        return securityContext;
     }
     
     @Override

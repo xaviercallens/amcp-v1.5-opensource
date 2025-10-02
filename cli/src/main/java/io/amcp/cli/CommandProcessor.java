@@ -4,7 +4,6 @@ import io.amcp.core.Agent;
 import io.amcp.core.Event;
 import io.amcp.core.AgentID;
 import io.amcp.core.DeliveryOptions;
-import io.amcp.examples.stockprice.StockPriceAgent;
 import io.amcp.examples.weather.WeatherAgent;
 
 import java.util.*;
@@ -68,8 +67,6 @@ public class CommandProcessor {
         // Agent interaction
         commands.put("send", this::handleSend);
         commands.put("ask", this::handleAsk);
-        commands.put("travel", this::handleTravel);
-        commands.put("stock", this::handleStock);
         commands.put("weather", this::handleWeather);
         commands.put("chat", this::handleChat);
         
@@ -201,27 +198,7 @@ public class CommandProcessor {
                     • orchestrator - Master orchestrator for workflows
                     
                     Examples:
-                      activate stock
                       activate weather
-                      activate travel
-                    """);
-                    
-            case "stock":
-                return CommandResult.info("""
-                    📈 stock <symbol|command>
-                    
-                    Interact with the Stock Price Agent for market data.
-                    Requires Polygon.io API key for real-time data.
-                    
-                    Commands:
-                      stock AAPL              - Get current price for AAPL
-                      stock prices AAPL,GOOGL - Get multiple stock prices
-                      stock alert AAPL 150 ABOVE - Create price alert
-                      stock portfolio create   - Create a new portfolio
-                      stock market            - Market summary
-                    
-                    Environment:
-                      Set POLYGON_API_KEY for real-time data
                     """);
                     
             case "weather":
@@ -324,66 +301,6 @@ public class CommandProcessor {
         return CommandResult.info("System Status", status);
     }
     
-    private CommandResult handleStock(String[] args) {
-        if (args.length == 0) {
-            return CommandResult.error("Usage: stock <symbol> or stock <command>");
-        }
-        
-        Agent stockAgent = agentRegistry.getActiveAgent("stock");
-        if (stockAgent == null) {
-            return CommandResult.error("Stock agent is not active. Use 'activate stock' first.");
-        }
-        
-        try {
-            if (stockAgent instanceof StockPriceAgent) {
-                StockPriceAgent spa = (StockPriceAgent) stockAgent;
-                
-                if (args[0].equals("status")) {
-                    Map<String, Object> status = new HashMap<>();
-                    status.put("Active Alerts", spa.getActiveAlertsCount());
-                    status.put("Portfolios", spa.getPortfoliosCount());
-                    status.put("Cached Stocks", spa.getCachedStocksCount());
-                    return CommandResult.success("Stock Agent Status", status);
-                } else {
-                    // Default to price lookup
-                    String symbol = args[0].toUpperCase();
-                    
-                    try {
-                        CompletableFuture<StockPriceAgent.StockData> future = spa.getStockPrice(symbol);
-                        StockPriceAgent.StockData stockData = future.get(10, TimeUnit.SECONDS);
-                        
-                        if (stockData != null) {
-                            Map<String, Object> result = new HashMap<>();
-                            result.put("Symbol", stockData.getSymbol());
-                            result.put("Close Price", String.format("$%.2f", stockData.getClosePrice()));
-                            result.put("Open Price", String.format("$%.2f", stockData.getOpenPrice()));
-                            result.put("High Price", String.format("$%.2f", stockData.getHighPrice()));
-                            result.put("Low Price", String.format("$%.2f", stockData.getLowPrice()));
-                            result.put("Change", String.format("$%.2f (%.2f%%)", stockData.getChange(), stockData.getChangePercent()));
-                            result.put("Volume", String.format("%,d", stockData.getVolume()));
-                            result.put("Updated", new Date(stockData.getTimestamp()).toString());
-                            
-                            return CommandResult.success("Stock data for " + symbol, result);
-                        } else {
-                            return CommandResult.error("Could not fetch stock data for " + symbol + ". Please check the symbol.");
-                        }
-                    } catch (TimeoutException e) {
-                        return CommandResult.error("Timeout waiting for stock data for " + symbol);
-                    } catch (ExecutionException e) {
-                        return CommandResult.error("Error fetching stock data: " + e.getCause().getMessage());
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        return CommandResult.error("Stock data fetch was interrupted");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            return CommandResult.error("Stock command failed: " + e.getMessage());
-        }
-        
-        return CommandResult.error("Stock agent is not properly initialized");
-    }
-    
     private CommandResult handleWeather(String[] args) {
         if (args.length == 0) {
             return CommandResult.error("Usage: weather <location>");
@@ -421,21 +338,6 @@ public class CommandProcessor {
         } catch (Exception e) {
             return CommandResult.error("Error fetching weather data: " + e.getMessage());
         }
-    }
-    
-    private CommandResult handleTravel(String[] args) {
-        if (args.length == 0) {
-            return CommandResult.error("Usage: travel <destination>");
-        }
-        
-        Agent travelAgent = agentRegistry.getActiveAgent("travel");
-        if (travelAgent == null) {
-            return CommandResult.error("Travel agent is not active. Use 'activate travel' first.");
-        }
-        
-        String destination = String.join(" ", args);
-        return CommandResult.info("Planning travel to " + destination + "...\n" +
-            "Use the travel agent's interactive interface for full functionality.");
     }
     
     private CommandResult handleChat(String[] args) {
@@ -721,10 +623,6 @@ public class CommandProcessor {
         switch (scenario.toLowerCase()) {
             case "quickstart":
                 return runQuickstartDemo();
-            case "stock":
-                return runStockDemo();
-            case "travel":
-                return runTravelDemo();
             case "multiagent":
                 return runMultiAgentDemo();
             case "troubleshoot":
@@ -757,35 +655,7 @@ public class CommandProcessor {
             """);
     }
     
-    private CommandResult runStockDemo() {
-        return CommandResult.info("""
-            📈 Stock Market Demo:
-            
-            Commands to try:
-              activate stock
-              stock AAPL
-              stock prices AAPL,GOOGL,MSFT
-              stock alert AAPL 150.00 ABOVE
-              stock portfolio create
-              api
-            
-            This demonstrates real-time stock monitoring with Polygon.io integration.
-            """);
-    }
-    
-    private CommandResult runTravelDemo() {
-        return CommandResult.info("""
-            ✈️ Travel Planning Demo:
-            
-            Commands to try:
-              activate travel
-              travel "Paris"
-              ask travel "Find flights from NYC to Paris on Dec 15"
-              ask travel "Best hotels near Eiffel Tower"
-            
-            This demonstrates AI-powered travel planning capabilities.
-            """);
-    }
+
     
     private CommandResult runMultiAgentDemo() {
         return CommandResult.info("""

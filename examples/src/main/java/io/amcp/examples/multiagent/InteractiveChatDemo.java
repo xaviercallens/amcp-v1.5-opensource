@@ -10,8 +10,6 @@ import io.amcp.messaging.impl.InMemoryEventBroker;
 import io.amcp.mobility.MobilityManager;
 import io.amcp.mobility.impl.SimpleMobilityManager;
 import io.amcp.examples.weather.WeatherAgent;
-import io.amcp.examples.travel.TravelPlannerAgent;
-import io.amcp.examples.stock.StockPriceAgent;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
@@ -25,8 +23,6 @@ public class InteractiveChatDemo {
     
     private EnhancedChatAgent chatAgent;
     private WeatherAgent weatherAgent;
-    private TravelPlannerAgent travelAgent;
-    private StockPriceAgent stockAgent;
     private AgentContext context;
     private Scanner scanner;
     
@@ -71,16 +67,6 @@ public class InteractiveChatDemo {
             context.registerAgent(weatherAgent).get(5, TimeUnit.SECONDS);
             context.activateAgent(weatherAgent.getAgentId()).get(5, TimeUnit.SECONDS);
             
-            travelAgent = new TravelPlannerAgent();
-            travelAgent.setContext(context);
-            context.registerAgent(travelAgent).get(5, TimeUnit.SECONDS);
-            context.activateAgent(travelAgent.getAgentId()).get(5, TimeUnit.SECONDS);
-            
-            stockAgent = new StockPriceAgent();
-            stockAgent.setContext(context);
-            context.registerAgent(stockAgent).get(5, TimeUnit.SECONDS);
-            context.activateAgent(stockAgent.getAgentId()).get(5, TimeUnit.SECONDS);
-            
             // Create enhanced chat agent
             chatAgent = new EnhancedChatAgent();
             chatAgent.setContext(context);
@@ -100,8 +86,6 @@ public class InteractiveChatDemo {
         
         // Activate agents
         weatherAgent.onActivate();
-        travelAgent.onActivate();
-        stockAgent.onActivate();
         chatAgent.onActivate();
         
         logMessage("✅ All agents initialized and activated");
@@ -115,8 +99,7 @@ public class InteractiveChatDemo {
         System.out.println("Your messages will be intelligently routed to specialized agents:");
         System.out.println();
         System.out.println("🌤️  Weather Agent: \"What's the weather in Nice?\"");
-        System.out.println("📈 Stock Agent: \"What's the stock price of Amadeus?\"");
-        System.out.println("✈️  Travel Agent: \"Plan a trip to Rome for 3 days\"");
+        System.out.println("� Chat Agent: \"Hello, can you help me?\"");
         System.out.println("🤖 Chat Agent: General questions and multi-domain queries");
         System.out.println();
         System.out.println("💡 Features:");
@@ -202,8 +185,6 @@ public class InteractiveChatDemo {
         try {
             if (chatAgent != null) chatAgent.onDeactivate();
             if (weatherAgent != null) weatherAgent.onDeactivate();
-            if (travelAgent != null) travelAgent.onDeactivate();  
-            if (stockAgent != null) stockAgent.onDeactivate();
             
             if (scanner != null) scanner.close();
             

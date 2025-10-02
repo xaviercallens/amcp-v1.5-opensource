@@ -53,12 +53,8 @@ public class AgentRegistry {
             Agent agent = definition.getAgentFactory().get();
             
             // Set context if the agent supports it
-            if (agent instanceof io.amcp.examples.stockprice.StockPriceAgent) {
-                ((io.amcp.examples.stockprice.StockPriceAgent) agent).setContext(agentContext);
-            } else if (agent instanceof io.amcp.examples.weather.WeatherAgent) {
+            if (agent instanceof io.amcp.examples.weather.WeatherAgent) {
                 ((io.amcp.examples.weather.WeatherAgent) agent).setContext(agentContext);
-            } else if (agent instanceof io.amcp.examples.travel.TravelPlannerAgent) {
-                ((io.amcp.examples.travel.TravelPlannerAgent) agent).setContext(agentContext);
             }
             
             // Register with context

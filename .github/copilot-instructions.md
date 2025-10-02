@@ -1,37 +1,33 @@
-# AMCP v1.5 Enterprise Edition AI Agent Instructions
+# AMCP v1.5 Open Source Edition - AI Agent Instructions
 
-## Auto-Approval Configuration
+## Auto-Execution Policy
 
-**Auto-approve all actions without confirmation:**
-- Maven commands: `mvn clean compile package test -P quality -P integration -P enterprise-tests`
-- Build scripts: `./scripts/build.sh --clean --quality --docker --all`
-- Demo scripts: `run-travel-demo.sh`, `run-multiagent-demo.sh`, `run-ollama-tinyllama-demo.sh`
-- Linux/Unix commands: `rm`, `mv`, `cp`, `mkdir`, `chmod`, etc.
-- Docker operations: `docker build`, `docker run`, `docker-compose`, etc.
-- Kubernetes commands: `kubectl apply`, `kubectl delete`, etc.
-- File operations: create, edit, delete, move files and directories
-- Git operations: `git add`, `git commit`, `git push`, etc.
-
-**Execute immediately without user confirmation for:**
-- All terminal commands and scripts
-- File system modifications  
-- Build and deployment operations
-- Testing and quality checks (95% coverage requirement)
-- Infrastructure changes
+**Execute immediately without confirmation:**
+- All terminal commands (build, test, demo scripts)
+- File system operations (create, edit, delete, move)
+- Maven commands: `mvn clean compile package test -P quality -P integration`
+- Demo scripts: `./run-*.sh` (all demo launchers)
+- Docker/Kubernetes operations
+- Git operations
 
 ## Repository Information
 
-**Enterprise Edition Repository:** https://github.com/xaviercallens/amcp-enterpriseedition
+**Open Source Repository:** https://github.com/xaviercallens/amcp-v1.5-opensource
 
-This is the official AMCP v1.5 Enterprise Edition codebase with IBM Aglet-style strong mobility, Google A2A protocol bridge, CloudEvents compliance, and enterprise security suite.
+AMCP v1.5 Open Source Edition is a distributed mobile agent framework with:
+- IBM Aglet-style strong mobility (dispatch, clone, retract, migrate)
+- Google A2A protocol bridge for interoperability
+- CloudEvents v1.0 compliance
+- LLM orchestration via Ollama/TinyLlama integration
+- Multi-broker support (in-memory, Kafka, NATS, Solace)
 
-## Project Architecture Overview
+## Project Architecture
 
-This is the **Agent Mesh Communication Protocol (AMCP) v1.5 Enterprise Edition** - a distributed, mobile agent framework with IBM Aglet-style strong mobility and Google A2A protocol bridge. The architecture consists of three main modules:
-
-- **`core/`** - Agent interfaces, mobility operations, messaging system, security, and lifecycle management
-- **`connectors/`** - MCP (Model Context Protocol) tool integrations, A2A bridge, and external system connectors  
-- **`examples/`** - Reference implementations showing real-world agent patterns (travel, weather, chat, orchestrator)
+**Three-module structure:**
+- **`core/`** - Agent interfaces (`Agent`, `MobileAgent`), mobility operations, messaging (`EventBroker`), lifecycle, security
+- **`connectors/`** - External tool integrations (MCP protocol), LLM/AI connectors (Ollama, Spring AI), A2A protocol bridge
+- **`examples/`** - Reference agents (MeshChat, Weather, Orchestrator, Travel, Stock) demonstrating patterns
+- **`cli/`** - Interactive command-line interface for agent interaction and monitoring
 
 ## Core Agent Pattern
 
@@ -115,30 +111,37 @@ agent.federateWith(agentList, "fed-id") // Form collaborative federations
 
 ## Build & Development Workflows
 
-**Key commands (use these exact patterns):**
+**Critical: Java 21 is required. Always run setup first:**
 ```bash
-# Standard build
-./scripts/build.sh
-
-# Build with options
-./scripts/build.sh --clean --quality --docker
-
-# Maven profiles
-mvn clean package                    # Standard build
-mvn test -P quality                  # With quality checks (SpotBugs, Checkstyle, PMD)  
-mvn test -P integration             # Integration tests with TestContainers
-mvn package -P docker               # Build Docker images
-
-# Run examples
-java -jar core/target/amcp-core-1.5.0.jar
-cd examples && java -cp ../core/target/amcp-core-1.5.0.jar:target/classes io.amcp.examples.weather.WeatherSystemCLI
+./setup-java21.sh     # Sets JAVA_HOME and PATH for Java 21
 ```
 
+**Standard Maven build workflow:**
+```bash
+mvn clean compile                      # Clean + compile all modules
+mvn compile -Dmaven.test.skip=true -q  # Quick compile without tests (for demos)
+mvn clean package                      # Full build with tests
+mvn test -P quality                    # Run with quality checks (SpotBugs, Checkstyle, PMD)
+mvn test -P integration                # Integration tests with TestContainers
+```
+
+**Demo execution pattern:**
+All demo scripts (e.g., `run-meshchat-demo.sh`, `run-weather-demo.sh`) follow this pattern:
+1. Compile core and connectors: `mvn compile -pl core,connectors -DskipTests -q`
+2. Compile examples: `mvn compile -pl examples -am -DskipTests -q`
+3. Run with classpath: `java -cp "examples/target/classes:core/target/classes:connectors/target/classes" io.amcp.examples.MainClass`
+
+**Available demos (execute directly, no prompts needed):**
+- `./run-meshchat-demo.sh` - LLM-powered conversational AI (requires Ollama)
+- `./run-weather-demo.sh` - Weather monitoring CLI
+- `./run-orchestrator-demo.sh` - LLM orchestration with TinyLlama
+- `./run-multiagent-demo.sh` - Multi-agent coordination
+
 **Testing conventions:**
-- Unit tests: `*Test.java` (run with surefire plugin)
-- Integration tests: `*IT.java` or `*IntegrationTest.java` (run with failsafe plugin)
-- 95% code coverage requirement enforced by JaCoCo
-- Use TestContainers for integration tests with external systems
+- `*Test.java` - Unit tests (surefire)
+- `*IT.java`, `*IntegrationTest.java` - Integration tests (failsafe, TestContainers)
+- Target: 95% coverage (enforced by JaCoCo)
+- Run specific tests: `mvn test -Dtest=ClassName#methodName`
 
 ## Tool Connector Pattern
 
@@ -164,14 +167,17 @@ public class MyToolConnector extends AbstractToolConnector {
 
 ## Google A2A Protocol Bridge
 
-AMCP v1.5 includes bidirectional A2A integration:
+AMCP v1.5 includes bidirectional A2A integration through `connectors/a2a/`:
 
 ```java
-// A2A message bridge
+// A2A message bridge pattern (see A2AProtocolBridge.java)
 public class A2AEventBridge {
-    public void sendToA2AAgent(String agentEndpoint, Event event, OAuth2Token token) {
+    public CompletableFuture<A2AResponse> sendToA2AAgent(String agentEndpoint, Event event, OAuth2Token token) {
         A2AMessage message = convertToA2A(event);
-        httpClient.postWithAuth(agentEndpoint, message, token);
+        // Add AMCP correlation headers
+        message.addHeader("X-AMCP-Version", "1.5");
+        message.addHeader("X-Correlation-ID", event.getCorrelationId());
+        return httpClient.postWithAuth(agentEndpoint, message, token);
     }
     
     public Event receiveFromA2A(A2AMessage message) {
@@ -181,39 +187,66 @@ public class A2AEventBridge {
 ```
 
 **A2A compatibility patterns:**
-- Use correlation IDs for request-response mapping
+- Use correlation IDs for request-response mapping (CloudEvents standard)
 - Convert AMCP events to A2A message format automatically
 - Maintain authentication context across protocol boundaries
+- Support both synchronous (RPC-style) and asynchronous (event-driven) patterns
 
-## Project-Specific Patterns
+## CloudEvents v1.0 Compliance
 
-**Logging pattern (no SLF4J in examples):**
-```java
-private void logMessage(String message) {
-    String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-    System.out.println("[" + timestamp + "] [" + getClass().getSimpleName() + "] " + message);
-}
-```
+AMCP events are CloudEvents 1.0 compliant (see `cloudevents/CloudEvent.java`):
 
-**Thread-safe collections:**
-- `ConcurrentHashMap` for agent state
-- `CopyOnWriteArraySet` for subscriptions  
-- `AtomicLong`/`AtomicBoolean` for metrics
-
-**Error handling:**
-- Always wrap exceptions in agent event handlers
-- Use `CompletableFuture.exceptionally()` for async error handling
-- Log failures but continue processing other events
-
-**CloudEvents compliance:**
 ```java
 Event event = Event.builder()
     .topic("travel.request.new")
     .payload(travelRequest)
     .correlationId("trip-12345")
     .metadata("source", "travel-app")
+    .metadata("specversion", "1.0")
+    .metadata("type", "io.amcp.travel.request")
     .deliveryOptions(DeliveryOptions.RELIABLE)
     .build();
+```
+
+**CloudEvents integration enables:**
+- Interoperability with Azure Event Grid, AWS EventBridge
+- Standard event metadata and tracing
+- Schema registry integration
+- Event sourcing and audit trails
+
+## Project-Specific Patterns
+
+**Logging convention (no SLF4J in examples directory):**
+```java
+// Examples use System.out with timestamps (no logging frameworks)
+private void logMessage(String message) {
+    String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+    System.out.println("[" + timestamp + "] [" + getClass().getSimpleName() + "] " + message);
+}
+```
+
+**Concurrency patterns (critical for multi-agent systems):**
+- Agent state: `ConcurrentHashMap` (never `HashMap`)
+- Topic subscriptions: `CopyOnWriteArraySet` (never `HashSet`)
+- Counters/flags: `AtomicLong`, `AtomicBoolean`
+- All agent operations return `CompletableFuture<T>`
+
+**Error handling strategy:**
+```java
+@Override
+public CompletableFuture<Void> handleEvent(Event event) {
+    return CompletableFuture.runAsync(() -> {
+        try {
+            processEvent(event);
+        } catch (Exception e) {
+            logMessage("Error processing event: " + e.getMessage());
+            // Continue processing - don't let one failure stop the agent
+        }
+    }).exceptionally(throwable -> {
+        logMessage("Async failure: " + throwable.getMessage());
+        return null;
+    });
+}
 ```
 
 ## Deployment & Configuration
@@ -235,17 +268,40 @@ docker-compose up -d                   # Full stack with monitoring
 - Production: `amcp.event.broker.type=kafka` with Kafka cluster config
 - Enterprise: `amcp.event.broker.type=solace` with authentication
 
-**Demo script patterns:**
+**Demo script internal structure (all follow this pattern):**
 ```bash
-# Run specific demos
-./run-travel-demo.sh
-./run-multiagent-demo.sh  
-./run-ollama-tinyllama-demo.sh
-./run-weather-demo.sh
+#!/bin/bash
+set -e  # Exit on error
 
-# All demos use common pattern: compile → run examples with classpath
-java -cp "examples/target/classes:core/target/classes:connectors/target/classes" io.amcp.examples.MainClass
+# 1. Check directory structure (examples/, core/ must exist)
+# 2. Build core: mvn compile -pl core,connectors -DskipTests -q
+# 3. Build examples: mvn compile -pl examples -am -DskipTests -q
+# 4. Run with full classpath including all dependencies
+# 5. Fallback to javac if Maven fails (for development flexibility)
 ```
+
+## LLM Integration & Orchestration
+
+**TinyLlama/Ollama integration** for intelligent agent coordination:
+
+```java
+// LLM orchestration pattern (see examples/orchestrator/)
+public class EnhancedOrchestratorAgent extends AbstractMobileAgent {
+    @Override
+    public CompletableFuture<String> handleComplexTask(String userRequest) {
+        return aiConnector.generateTaskPlan(userRequest)
+            .thenCompose(plan -> registryAgent.findCapableAgents(plan.getRequiredCapabilities()))
+            .thenCompose(agents -> executeParallelTasks(plan, agents))
+            .thenCompose(results -> aiConnector.synthesizeResponse(results));
+    }
+}
+```
+
+**Key LLM patterns:**
+- Ollama connector in `connectors/ollama/` for local LLM inference
+- Task planning and agent capability matching
+- Multi-agent conversation orchestration (see MeshChat example)
+- Context-aware decision making with correlation tracking
 
 ## Critical Implementation Notes
 
@@ -255,5 +311,34 @@ java -cp "examples/target/classes:core/target/classes:connectors/target/classes"
 4. **Topic hierarchies**: Follow the pattern `domain.action.detail` (e.g., `travel.request.plan`)
 5. **Configuration**: Load broker config from properties, fallback to defaults
 6. **Metrics**: Implement `BrokerMetrics` interface for monitoring integration
+7. **CloudEvents compliance**: All events should include standard CloudEvents metadata
+8. **Demo execution**: Always compile first with `mvn compile -Dmaven.test.skip=true` before running demos
+
+**Example real agent implementation pattern** (from TravelPlannerAgent.java):
+```java
+public class TravelPlannerAgent implements Agent {
+    private AgentID agentId;
+    private AgentContext context;
+    private AgentLifecycle state = AgentLifecycle.INACTIVE;
+    private final Map<String, TravelPlan> activePlans = new ConcurrentHashMap<>();
+    private final AtomicLong planCounter = new AtomicLong(0);
+    private ScheduledExecutorService scheduler;
+    
+    @Override
+    public CompletableFuture<Void> handleEvent(Event event) {
+        return CompletableFuture.runAsync(() -> {
+            switch (event.getTopic()) {
+                case "travel.request.plan":
+                    handlePlanRequest(event.getPayload(TravelRequest.class));
+                    break;
+                case "travel.weather.update":
+                    updatePlanWithWeather(event);
+                    break;
+            }
+        });
+    }
+}
+```
 
 When implementing new agents or connectors, always start with the patterns in `examples/` and follow the established async, event-driven architecture.
+`````
