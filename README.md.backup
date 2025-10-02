@@ -1,906 +1,454 @@
-# 🚀 AMCP v1.5 - Agent Mesh Communication Protocol# AMCP v1.5 Open Source Edition - Agent Mesh Communication Protocol# AMCP v1.5 Open Source Edition - Agent Mesh Communication Protocol
+# AMCP v1.5 Open Source Edition - Agent Mesh Communication Protocol# AMCP v1.5 Open Source Edition - Agent Mesh Communication Protocol
 
 
 
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-[![Java Version](https://img.shields.io/badge/Java-21%2B-orange.svg)](https://openjdk.java.net/)
+[![Java Version](https://img.shields.io/badge/Java-21%2B-orange.svg)](https://openjdk.java.net/)[![Java Version](https://img.shields.io/badge/Java-21%2B-orange.svg)](https://openjdk.java.net/)
 
-[![Build Status](https://img.shields.io/badge/Build-Passing-green.svg)]()[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Build Status](https://img.shields.io/badge/Build-Passing-green.svg)]()[![Build Status](https://img.shields.io/badge/Build-Passing-green.svg)]()
 
-[![Coverage](https://img.shields.io/badge/Coverage-95%25-brightgreen.svg)]()
+[![Open Source](https://img.shields.io/badge/Open%20Source-Community-brightgreen.svg)]()[![Coverage](https://img.shields.io/badge/Coverage-95%25-brightgreen.svg)]()
 
-[![Open Source](https://img.shields.io/badge/Open%20Source-Community-brightgreen.svg)]()[![Java Version](https://img.shields.io/badge/Java-21%2B-orange.svg)](https://openjdk.java.net/)[![Java Version](https://img.shields.io/badge/Java-21%2B-orange.svg)](https://openjdk.java.net/)
+[![Open Source](https://img.shields.io/badge/Open%20Source-Community-brightgreen.svg)]()
 
-
-
-> **Build intelligent, distributed multi-agent systems with the simplicity of function calls and the power of event-driven architecture.**[![Build Status](https://img.shields.io/badge/Build-Passing-green.svg)]()[![Build Status](https://img.shields.io/badge/Build-Passing-green.svg)]()
+## 🚀 Overview[![Developer Friendly](https://img.shields.io/badge/Developer-Friendly-blue.svg)]()
 
 
 
----[![Open Source](https://img.shields.io/badge/Open%20Source-Community-brightgreen.svg)]()[![Coverage](https://img.shields.io/badge/Coverage-95%25-brightgreen.svg)]()
+**AMCP v1.5 Open Source Edition** is a powerful framework for building distributed multi-agent systems. Designed for developers, startups, and the open source community, this edition provides core capabilities for creating intelligent agent-based applications.## 🚀 Open Source Overview
 
 
-
-## 🎯 Why AMCP?[![Open Source](https://img.shields.io/badge/Open%20Source-Community-brightgreen.svg)]()
-
-
-
-AMCP is an **open-source framework** that makes building multi-agent systems as easy as writing regular code, while giving you enterprise-grade capabilities out of the box:## 🚀 Overview[![Developer Friendly](https://img.shields.io/badge/Developer-Friendly-blue.svg)]()
-
-
-
-- **🧠 LLM-Native**: Built-in orchestration with TinyLlama/Ollama - agents that think and coordinate
-
-- **🚀 True Mobility**: Agents can move across servers at runtime (dispatch, clone, migrate) - IBM Aglet-style
-
-- **🌐 Protocol Bridge**: Native Google A2A compatibility + CloudEvents 1.0 - integrate anything**AMCP v1.5 Open Source Edition** is a powerful framework for building distributed multi-agent systems. Designed for developers, startups, and the open source community, this edition provides core capabilities for creating intelligent agent-based applications.## 🚀 Open Source Overview
-
-- **📦 Zero Infrastructure**: Works with in-memory, Kafka, NATS, or Solace - your choice
-
-- **🔌 Tool Integration**: MCP protocol support - call any external API or service
-
-- **🛡️ Production Ready**: 95% test coverage, formal verification, monitoring built-in
 
 ### Key Features**AMCP v1.5 Open Source Edition** is a powerful, developer-friendly framework for building distributed agent-based systems. Designed for developers, startups, and the open source community, this edition provides the core capabilities of AMCP without enterprise complexity, making it perfect for learning, prototyping, and building innovative multi-agent applications.
 
-### Quick Comparison
 
 
+- **🧠 LLM-Powered Orchestration** - TinyLlama/Ollama integration for intelligent agent coordination### � Open Source Value Proposition
 
-| Feature | AMCP | LangChain | AutoGen | CrewAI |
+- **🌐 Multi-Protocol Integration** - Google A2A bridge, CloudEvents 1.0 compliance
 
-|---------|------|-----------|---------|--------|- **🧠 LLM-Powered Orchestration** - TinyLlama/Ollama integration for intelligent agent coordination### � Open Source Value Proposition
+- **🚀 IBM Aglet-style Mobility** - Strong agent mobility (dispatch, clone, retract, migrate)- **🧠 LLM-Powered Orchestration** - TinyLlama/Ollama integration for intelligent agent coordination
 
-| Agent Mobility (runtime migration) | ✅ | ❌ | ❌ | ❌ |
+- **📊 Built-in Observability** - Prometheus, Grafana integration- **🌐 Multi-Protocol Integration** - Google A2A bridge, CloudEvents 1.0 compliance, OAuth2/JWT
 
-| Distributed by Design | ✅ | ❌ | ⚠️ | ⚠️ |- **🌐 Multi-Protocol Integration** - Google A2A bridge, CloudEvents 1.0 compliance
+- **🧪 Comprehensive Testing** - TestContainers, 95% test coverage- **🚀 Developer-Ready Architecture** - Docker support, easy local development, minimal setup
 
-| Multi-Protocol (A2A, CloudEvents) | ✅ | ❌ | ❌ | ❌ |
+- **💬 Interactive Examples** - MeshChat conversational AI, weather services- **📊 Built-in Observability** - Prometheus, Grafana integration for monitoring
 
-| LLM Orchestration | ✅ | ✅ | ✅ | ✅ |- **🚀 IBM Aglet-style Mobility** - Strong agent mobility (dispatch, clone, retract, migrate)- **🧠 LLM-Powered Orchestration** - TinyLlama/Ollama integration for intelligent agent coordination
+- **🧪 Comprehensive Testing** - TestContainers, performance benchmarks
 
-| Event-Driven Architecture | ✅ | ⚠️ | ⚠️ | ❌ |
-
-| Built-in Observability | ✅ | ⚠️ | ❌ | ❌ |- **📊 Built-in Observability** - Prometheus, Grafana integration- **🌐 Multi-Protocol Integration** - Google A2A bridge, CloudEvents 1.0 compliance, OAuth2/JWT
-
-
-
----- **🧪 Comprehensive Testing** - TestContainers, 95% test coverage- **🚀 Developer-Ready Architecture** - Docker support, easy local development, minimal setup
-
-
-
-## ⚡ Quick Start (5 minutes)- **💬 Interactive Examples** - MeshChat conversational AI, weather services- **📊 Built-in Observability** - Prometheus, Grafana integration for monitoring
-
-
-
-### Prerequisites- **🧪 Comprehensive Testing** - TestContainers, performance benchmarks
-
-- Java 21+ (OpenJDK recommended)
-
-- Maven 3.8+## 🏗️ Architecture- **� Interactive Agent Examples** - MeshChat conversational AI, weather services
-
-- (Optional) Docker for advanced demos
+## 🏗️ Architecture- **� Interactive Agent Examples** - MeshChat conversational AI, weather services
 
 - **🛡️ Production-Ready** - 95% test coverage, formal verification, scalable design
 
-### 1️⃣ Clone and Build
-
 ```
 
-```bash
-
-git clone https://github.com/xaviercallens/amcp-v1.5-opensource.git┌─────────────────────────────────────────────────────────────────────────────┐## 🎯 Open Source Features & Demonstrations
-
-cd amcp-v1.5-opensource
+┌─────────────────────────────────────────────────────────────────────────────┐## 🎯 Open Source Features & Demonstrations
 
 │                    AMCP v1.5 Open Source Architecture                       │
 
-# Setup Java 21 and build
+├─────────────────────────────────────────────────────────────────────────────┤### 🧠 **LLM-Powered Agent Orchestration**
 
-./setup-java21.sh├─────────────────────────────────────────────────────────────────────────────┤### 🧠 **LLM-Powered Agent Orchestration**
+│  🧠 LLM Orchestration: TinyLlama, Ollama Integration                        │**Open Source Innovation**: Revolutionary AI-powered multi-agent coordination with local LLM integration.
 
-mvn clean install -DskipTests
+├─────────────────────────────────────────────────────────────────────────────┤
 
-```│  🧠 LLM Orchestration: TinyLlama, Ollama Integration                        │**Open Source Innovation**: Revolutionary AI-powered multi-agent coordination with local LLM integration.
+│  🤖 Example Agents: MeshChat, Weather, Orchestrator                        │```bash
 
-
-
-### 2️⃣ Run Your First Agent├─────────────────────────────────────────────────────────────────────────────┤
-
-
-
-```bash│  🤖 Example Agents: MeshChat, Weather, Orchestrator                        │```bash
-
-# Start the weather agent demo
-
-./run-weather-demo.sh├─────────────────────────────────────────────────────────────────────────────┤# Experience intelligent orchestration
-
-```
+├─────────────────────────────────────────────────────────────────────────────┤# Experience intelligent orchestration
 
 │  🔗 Protocols: Google A2A Bridge, CloudEvents 1.0, OAuth2/JWT              │./run-orchestrator-demo.sh
 
-Expected output:
+├─────────────────────────────────────────────────────────────────────────────┤
 
-```├─────────────────────────────────────────────────────────────────────────────┤
+│  🚀 Strong Mobility: dispatch(), clone(), retract(), migrate()              │# Key Capabilities:
 
-🚀 AMCP v1.5 Open Source Edition - Weather Agent Demo
+├─────────────────────────────────────────────────────────────────────────────┤# • Dynamic task planning with TinyLlama 1.1B model
 
-✓ AgentContext initialized│  🚀 Strong Mobility: dispatch(), clone(), retract(), migrate()              │# Key Capabilities:
+│  📨 Multi-Broker Support:                                                   │# • Intelligent agent discovery and capability matching
 
-✓ WeatherAgent activated
+│            ├─ InMemoryBroker (Development)                                 │# • Parallel task execution with correlation tracking
 
-✓ Subscribed to weather.** topics├─────────────────────────────────────────────────────────────────────────────┤# • Dynamic task planning with TinyLlama 1.1B model
+│            ├─ KafkaBroker (Production)                                     │# • CloudEvents v1.0 compliant messaging
 
+│            └─ NATSBroker (Lightweight)                                     │# • Context-aware decision making
 
-
-Try: weather Paris│  📨 Multi-Broker Support:                                                   │# • Intelligent agent discovery and capability matching
-
-     weather "New York"
-
-```│            ├─ InMemoryBroker (Development)                                 │# • Parallel task execution with correlation tracking
-
-
-
-### 3️⃣ Try LLM-Powered Orchestration│            ├─ KafkaBroker (Production)                                     │# • CloudEvents v1.0 compliant messaging
-
-
-
-```bash│            └─ NATSBroker (Lightweight)                                     │# • Context-aware decision making
-
-# Requires Ollama with TinyLlama model installed
-
-./run-orchestrator-demo.sh├─────────────────────────────────────────────────────────────────────────────┤```
-
-```
+├─────────────────────────────────────────────────────────────────────────────┤```
 
 │  🔌 Tool Integration: MCP Protocol, Weather APIs, AI Services              │
 
-This demonstrates **intelligent multi-agent coordination** where an LLM-powered orchestrator:
+├─────────────────────────────────────────────────────────────────────────────┤### 💬 **MeshChat - Open Source Conversational AI**
 
-- Analyzes user requests├─────────────────────────────────────────────────────────────────────────────┤### 💬 **MeshChat - Open Source Conversational AI**
-
-- Discovers capable agents dynamically
-
-- Plans and executes tasks in parallel│  📊 Observability: Prometheus, Grafana                                     │**Community-driven** conversational AI system showcasing multi-agent orchestration for developers.
-
-- Aggregates results with full traceability
+│  📊 Observability: Prometheus, Grafana                                     │**Community-driven** conversational AI system showcasing multi-agent orchestration for developers.
 
 └─────────────────────────────────────────────────────────────────────────────┘
 
----
-
 ``````bash
-
-## 📖 Core Concepts (3 minutes read)
 
 # Launch comprehensive demo
 
-### 1. Agents: Autonomous, Stateful, Mobile
-
 ### Project Structure./run-meshchat-full-demo.sh
 
-```java
-
-public class MyAgent extends AbstractMobileAgent {
-
-    @Override
-
-    public void onActivate() {```# Try enterprise scenarios:
-
-        // Subscribe to topics - hierarchical pattern matching
-
-        subscribe("orders.new");amcp-v1.5-opensource/> "Plan a 5-day business trip to Tokyo with meetings and entertainment budget $3000"
-
-        subscribe("orders.cancelled");
-
-    }├── 🧠 core/                          # Core Framework> "Analyze Apple stock performance and provide investment recommendation"
-
-    
-
-    @Override│   ├── src/main/java/io/amcp/> "Research weather patterns for my New York business trip next week"
-
-    public CompletableFuture<Void> handleEvent(Event event) {
-
-        return CompletableFuture.runAsync(() -> {│   │   ├── core/                      # Agent interfaces, lifecycle```
-
-            switch (event.getTopic()) {
-
-                case "orders.new":│   │   ├── mobility/                  # Strong mobility operations
-
-                    processOrder(event.getPayload(Order.class));
-
-                    break;│   │   ├── messaging/                 # EventBroker system**Enterprise Features:**
-
-                case "orders.cancelled":
-
-                    cancelOrder(event.getPayload(OrderId.class));│   │   └── util/                      # Core utilities- 🧠 **Intelligent Routing**: TinyLlama/Ollama-powered agent selection
-
-                    break;
-
-            }│   └── src/test/java/                 # Unit tests- ✈️ **Travel Intelligence**: 11+ destinations with budget optimization
-
-        });
-
-    }├── 🔌 connectors/                     # Tool Connectors- 📈 **Financial Analytics**: Real-time stock data via Polygon.io API
-
-}
-
-```│   ├── src/main/java/io/amcp/connectors/- 💭 **Conversation Memory**: Persistent session management with context awareness
 
 
+```# Try enterprise scenarios:
 
-**Key Features:**│   │   ├── ai/                        # LLM/AI connectors- 🔄 **Multi-Agent Coordination**: Seamless travel, financial, and chat agent integration
+amcp-v1.5-opensource/> "Plan a 5-day business trip to Tokyo with meetings and entertainment budget $3000"
 
-- **Event-Driven**: Agents communicate via pub/sub (no tight coupling)
+├── 🧠 core/                          # Core Framework> "Analyze Apple stock performance and provide investment recommendation"
 
-- **Asynchronous**: All operations return `CompletableFuture<T>`│   │   ├── weather/                   # Weather APIs- 🎯 **Dynamic Discovery**: Runtime agent registration and capability matching
+│   ├── src/main/java/io/amcp/> "Research weather patterns for my New York business trip next week"
 
-- **Mobile**: Use `dispatch()`, `clone()`, `migrate()` to move agents at runtime
+│   │   ├── core/                      # Agent interfaces, lifecycle```
+
+│   │   ├── mobility/                  # Strong mobility operations
+
+│   │   ├── messaging/                 # EventBroker system**Enterprise Features:**
+
+│   │   └── util/                      # Core utilities- 🧠 **Intelligent Routing**: TinyLlama/Ollama-powered agent selection
+
+│   └── src/test/java/                 # Unit tests- ✈️ **Travel Intelligence**: 11+ destinations with budget optimization
+
+├── 🔌 connectors/                     # Tool Connectors- 📈 **Financial Analytics**: Real-time stock data via Polygon.io API
+
+│   ├── src/main/java/io/amcp/connectors/- 💭 **Conversation Memory**: Persistent session management with context awareness
+
+│   │   ├── ai/                        # LLM/AI connectors- 🔄 **Multi-Agent Coordination**: Seamless travel, financial, and chat agent integration
+
+│   │   ├── weather/                   # Weather APIs- 🎯 **Dynamic Discovery**: Runtime agent registration and capability matching
 
 │   │   ├── mcp/                       # MCP protocol
 
-### 2. Mobility: Move Agents, Not Data
-
 │   │   ├── ollama/                    # Ollama integration### 📈 **Real-Time Financial Integration**
 
-```java
-
-// Move agent to edge for low-latency processing│   │   └── a2a/                       # A2A protocol bridge**Production-grade** financial data processing with live market integration.
-
-agent.dispatch("edge-datacenter-paris");
+│   │   └── a2a/                       # A2A protocol bridge**Production-grade** financial data processing with live market integration.
 
 │   └── src/test/java/                 # Connector tests
 
-// Clone agent for HA
+├── 🎯 examples/                       # Example Agents```bash
 
-agent.clone("backup-datacenter");├── 🎯 examples/                       # Example Agents```bash
+│   ├── src/main/java/io/amcp/examples/# Launch financial services demo
 
+│   │   ├── meshchat/                  # Conversational AI./run-stockprice-demo.sh
 
-
-// Intelligent migration with load balancing│   ├── src/main/java/io/amcp/examples/# Launch financial services demo
-
-agent.migrate(MigrationOptions.builder()
-
-    .targetContext("optimal-location")│   │   ├── meshchat/                  # Conversational AI./run-stockprice-demo.sh
-
-    .preserveState(true)
-
-    .build());│   │   ├── weather/                   # Weather monitoring
-
-```
+│   │   ├── weather/                   # Weather monitoring
 
 │   │   ├── orchestrator/              # LLM orchestration# Enterprise capabilities:
 
-**Why This Matters:**
+│   │   └── multiagent/                # Multi-agent demos# • Live stock market data via Polygon.io
 
-- Process data where it lives (edge computing)│   │   └── multiagent/                # Multi-agent demos# • Live stock market data via Polygon.io
-
-- Dynamic scaling and load balancing
-
-- Disaster recovery and high availability│   └── src/test/java/                 # Example tests# • Real-time price monitoring and alerts
-
-- No data transfer overhead
+│   └── src/test/java/                 # Example tests# • Real-time price monitoring and alerts
 
 ├── 🚀 deploy/                         # Deployment# • Investment analysis and recommendations
 
-### 3. LLM Orchestration: Agents That Think
-
 │   ├── docker/                        # Container configs# • Portfolio tracking and optimization
 
-```java
+│   └── monitoring/                   # Observability# • Risk assessment and market insights
 
-public class OrchestratorAgent extends AbstractMobileAgent {│   └── monitoring/                   # Observability# • Risk assessment and market insights
+├── 📚 docs/                          # Documentation```
 
-    @Override
+└── pom.xml                           # Maven config
 
-    public CompletableFuture<String> handleComplexTask(String userRequest) {├── 📚 docs/                          # Documentation```
+```### ✈️ **Enterprise Travel Planning System**
 
-        // 1. LLM generates task plan
+**Mission-critical** travel orchestration with weather and logistics integration.
 
-        return aiConnector.generateTaskPlan(userRequest)└── pom.xml                           # Maven config
+## 🚀 Quick Start
 
-            // 2. Find agents with required capabilities
-
-            .thenCompose(plan -> registry.findCapableAgents(plan.getRequiredCapabilities()))```### ✈️ **Enterprise Travel Planning System**
-
-            // 3. Execute tasks in parallel
-
-            .thenCompose(agents -> executeParallelTasks(plan, agents))**Mission-critical** travel orchestration with weather and logistics integration.
-
-            // 4. LLM synthesizes final response
-
-            .thenCompose(results -> aiConnector.synthesizeResponse(results));## 🚀 Quick Start
-
-    }
-
-}```bash
-
-```
+```bash
 
 ### Prerequisites# Experience intelligent travel planning
 
-**Built-In Support:**
+./run-travel-demo.sh
 
-- TinyLlama 1.1B (local, no API costs)./run-travel-demo.sh
-
-- Ollama integration (any open-source model)
-
-- Task planning and decomposition- **Java 21+** (OpenJDK or Oracle JDK)
-
-- Capability-based agent discovery
+- **Java 21+** (OpenJDK or Oracle JDK)
 
 - **Maven 3.8+** for build management# Enterprise features:
 
-### 4. Protocol Bridge: Integrate Everything
-
 - **Docker 20.10+** (optional, for containerized deployment)# • Multi-destination itinerary optimization
 
-```java
+- **Ollama** (optional, for LLM integration) - [Install Guide](https://ollama.ai/)# • Real-time weather integration and alerts
 
-// AMCP native event- **Ollama** (optional, for LLM integration) - [Install Guide](https://ollama.ai/)# • Real-time weather integration and alerts
+# • Budget management and cost optimization
 
-Event event = Event.builder()
-
-    .topic("payment.process")# • Budget management and cost optimization
-
-    .payload(paymentRequest)
-
-    .correlationId(UUID.randomUUID().toString())### Installation & Demo# • Agent mobility demonstrations
-
-    .build();
+### Installation & Demo# • Agent mobility demonstrations
 
 # • Event-driven coordination across services
 
-// Automatically bridges to:
+```bash```
 
-// - Google A2A agents```bash```
-
-// - CloudEvents systems (Azure Event Grid, AWS EventBridge)
-
-// - Legacy systems via adapters# Clone repository
-
-```
+# Clone repository
 
 git clone https://github.com/xaviercallens/amcp-v1.5-opensource.git### 🔒 **Advanced Security Suite**
 
----
-
 cd amcp-v1.5-opensource**Enterprise-grade** security with comprehensive authentication and authorization.
 
-## 🎮 Interactive Demos
 
 
+# Setup Java 21 (if needed)**Security Architecture:**
 
-### Demo 1: Weather Agent (Simple)
-
-**What it shows:** Basic agent, topic subscriptions, event handling# Setup Java 21 (if needed)**Security Architecture:**
-
-
-
-```bash./setup-java21.sh- 🔐 **Multi-Factor Authentication (MFA)** - TOTP, SMS, Email, Hardware Keys, Backup Codes
-
-./run-weather-demo.sh
+./setup-java21.sh- 🔐 **Multi-Factor Authentication (MFA)** - TOTP, SMS, Email, Hardware Keys, Backup Codes
 
 - 📋 **Certificate-Based Authentication (mTLS)** - X.509 validation, CRL/OCSP, Custom CA
 
-# Try commands:
+# Build project- 🎫 **JWT Token Management** - Standards compliance, per-tenant signing, OAuth2/OIDC
 
-weather Tokyo# Build project- 🎫 **JWT Token Management** - Standards compliance, per-tenant signing, OAuth2/OIDC
-
-weather "San Francisco"
-
-forecast Parismvn clean compile package- �️ **Role-Based Access Control (RBAC)** - Fine-grained permissions, role hierarchies
-
-```
+mvn clean compile package- �️ **Role-Based Access Control (RBAC)** - Fine-grained permissions, role hierarchies
 
 - 📊 **Security Audit & Compliance** - Comprehensive logging, SIEM integration, compliance reports
 
-### Demo 2: MeshChat (Conversational AI)
-
-**What it shows:** LLM integration, context management, multi-turn conversations# Run MeshChat demo (LLM-powered conversational AI)- ⏰ **Advanced Session Management** - Configurable timeouts, concurrent session limits
-
-
-
-```bash./run-meshchat-demo.sh
+# Run MeshChat demo (LLM-powered conversational AI)- ⏰ **Advanced Session Management** - Configurable timeouts, concurrent session limits
 
 ./run-meshchat-demo.sh
 
 ```java
 
-# Try scenarios:
+# Run orchestrator demo (AI task coordination)// Example enterprise security implementation
 
-> Tell me about Paris# Run orchestrator demo (AI task coordination)// Example enterprise security implementation
-
-> What's the weather like there?
-
-> Plan a 3-day itinerary./run-orchestrator-demo.shAdvancedSecurityManager securityManager = new AdvancedSecurityManager(config);
-
-```
+./run-orchestrator-demo.shAdvancedSecurityManager securityManager = new AdvancedSecurityManager(config);
 
 AuthenticationResult result = securityManager.authenticate(username, password, tenantId).get();
 
-### Demo 3: Multi-Agent Orchestration (Advanced)
+# Run weather demo (multi-agent weather monitoring)SecurityContext context = securityManager.createSecurityContext(result.getUser(), tenantId);
 
-**What it shows:** LLM orchestration, parallel execution, agent discovery# Run weather demo (multi-agent weather monitoring)SecurityContext context = securityManager.createSecurityContext(result.getUser(), tenantId);
-
-
-
-```bash./run-weather-demo.sh```
-
-./run-orchestrator-demo.sh
+./run-weather-demo.sh```
 
 ```
 
-# Try complex requests:
+## 🏗️ Open Source Architecture
 
-> Research weather in Tokyo and Paris, then recommend best travel time## 🏗️ Open Source Architecture
+### Development
 
-> Analyze weather patterns and suggest outdoor activities
-
-```### Development
-
-
-
-### Demo 4: Interactive CLI (Full Power)AMCP v1.5 Open Source Edition delivers a developer-friendly agent mesh infrastructure:
-
-**What it shows:** All features, debugging tools, session management
+AMCP v1.5 Open Source Edition delivers a developer-friendly agent mesh infrastructure:
 
 ```bash
 
-```bash
+# Build without tests```
 
-./run-meshchat-cli.sh# Build without tests```
+mvn clean compile -DskipTests┌─────────────────────────────────────────────────────────────────────────────┐
 
+│                    AMCP v1.5 Open Source Architecture                       │
 
+# Run tests├─────────────────────────────────────────────────────────────────────────────┤
 
-CLI Commands:mvn clean compile -DskipTests┌─────────────────────────────────────────────────────────────────────────────┐
+mvn test│  🧠 LLM Orchestration: TinyLlama, Ollama Integration, AI-Powered Routing    │
 
-  agents              - List all available agents
+├─────────────────────────────────────────────────────────────────────────────┤
 
-  activate weather    - Start the weather agent│                    AMCP v1.5 Open Source Architecture                       │
+# Run with quality checks│  🤖 Open Agents: MeshChat, Weather, Orchestrator                           │
 
-  ask weather "Tokyo" - Query an agent
+mvn test -P quality├─────────────────────────────────────────────────────────────────────────────┤
 
-  status             - System health check# Run tests├─────────────────────────────────────────────────────────────────────────────┤
+│  🔗 Protocol Bridges: Google A2A ↔ AMCP, CloudEvents 1.0, OAuth2/JWT       │
 
-  help               - Full command list
+# Run integration tests├─────────────────────────────────────────────────────────────────────────────┤
 
-```mvn test│  🧠 LLM Orchestration: TinyLlama, Ollama Integration, AI-Powered Routing    │
+mvn test -P integration│  🚀 Strong Mobility: dispatch(), clone(), retract(), migrate(),             │
 
+```│                     replicate(), federateWith() - IBM Aglet-style          │
 
-
----├─────────────────────────────────────────────────────────────────────────────┤
-
-
-
-## 🏗️ Architecture Overview# Run with quality checks│  🤖 Open Agents: MeshChat, Weather, Orchestrator                           │
-
-
-
-```mvn test -P quality├─────────────────────────────────────────────────────────────────────────────┤
-
-┌─────────────────────────────────────────────────────────────────┐
-
-│                  AMCP v1.5 Open Source Architecture             ││  🔗 Protocol Bridges: Google A2A ↔ AMCP, CloudEvents 1.0, OAuth2/JWT       │
-
-├─────────────────────────────────────────────────────────────────┤
-
-│  🧠 LLM Layer: TinyLlama/Ollama Orchestration                   │# Run integration tests├─────────────────────────────────────────────────────────────────────────────┤
-
-│  🤖 Agent Layer: MobileAgent, RegistryAgent, OrchestratorAgent  │
-
-│  📨 Messaging Layer: EventBroker (Memory/Kafka/NATS/Solace)     │mvn test -P integration│  🚀 Strong Mobility: dispatch(), clone(), retract(), migrate(),             │
-
-│  🔗 Protocol Layer: A2A Bridge, CloudEvents 1.0, OAuth2/JWT     │
-
-│  🔌 Integration Layer: MCP Tools, External APIs, Legacy Systems │```│                     replicate(), federateWith() - IBM Aglet-style          │
-
-│  📊 Observability: Prometheus, Grafana, Distributed Tracing     │
-
-└─────────────────────────────────────────────────────────────────┘├─────────────────────────────────────────────────────────────────────────────┤
-
-```
+├─────────────────────────────────────────────────────────────────────────────┤
 
 ### Docker Deployment│  📨 Multi-Broker Support: Pluggable Message Brokers                        │
 
-### Project Structure
-
 │            ├─ InMemoryBroker (Development)                                 │
 
-```
+```bash│            ├─ KafkaBroker (Production)                                     │
 
-amcp-v1.5-opensource/```bash│            ├─ KafkaBroker (Production)                                     │
+# Launch full stack│            └─ NATSBroker (Lightweight)                                     │
 
-├── 📁 core/                    # Core framework
+cd deploy/docker├─────────────────────────────────────────────────────────────────────────────┤
 
-│   ├── Agent.java             # Base agent interface# Launch full stack│            └─ NATSBroker (Lightweight)                                     │
+docker-compose up -d│  🔌 Tool Integration: MCP Protocol, External APIs                          │
 
-│   ├── MobileAgent.java       # Mobility operations
+│              ├─ Weather APIs (OpenWeatherMap, WeatherAPI)                  │
 
-│   ├── EventBroker.java       # Messaging abstractioncd deploy/docker├─────────────────────────────────────────────────────────────────────────────┤
+# Includes:│              └─ AI Services (Ollama, OpenAI, Azure OpenAI)                 │
 
-│   └── AgentContext.java      # Lifecycle management
+# • AMCP agent contexts├─────────────────────────────────────────────────────────────────────────────┤
 
-│docker-compose up -d│  🔌 Tool Integration: MCP Protocol, External APIs                          │
+# • Kafka event broker│  📊 Open Observability: Prometheus, Grafana, Custom Metrics               │
 
-├── 📁 connectors/             # External integrations
+# • Prometheus monitoring├─────────────────────────────────────────────────────────────────────────────┤
 
-│   ├── ollama/               # LLM integration│              ├─ Weather APIs (OpenWeatherMap, WeatherAPI)                  │
+# • Grafana dashboards│  🧪 Testing Framework: TestContainers, Performance Testing                 │
 
-│   ├── a2a/                  # Google A2A bridge
+├─────────────────────────────────────────────────────────────────────────────┤
 
-│   └── mcp/                  # Tool connectors# Includes:│              └─ AI Services (Ollama, OpenAI, Azure OpenAI)                 │
-
-│
-
-├── 📁 examples/              # Reference implementations# • AMCP agent contexts├─────────────────────────────────────────────────────────────────────────────┤
-
-│   ├── weather/             # WeatherAgent example
-
-│   ├── meshchat/            # Conversational AI# • Kafka event broker│  📊 Open Observability: Prometheus, Grafana, Custom Metrics               │
-
-│   └── orchestrator/        # LLM orchestration
-
-│# • Prometheus monitoring├─────────────────────────────────────────────────────────────────────────────┤
-
-├── 📁 cli/                   # Interactive CLI
-
-│# • Grafana dashboards│  🧪 Testing Framework: TestContainers, Performance Testing                 │
-
-└── 📁 docs/                  # Documentation
-
-    ├── ARCHITECTURE.md├─────────────────────────────────────────────────────────────────────────────┤
-
-    ├── DEVELOPER_GUIDE.md
-
-    └── API_REFERENCE.md# Check services│  🏢 Open Platform: Docker, Local Development                               │
-
-```
+# Check services│  🏢 Open Platform: Docker, Local Development                               │
 
 curl http://localhost:8080/api/v1.5/agents    # Agent status└─────────────────────────────────────────────────────────────────────────────┘
 
----
-
 curl http://localhost:8081/metrics           # Prometheus metrics```
-
-## 📚 Documentation
 
 curl http://localhost:3000                   # Grafana (admin/admin)│              ├─ Travel APIs (Amadeus, TripAdvisor)                         │
 
-### For Developers
+```│              └─ AI Services (Ollama, OpenAI, Azure OpenAI)                 │
 
-- **[Quick Start Guide](QUICK_START.md)** - Get up and running in 5 minutes```│              └─ AI Services (Ollama, OpenAI, Azure OpenAI)                 │
-
-- **[Developer Guide](docs/DEVELOPER_GUIDE.md)** - Build your first agent
-
-- **[Architecture Guide](docs/ARCHITECTURE.md)** - Deep dive into AMCP design├─────────────────────────────────────────────────────────────────────────────┤
-
-- **[API Reference](docs/API_REFERENCE.md)** - Complete API documentation
+├─────────────────────────────────────────────────────────────────────────────┤
 
 ## 🎯 Core API Examples│  🔒 Advanced Security: MFA, mTLS, RBAC, Audit, Compliance                  │
 
-### For Contributors
+├─────────────────────────────────────────────────────────────────────────────┤
 
-- **[Contributing Guide](CONTRIBUTING.md)** - How to contribute├─────────────────────────────────────────────────────────────────────────────┤
+### Basic Agent Implementation│  📊 Enterprise Observability: Prometheus, Grafana, Jaeger, Custom Metrics  │
 
-- **[Build Guide](BUILD_TROUBLESHOOTING.md)** - Build and test locally
+├─────────────────────────────────────────────────────────────────────────────┤
 
-- **[Code Style Guide](docs/CODE_STYLE.md)** - Coding conventions### Basic Agent Implementation│  📊 Enterprise Observability: Prometheus, Grafana, Jaeger, Custom Metrics  │
+```java│  🧪 Testing Framework: TestContainers, Performance, Security, Chaos        │
 
+public class MyAgent extends AbstractMobileAgent {├─────────────────────────────────────────────────────────────────────────────┤
 
+    │  🏢 Production Platform: Kubernetes, Docker, Istio Service Mesh            │
 
-### Advanced Topics├─────────────────────────────────────────────────────────────────────────────┤
+    @Override└─────────────────────────────────────────────────────────────────────────────┘
 
-- **[Multi-Agent Systems](MULTIAGENT_SYSTEM_GUIDE.md)** - Coordination patterns
+    public void onActivate() {```
 
-- **[LLM Orchestration](OLLAMA_INTEGRATION_GUIDE.md)** - AI-powered agents```java│  🧪 Testing Framework: TestContainers, Performance, Security, Chaos        │
+        super.onActivate();
 
-- **[Protocol Bridge](docs/A2A_BRIDGE.md)** - Google A2A integration
+        subscribe("my.topic.**");  // Subscribe to topics### 🏗️ Open Source Project Structure
 
-- **[CloudEvents Guide](CLOUDEVENTS_COMPLIANCE.md)** - Event interoperabilitypublic class MyAgent extends AbstractMobileAgent {├─────────────────────────────────────────────────────────────────────────────┤
+        logMessage("Agent activated");
 
+    }```
 
+    amcp-v1.5-opensource/
 
----    │  🏢 Production Platform: Kubernetes, Docker, Istio Service Mesh            │
+    @Override├── 🧠 core/                          # Open Source Core Framework
 
+    public CompletableFuture<Void> handleEvent(Event event) {│   ├── src/main/java/io/amcp/
 
+        return CompletableFuture.runAsync(() -> {│   │   ├── core/                      # Agent interfaces, lifecycle, discovery
 
-## 🛠️ Use Cases    @Override└─────────────────────────────────────────────────────────────────────────────┘
+            switch (event.getTopic()) {│   │   ├── mobility/                  # IBM Aglet-style strong mobility
 
+                case "my.topic.request":│   │   ├── messaging/                 # Multi-broker EventBroker system
 
+                    handleRequest(event.getPayload(RequestType.class));│   │   ├── memory/                    # Conversation memory system
 
-### 1. **AI Agent Orchestration**    public void onActivate() {```
+                    publishEvent("my.topic.response", response);│   │   ├── registry/                  # Dynamic agent registry
 
-Build LangChain/AutoGen-style systems with distributed execution:
+                    break;│   │   └── util/                      # Core utilities
 
-- Multi-agent research assistants        super.onActivate();
+            }│   └── src/test/java/                 # Comprehensive testing framework
 
-- Intelligent task decomposition
-
-- Parallel execution with correlation        subscribe("my.topic.**");  // Subscribe to topics### 🏗️ Open Source Project Structure
-
-
-
-### 2. **Edge Computing**        logMessage("Agent activated");
-
-Move agents to where data lives:
-
-- IoT data processing at edge    }```
-
-- Low-latency decision making
-
-- Bandwidth optimization    amcp-v1.5-opensource/
-
-
-
-### 3. **Event-Driven Microservices**    @Override├── 🧠 core/                          # Open Source Core Framework
-
-Replace traditional RPC with intelligent agents:
-
-- Dynamic service discovery    public CompletableFuture<Void> handleEvent(Event event) {│   ├── src/main/java/io/amcp/
-
-- Resilient communication
-
-- Built-in observability        return CompletableFuture.runAsync(() -> {│   │   ├── core/                      # Agent interfaces, lifecycle, discovery
-
-
-
-### 4. **Legacy System Integration**            switch (event.getTopic()) {│   │   ├── mobility/                  # IBM Aglet-style strong mobility
-
-Bridge old and new with protocol adapters:
-
-- A2A protocol compatibility                case "my.topic.request":│   │   ├── messaging/                 # Multi-broker EventBroker system
-
-- CloudEvents for cloud integration
-
-- Custom MCP tool connectors                    handleRequest(event.getPayload(RequestType.class));│   │   ├── memory/                    # Conversation memory system
-
-
-
----                    publishEvent("my.topic.response", response);│   │   ├── registry/                  # Dynamic agent registry
-
-
-
-## 🚦 Getting Started - Next Steps                    break;│   │   └── util/                      # Core utilities
-
-
-
-### 1. **Learn the Basics** (30 minutes)            }│   └── src/test/java/                 # Comprehensive testing framework
-
-```bash
-
-# Run all demos in sequence        });├── 🔌 connectors/                     # Open Source Tool Connectors
-
-./demo-launcher.sh
+        });├── 🔌 connectors/                     # Open Source Tool Connectors
 
     }│   ├── src/main/java/io/amcp/connectors/
 
-# Read the Quick Start
-
-cat QUICK_START.md    │   │   ├── ai/                        # LLM/AI service connectors
-
-```
+    │   │   ├── ai/                        # LLM/AI service connectors
 
     @Override│   │   ├── weather/                   # Weather service APIs
 
-### 2. **Build Your First Agent** (1 hour)
+    public void setContext(AgentContext context) {│   │   ├── mcp/                       # Model Context Protocol integration
 
-Follow our [Developer Guide](docs/DEVELOPER_GUIDE.md) to create:    public void setContext(AgentContext context) {│   │   ├── mcp/                       # Model Context Protocol integration
-
-- A simple echo agent
-
-- An agent that calls external APIs        this.context = context; // CRITICAL: Always set context before activation│   │   ├── ollama/                    # Ollama LLM integration
-
-- A mobile agent that migrates at runtime
+        this.context = context; // CRITICAL: Always set context before activation│   │   ├── ollama/                    # Ollama LLM integration
 
     }│   │   └── a2a/                       # Google A2A protocol bridge
 
-### 3. **Explore Advanced Features** (2 hours)
+}│   └── src/test/java/                 # Connector integration tests
 
-- Add LLM orchestration to your agents}│   └── src/test/java/                 # Connector integration tests
+```├── 🎯 examples/                       # Open Source Agent Examples
 
-- Implement agent mobility patterns
+│   ├── src/main/java/io/amcp/examples/
 
-- Bridge to Google A2A or CloudEvents```├── 🎯 examples/                       # Open Source Agent Examples
-
-
-
-### 4. **Deploy to Production** (variable)│   ├── src/main/java/io/amcp/examples/
-
-- [Docker Deployment](deploy/docker/README.md)
-
-- [Kubernetes with Istio](deploy/k8s/README.md)### Strong Mobility Operations│   │   ├── meshchat/                  # Conversational AI system
-
-- [Monitoring Setup](docs/MONITORING.md)
+### Strong Mobility Operations│   │   ├── meshchat/                  # Conversational AI system
 
 │   │   ├── weather/                   # Weather monitoring agents
 
----
-
 ```java│   │   ├── orchestrator/              # LLM orchestration agents
-
-## 🤝 Community & Support
 
 // IBM Aglet-style mobility│   │   └── multiagent/                # Multi-agent coordination examples
 
-### Get Help
+public interface MobileAgent extends Agent {│   └── src/test/java/                 # Example tests and scenarios
 
-- **GitHub Issues**: [Report bugs or request features](https://github.com/xaviercallens/amcp-v1.5-opensource/issues)public interface MobileAgent extends Agent {│   └── src/test/java/                 # Example tests and scenarios
+    // Move agent to remote context├── 🚀 deploy/                         # Open Source Deployment
 
-- **Discussions**: [Ask questions, share ideas](https://github.com/xaviercallens/amcp-v1.5-opensource/discussions)
+    CompletableFuture<Void> dispatch(String destinationContext);│   ├── docker/                        # Container orchestration
 
-- **Documentation**: [Full docs](https://github.com/xaviercallens/amcp-v1.5-opensource/tree/main/docs)    // Move agent to remote context├── 🚀 deploy/                         # Open Source Deployment
+    │   │   ├── Dockerfile                 # Multi-stage build
 
-
-
-### Contribute    CompletableFuture<Void> dispatch(String destinationContext);│   ├── docker/                        # Container orchestration
-
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
-
-- Code contributions    │   │   ├── Dockerfile                 # Multi-stage build
-
-- Documentation improvements
-
-- Bug reports and feature requests    // Create copy in remote context│   │   ├── docker-compose.yml         # Local stack with monitoring
-
-- Example agents and demos
+    // Create copy in remote context│   │   ├── docker-compose.yml         # Local stack with monitoring
 
     CompletableFuture<AgentID> clone(String destinationContext);│   │   └── entrypoint.sh              # Development entrypoint
 
-### Roadmap
+    │   └── monitoring/                   # Open source observability
 
-- **v1.6**: Python and Rust SDKs, LangChain/Semantic Kernel integrations    │   └── monitoring/                   # Open source observability
-
-- **v1.7**: Enhanced CLI with GUI dashboard, more LLM providers
-
-- **v1.8**: Advanced security policies, multi-tenancy    // Recall agent from remote context│       ├── prometheus/                # Metrics collection
-
-- **v2.0**: Breaking changes for cleaner APIs, performance optimizations
+    // Recall agent from remote context│       ├── prometheus/                # Metrics collection
 
     CompletableFuture<Void> retract(String sourceContext);│       └── grafana/                   # Community dashboards
 
----
-
     ├── 📚 docs/                          # Community Documentation
-
-## 📊 Performance & Scale
 
     // Intelligent migration with options│   ├── QUICK_START.md                 # Getting started guide
 
-### Benchmarks (Local Development)
+    CompletableFuture<Void> migrate(MigrationOptions options);│   ├── ARCHITECTURE.md               # System architecture
 
-- **Latency**: < 1ms event delivery (in-memory broker)    CompletableFuture<Void> migrate(MigrationOptions options);│   ├── ARCHITECTURE.md               # System architecture
-
-- **Throughput**: 100K+ events/sec (single node)
-
-- **Agents**: 1000+ concurrent agents per context    │   ├── API_REFERENCE.md              # Developer API docs
-
-- **Memory**: ~50MB baseline + ~1MB per agent
+    │   ├── API_REFERENCE.md              # Developer API docs
 
     // Replicate for high availability│   └── CONTRIBUTING.md               # Contribution guidelines
 
-### Production Scale (Kafka/NATS)
+    CompletableFuture<List<AgentID>> replicate(String... contexts);├── 🔧 scripts/                       # Build and deployment scripts
 
-- **Latency**: 5-10ms p99 (Kafka cluster)    CompletableFuture<List<AgentID>> replicate(String... contexts);├── 🔧 scripts/                       # Build and deployment scripts
-
-- **Throughput**: 1M+ events/sec (partitioned)
-
-- **Agents**: 10K+ distributed across nodes}├── pom.xml                           # Maven configuration
-
-- **Availability**: 99.9%+ with replication
+}├── pom.xml                           # Maven configuration
 
 ```└── LICENSE                           # Apache 2.0 license
 
-*Benchmarks run on: MacBook Pro M1, 16GB RAM, Java 21*
-
 ```
-
----
 
 ### Event-Driven Messaging│   └── src/test/java/                 # Example tests and scenarios
 
-## 📄 License
-
 ├── 🚀 deploy/                         # Enterprise Deployment
-
-AMCP v1.5 Open Source Edition is licensed under the **Apache License 2.0**.
 
 ```java│   ├── docker/                        # Container orchestration
 
-See [LICENSE](LICENSE) for details.
-
 // Create and publish events│   │   ├── Dockerfile                 # Multi-stage enterprise build
-
----
 
 Event event = Event.builder()│   │   ├── docker-compose.yml         # Full stack with monitoring
 
-## 🌟 Why Open Source?
-
     .topic("weather.request.forecast")│   │   └── entrypoint.sh              # Production entrypoint
-
-AMCP was born from the belief that **multi-agent systems should be accessible to everyone**. Whether you're:
 
     .payload(weatherRequest)│   ├── k8s/                          # Kubernetes manifests
 
-- 🎓 A **student** learning distributed systems
+    .correlationId("req-" + UUID.randomUUID())│   │   ├── namespace.yaml             # Multi-tenant namespaces
 
-- 🚀 A **startup** building the next AI unicorn    .correlationId("req-" + UUID.randomUUID())│   │   ├── namespace.yaml             # Multi-tenant namespaces
+    .metadata("source", "weather-app")│   │   ├── deployment.yaml            # Production deployment
 
-- 🏢 An **enterprise** exploring agent-based architecture
+    .build();│   │   ├── service.yaml               # Service mesh integration
 
-- 🔬 A **researcher** pushing the boundaries of AI    .metadata("source", "weather-app")│   │   ├── deployment.yaml            # Production deployment
+│   │   ├── configmap.yaml             # Configuration management
 
+publishEvent(event);│   │   └── hpa.yaml                   # Horizontal Pod Autoscaling
 
+│   ├── istio/                        # Service mesh configuration
 
-**AMCP gives you production-grade tools without vendor lock-in.**    .build();│   │   ├── service.yaml               # Service mesh integration
+// CloudEvents 1.0 compliant│   │   ├── gateway.yaml               # Ingress configuration
 
+Event cloudEvent = Event.builder()│   │   ├── virtual-service.yaml       # Traffic management
 
+    .topic("travel.request.plan")│   │   ├── destination-rule.yaml      # Load balancing rules
 
-### What Makes AMCP Special?│   │   ├── configmap.yaml             # Configuration management
+    .payload(planRequest)│   │   └── security/                  # mTLS and security policies
 
+    .correlationId("trip-12345")│   └── monitoring/                   # Enterprise observability
 
-
-1. **True Mobility**: Only framework with runtime agent migration (IBM Aglet heritage)publishEvent(event);│   │   └── hpa.yaml                   # Horizontal Pod Autoscaling
-
-2. **Protocol Bridge**: Native A2A compatibility - integrate with existing systems
-
-3. **LLM-Native**: Orchestration built-in, not bolted-on│   ├── istio/                        # Service mesh configuration
-
-4. **Zero Infrastructure**: Start with in-memory, scale to enterprise brokers
-
-5. **Production Ready**: Formal verification, 95% coverage, battle-tested// CloudEvents 1.0 compliant│   │   ├── gateway.yaml               # Ingress configuration
-
-
-
----Event cloudEvent = Event.builder()│   │   ├── virtual-service.yaml       # Traffic management
-
-
-
-## 🚀 Start Building Now    .topic("travel.request.plan")│   │   ├── destination-rule.yaml      # Load balancing rules
-
-
-
-```bash    .payload(planRequest)│   │   └── security/                  # mTLS and security policies
-
-git clone https://github.com/xaviercallens/amcp-v1.5-opensource.git
-
-cd amcp-v1.5-opensource    .correlationId("trip-12345")│   └── monitoring/                   # Enterprise observability
-
-./setup-java21.sh
-
-./run-weather-demo.sh    .metadata("specversion", "1.0")│       ├── prometheus/                # Metrics collection
-
-```
+    .metadata("specversion", "1.0")│       ├── prometheus/                # Metrics collection
 
     .metadata("type", "io.amcp.travel.request")│       ├── grafana/                   # Enterprise dashboards
 
-**Welcome to the future of multi-agent systems.** 🤖
-
     .build();│       └── jaeger/                    # Distributed tracing
-
----
 
 ```├── 📚 docs/                          # Comprehensive Documentation
 
-<div align="center">
+│   ├── MESHCHAT_DOCUMENTATION.md     # Complete user guide
 
-  │   ├── MESHCHAT_DOCUMENTATION.md     # Complete user guide
-
-**[⭐ Star us on GitHub](https://github.com/xaviercallens/amcp-v1.5-opensource)** | 
-
-**[📖 Read the Docs](docs/)** | ### LLM-Powered Orchestration│   ├── MESHCHAT_ARCHITECTURE.md      # System architecture
-
-**[💬 Join Discussions](https://github.com/xaviercallens/amcp-v1.5-opensource/discussions)**
+### LLM-Powered Orchestration│   ├── MESHCHAT_ARCHITECTURE.md      # System architecture
 
 │   ├── MESHCHAT_API_REFERENCE.md     # Developer API docs
 
-Made with ❤️ by the AMCP Community
-
 ```java│   └── MESHCHAT_QUICK_START.md       # Getting started guide
-
-</div>
 
 public class OrchestratorAgent extends AbstractMobileAgent {├── 🔧 scripts/                       # Build and deployment scripts
 
