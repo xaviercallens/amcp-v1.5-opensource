@@ -52,15 +52,24 @@ Get your first agent running in **under 5 minutes**:
 - Maven 3.8+
 - Docker (optional, for advanced demos)
 
-### One-Command Setup
+### Platform-Specific Setup
 
+#### 🐧 Linux
 ```bash
-# Clone and setup
 git clone https://github.com/xaviercallens/amcp-v1.5-opensource.git
 cd amcp-v1.5-opensource
+./setup-linux.sh  # Automated setup for all major Linux distros
+source ~/.bashrc
+mvn clean install -DskipTests
+./amcp-cli --build
+```
+**📖 See [LINUX_DEPLOYMENT.md](LINUX_DEPLOYMENT.md) for detailed Linux instructions**
 
-# Auto-setup Java 21 and build
-./get-started.sh
+#### 🍎 macOS
+```bash
+git clone https://github.com/xaviercallens/amcp-v1.5-opensource.git
+cd amcp-v1.5-opensource
+./get-started.sh  # Or ./setup-java21.sh for Java setup only
 ```
 
 ### Your First Agent
