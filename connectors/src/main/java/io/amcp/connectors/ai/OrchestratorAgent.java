@@ -42,6 +42,7 @@ public class OrchestratorAgent implements Agent {
     private final AgentRegistry agentRegistry;
     private final OllamaSpringAIConnector ollamaConnector;
     private final IntentAnalyzer intentAnalyzer;
+    private final boolean useSimulationMode;
     
     // Request orchestration tracking
     private final Map<String, OrchestrationSession> activeSessions = new ConcurrentHashMap<>();
@@ -50,8 +51,23 @@ public class OrchestratorAgent implements Agent {
     public OrchestratorAgent() {
         this.agentId = AgentID.named("OrchestratorAgent");
         this.agentRegistry = new AgentRegistry();
-        this.ollamaConnector = new OllamaSpringAIConnector();
+        
+        // Check environment variables for simulation mode
+        String ollamaEnabled = System.getenv("OLLAMA_ENABLED");
+        String useSimulation = System.getenv("USE_SIMULATION_MODE");
+        String chatAgentEnabled = System.getenv("CHAT_AGENT_ENABLED");
+        
+        this.useSimulationMode = "false".equals(ollamaEnabled) || 
+                                "true".equals(useSimulation) || 
+                                "false".equals(chatAgentEnabled);
+        
+        // Only create Ollama connector if not in simulation mode
+        this.ollamaConnector = useSimulationMode ? null : new OllamaSpringAIConnector();
         this.intentAnalyzer = new IntentAnalyzer();
+        
+        if (useSimulationMode) {
+            System.out.println("[OrchestratorAgent] 🎭 Running in simulation mode - Ollama disabled");
+        }
     }
     
     /**
@@ -98,6 +114,12 @@ public class OrchestratorAgent implements Agent {
             return CompletableFuture.supplyAsync(() -> {
                 try {
                     List<AgentRegistry.AgentInfo> agentList = new ArrayList<>(availableAgents);
+                    
+                    // Use simulation mode if Ollama is disabled
+                    if (useSimulationMode || ollamaConnector == null) {
+                        return simulateIntentAnalysis(userQuery, agentList);
+                    }
+                    
                     String analysisPrompt = buildIntentAnalysisPrompt(userQuery, agentList);
                     
                     // Call TinyLlama via OLLAMA for intent analysis
@@ -123,23 +145,43 @@ public class OrchestratorAgent implements Agent {
                         return parseIntentAnalysis(analysisResult, userQuery);
                     } else {
                         logMessage("TinyLlama intent analysis failed: " + response.getErrorMessage());
-                        return createFallbackIntent(userQuery, agentList);
+                        return createFallbackIntent(userQuery, new ArrayList<>(availableAgents));
                     }
                     
                 } catch (Exception e) {
-                    logMessage("Error in intent analysis: " + e.getMessage());
+                    logMessage("Exception during intent analysis: " + e.getMessage());
                     return createFallbackIntent(userQuery, new ArrayList<>(availableAgents));
                 }
             });
         }
         
-        private String buildIntentAnalysisPrompt(String userQuery, List<AgentRegistry.AgentInfo> agents) {
+        /**
+         * Simulate intent analysis without using Ollama (for performance/testing)
+         */
+        private IntentAnalysis simulateIntentAnalysis(String userQuery, List<AgentRegistry.AgentInfo> agentList) {
+            String query = userQuery.toLowerCase();
+            Map<String, Object> params = new HashMap<>();
+            
+            // Simple keyword-based routing for simulation
+            if (query.contains("weather") || query.contains("temperature") || query.contains("forecast")) {
+                return new IntentAnalysis("weather", "WeatherAgent", 0.90, params, "Weather keyword detected - highest priority");
+            } else if (query.contains("travel") || query.contains("trip") || query.contains("flight") || query.contains("hotel")) {
+                return new IntentAnalysis("travel", "TravelPlannerAgent", 0.85, params, "Travel keyword detected");
+            } else if (query.contains("stock") || query.contains("finance") || query.contains("investment") || query.contains("market")) {
+                return new IntentAnalysis("finance", "StockAgent", 0.85, params, "Finance keyword detected");
+            } else {
+                // Default to weather agent for unknown queries
+                return new IntentAnalysis("weather", "WeatherAgent", 0.70, params, "Default routing - no specific keywords detected");
+            }
+        }
+        
+        private String buildIntentAnalysisPrompt(String userQuery, List<AgentRegistry.AgentInfo> availableAgents) {
             StringBuilder prompt = new StringBuilder();
             
             prompt.append("You are TinyLlama, an intelligent agent router. Your job is to choose the RIGHT agent for the user's request.\n\n");
             
             prompt.append("AVAILABLE AGENTS:\n");
-            for (AgentRegistry.AgentInfo agent : agents) {
+            for (AgentRegistry.AgentInfo agent : availableAgents) {
                 prompt.append("• ").append(agent.getAgentId()).append(": ").append(agent.getDescription()).append("\n");
                 if (!agent.getCapabilities().isEmpty()) {
                     prompt.append("  Use for: ").append(String.join(", ", agent.getCapabilities())).append("\n");
@@ -495,6 +537,12 @@ public class OrchestratorAgent implements Agent {
     private CompletableFuture<String> formatFinalResponse(OrchestrationSession session, String agentResponse) {
         return CompletableFuture.supplyAsync(() -> {
             try {
+                // Use simulation mode if Ollama is disabled
+                if (useSimulationMode || ollamaConnector == null) {
+                    logMessage("✨ Using simulation mode for response formatting");
+                    return "🤖 " + agentResponse; // Simple formatting for simulation
+                }
+                
                 // Use TinyLlama to format and enhance the response
                 String formattingPrompt = buildResponseFormattingPrompt(session, agentResponse);
                 
