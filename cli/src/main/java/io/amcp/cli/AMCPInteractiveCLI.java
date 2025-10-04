@@ -2,13 +2,9 @@ package io.amcp.cli;
 
 import io.amcp.examples.weather.WeatherAgent;
 import io.amcp.connectors.ai.EnhancedChatAgent; // Re-enabled with connectors dependency
-import io.amcp.examples.multiagent.MultiAgentDemo;
 import io.amcp.connectors.ai.OrchestratorAgent; // Re-enabled with connectors dependency
 
 import io.amcp.core.AgentContext;
-import io.amcp.core.AgentID;
-import io.amcp.core.Event;
-import io.amcp.core.DeliveryOptions;
 import io.amcp.messaging.EventBroker;
 import io.amcp.messaging.impl.InMemoryEventBroker;
 import io.amcp.mobility.MobilityManager;
@@ -16,12 +12,9 @@ import io.amcp.core.impl.SimpleAgentContext;
 import io.amcp.mobility.impl.SimpleMobilityManager;
 
 import java.util.*;
-import java.util.concurrent.*;
-import java.io.*;
 import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.stream.Collectors;
 
 /**
  * AMCP v1.5 Open Source Edition Interactive CLI
