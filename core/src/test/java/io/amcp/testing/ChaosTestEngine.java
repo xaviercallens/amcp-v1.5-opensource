@@ -1,5 +1,6 @@
 package io.amcp.testing;
 
+import io.amcp.core.Event;
 import io.amcp.messaging.EventBroker;
 
 import java.util.Random;
@@ -29,6 +30,10 @@ public class ChaosTestEngine {
     private final ExecutorService executor;
     private final Random random;
     private final AtomicBoolean chaosEnabled;
+    
+    public ChaosTestEngine() {
+        this(TestConfiguration.defaultConfig());
+    }
     
     public ChaosTestEngine(TestConfiguration configuration) {
         this.configuration = configuration;
@@ -228,11 +233,17 @@ public class ChaosTestEngine {
             
             // Setup receiver
             CountDownLatch receiveLatch = new CountDownLatch(100);
-            eventBroker.subscribe("packetloss.**", event -> {
-                receivedEvents.incrementAndGet();
-                receiveLatch.countDown();
-                return CompletableFuture.completedFuture(null);
-            });
+            EventBroker.EventSubscriber subscriber = new EventBroker.EventSubscriber() {
+                @Override
+                public CompletableFuture<Void> handleEvent(Event event) {
+                    receivedEvents.incrementAndGet();
+                    receiveLatch.countDown();
+                    return CompletableFuture.completedFuture(null);
+                }
+                @Override
+                public String getSubscriberId() { return "packetloss-subscriber"; }
+            };
+            eventBroker.subscribe(subscriber, "packetloss.**");
             
             CompletableFuture<Void> testTask = CompletableFuture.runAsync(() -> {
                 for (int i = 0; i < 100; i++) {

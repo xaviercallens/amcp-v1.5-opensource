@@ -63,11 +63,25 @@ public class TestResult {
     }
     
     /**
+     * Check if test is successful (alias for isPassed)
+     */
+    public boolean isSuccess() {
+        return isPassed();
+    }
+    
+    /**
      * Check if test failed
      */
     public boolean isFailed() {
         return status == TestStatus.FAILED || 
                checks.values().stream().anyMatch(check -> !check);
+    }
+    
+    /**
+     * Get error message (alias for getErrorMessage)
+     */
+    public String getError() {
+        return errorMessage;
     }
     
     /**

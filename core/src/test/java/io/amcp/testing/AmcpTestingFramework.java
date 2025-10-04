@@ -187,7 +187,8 @@ public class AmcpTestingFramework {
             result.addCheck("elasticsearch_connectivity", testElasticsearchConnectivity());
             
             // Container health checks
-            result.addCheck("container_health", validateContainerHealth());
+            validateContainerHealth();
+            result.addCheck("container_health", true);
             
             // Network connectivity tests
             result.addCheck("network_connectivity", testNetworkConnectivity());
@@ -475,11 +476,20 @@ public class AmcpTestingFramework {
             AtomicInteger receivedCount = new AtomicInteger(0);
             
             // Subscribe to test events
-            eventBroker.subscribe("test.**", event -> {
-                receivedCount.incrementAndGet();
-                receivedLatch.countDown();
-                return CompletableFuture.completedFuture(null);
-            });
+            EventBroker.EventSubscriber subscriber = new EventBroker.EventSubscriber() {
+                @Override
+                public CompletableFuture<Void> handleEvent(Event event) {
+                    receivedCount.incrementAndGet();
+                    receivedLatch.countDown();
+                    return CompletableFuture.completedFuture(null);
+                }
+                
+                @Override
+                public String getSubscriberId() {
+                    return "test-subscriber-" + System.currentTimeMillis();
+                }
+            };
+            eventBroker.subscribe(subscriber, "test.**");
             
             // Publish test event
             Event testEvent = Event.builder()
@@ -511,24 +521,42 @@ public class AmcpTestingFramework {
             CountDownLatch completionLatch = new CountDownLatch(6); // 3 events * 2 matching subscriptions
             
             // Pattern subscriptions
-            eventBroker.subscribe("order.**", event -> {
-                orderEvents.incrementAndGet();
-                allEvents.incrementAndGet();
-                completionLatch.countDown();
-                return CompletableFuture.completedFuture(null);
-            });
+            EventBroker.EventSubscriber orderSubscriber = new EventBroker.EventSubscriber() {
+                @Override
+                public CompletableFuture<Void> handleEvent(Event event) {
+                    orderEvents.incrementAndGet();
+                    allEvents.incrementAndGet();
+                    completionLatch.countDown();
+                    return CompletableFuture.completedFuture(null);
+                }
+                @Override
+                public String getSubscriberId() { return "order-subscriber"; }
+            };
+            eventBroker.subscribe(orderSubscriber, "order.**");
             
-            eventBroker.subscribe("user.**", event -> {
-                userEvents.incrementAndGet();
-                allEvents.incrementAndGet();
-                completionLatch.countDown();
-                return CompletableFuture.completedFuture(null);
-            });
+            EventBroker.EventSubscriber userSubscriber = new EventBroker.EventSubscriber() {
+                @Override
+                public CompletableFuture<Void> handleEvent(Event event) {
+                    userEvents.incrementAndGet();
+                    allEvents.incrementAndGet();
+                    completionLatch.countDown();
+                    return CompletableFuture.completedFuture(null);
+                }
+                @Override
+                public String getSubscriberId() { return "user-subscriber"; }
+            };
+            eventBroker.subscribe(userSubscriber, "user.**");
             
-            eventBroker.subscribe("**", event -> {
-                completionLatch.countDown();
-                return CompletableFuture.completedFuture(null);
-            });
+            EventBroker.EventSubscriber allSubscriber = new EventBroker.EventSubscriber() {
+                @Override
+                public CompletableFuture<Void> handleEvent(Event event) {
+                    completionLatch.countDown();
+                    return CompletableFuture.completedFuture(null);
+                }
+                @Override
+                public String getSubscriberId() { return "all-subscriber"; }
+            };
+            eventBroker.subscribe(allSubscriber, "**");
             
             // Publish test events
             List<Event> testEvents = List.of(

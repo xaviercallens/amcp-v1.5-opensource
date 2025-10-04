@@ -87,8 +87,15 @@ public class TestingFrameworkDemo {
             
             logger.info("📊 Starting performance benchmarks...");
             
+            // Create event broker for testing
+            EventBroker eventBroker = new InMemoryEventBroker();
+            eventBroker.start();
+            
             // Run performance tests
-            TestResult result = framework.runPerformanceTests();
+            TestResult result = framework.runPerformanceBenchmarks(eventBroker);
+            
+            // Cleanup
+            eventBroker.stop();
             
             // Display results with metrics
             displayResults("Performance Benchmarks", result);
@@ -118,8 +125,15 @@ public class TestingFrameworkDemo {
             
             logger.info("🛡️ Starting security validation tests...");
             
+            // Create event broker for testing
+            EventBroker eventBroker = new InMemoryEventBroker();
+            eventBroker.start();
+            
             // Run security tests
-            TestResult result = framework.runSecurityTests();
+            TestResult result = framework.runSecurityValidation(eventBroker);
+            
+            // Cleanup
+            eventBroker.stop();
             
             // Display results with security metrics
             displayResults("Security Validation", result);
@@ -150,8 +164,15 @@ public class TestingFrameworkDemo {
             logger.info("⚡ Starting chaos engineering tests...");
             logger.info("   Warning: This may cause temporary system instability");
             
+            // Create event broker for testing
+            EventBroker eventBroker = new InMemoryEventBroker();
+            eventBroker.start();
+            
             // Run chaos tests
-            TestResult result = framework.runChaosTests();
+            TestResult result = framework.runChaosTests(eventBroker);
+            
+            // Cleanup
+            eventBroker.stop();
             
             // Display results with chaos metrics
             displayResults("Chaos Engineering", result);
@@ -182,11 +203,18 @@ public class TestingFrameworkDemo {
             logger.info("🔍 Starting comprehensive test suite...");
             logger.info("   This includes all test categories and may take several minutes");
             
+            // Create event broker for testing
+            EventBroker eventBroker = new InMemoryEventBroker();
+            eventBroker.start();
+            
             // Run all tests
-            TestResult result = framework.runAllTests();
+            TestSuiteResult result = framework.runComprehensiveTestSuite(eventBroker);
+            
+            // Cleanup
+            eventBroker.stop();
             
             // Display comprehensive results
-            displayResults("Comprehensive Test Suite", result);
+            displaySuiteResults("Comprehensive Test Suite", result);
             displayComprehensiveMetrics(framework.getMetricsCollector());
             
             // Generate detailed report
@@ -220,12 +248,37 @@ public class TestingFrameworkDemo {
         // Show summary of individual checks
         result.getChecks().forEach((check, passed) -> {
             String status = passed ? "✅" : "❌";
-            logger.info("   " + status + " " + check);
+            logger.info("     " + status + " " + check);
         });
+        logger.info("");
+    }
+    
+    /**
+     * Display test suite results in a formatted way
+     */
+    private static void displaySuiteResults(String testName, TestSuiteResult result) {
+        logger.info("📋 " + testName + " Results:");
+        logger.info("   Status: " + (result.isSuccessful() ? "✅ PASSED" : "❌ FAILED"));
+        logger.info("   Duration: " + result.getTotalDuration().toMillis() + "ms");
+        logger.info("   Tests: " + result.getPassedTests() + "/" + result.getTotalTests() + " passed");
+        logger.info("   Success Rate: " + String.format("%.1f%%", result.getSuccessRate()));
+        
+        if (!result.getErrors().isEmpty()) {
+            logger.info("   Errors: " + result.getErrors().size());
+            result.getErrors().forEach(error -> logger.warning("     - " + error));
+        }
+        
+        // Show summary of individual test results
+        result.getTestResults().forEach(testResult -> {
+            String status = testResult.isPassed() ? "✅" : "❌";
+            logger.info("     " + status + " " + testResult.getTestName());
+        });
+        logger.info("");
     }
     
     /**
      * Display performance metrics
+{{ ... }}
      */
     private static void displayPerformanceMetrics(TestMetricsCollector metrics) {
         logger.info("📊 Performance Metrics:");
@@ -375,10 +428,17 @@ public class TestingFrameworkDemo {
             
             logger.info("🔧 Starting custom test configuration...");
             
+            // Create event broker for testing
+            EventBroker eventBroker = new InMemoryEventBroker();
+            eventBroker.start();
+            
             // Run selected tests
             TestResult infraResult = framework.runInfrastructureTests();
-            TestResult perfResult = framework.runPerformanceTests();
-            TestResult secResult = framework.runSecurityTests();
+            TestResult perfResult = framework.runPerformanceBenchmarks(eventBroker);
+            TestResult secResult = framework.runSecurityValidation(eventBroker);
+            
+            // Cleanup
+            eventBroker.stop();
             
             // Display individual results
             displayResults("Infrastructure Tests", infraResult);
@@ -449,10 +509,18 @@ public class TestingFrameworkDemo {
             
             // Run selected configuration
             AmcpTestingFramework framework = new AmcpTestingFramework(config);
-            TestResult result = framework.runAllTests();
+            
+            // Create event broker for testing
+            EventBroker eventBroker = new InMemoryEventBroker();
+            eventBroker.start();
+            
+            TestSuiteResult result = framework.runComprehensiveTestSuite(eventBroker);
+            
+            // Cleanup
+            eventBroker.stop();
             
             // Display results
-            displayResults(testName + " Test Suite", result);
+            displaySuiteResults(testName + " Test Suite", result);
             displayComprehensiveMetrics(framework.getMetricsCollector());
             
             // Cleanup

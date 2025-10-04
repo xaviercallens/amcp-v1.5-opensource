@@ -35,8 +35,19 @@ public class SecurityTestValidator {
     
     private final TestConfiguration configuration;
     
+    public SecurityTestValidator() {
+        this(TestConfiguration.defaultConfig());
+    }
+    
     public SecurityTestValidator(TestConfiguration configuration) {
         this.configuration = configuration;
+    }
+    
+    /**
+     * Run comprehensive security validation tests
+     */
+    public TestResult runValidation(EventBroker eventBroker, TestMetricsCollector metrics) {
+        return runSecurityTests(eventBroker, metrics);
     }
     
     /**
@@ -677,7 +688,8 @@ public class SecurityTestValidator {
     // Helper methods (simulated implementations)
     
     private boolean authenticateEvent(Event event) {
-        String token = event.getMetadata().get("auth_token");
+        Object tokenObj = event.getMetadata().get("auth_token");
+        String token = tokenObj != null ? tokenObj.toString() : null;
         return "valid-auth-token-12345".equals(token);
     }
     

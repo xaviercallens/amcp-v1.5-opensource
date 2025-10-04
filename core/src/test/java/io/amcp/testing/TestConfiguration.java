@@ -164,6 +164,13 @@ public class TestConfiguration {
     public String getReportOutputPath() { return reportOutputPath; }
     
     /**
+     * Create a new Builder instance
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+    
+    /**
      * Builder for TestConfiguration
      */
     public static class Builder {

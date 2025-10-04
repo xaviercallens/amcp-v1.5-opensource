@@ -181,20 +181,26 @@ public class PerformanceBenchmark {
             Object latenciesLock = new Object();
             
             // Setup subscription to measure latency
-            eventBroker.subscribe("latency.**", event -> {
-                long receiveTime = System.nanoTime();
-                String timestampStr = event.getMetadata().get("timestamp");
-                if (timestampStr != null) {
-                    long sendTime = Long.parseLong(timestampStr);
-                    long latencyNanos = receiveTime - sendTime;
-                    
-                    synchronized (latenciesLock) {
-                        latencies.add(latencyNanos / 1_000_000); // Convert to milliseconds
+            EventBroker.EventSubscriber latencySubscriber = new EventBroker.EventSubscriber() {
+                @Override
+                public CompletableFuture<Void> handleEvent(Event event) {
+                    long receiveTime = System.nanoTime();
+                    Object timestampObj = event.getMetadata().get("timestamp");
+                    if (timestampObj != null) {
+                        long sendTime = Long.parseLong(timestampObj.toString());
+                        long latencyNanos = receiveTime - sendTime;
+                        
+                        synchronized (latenciesLock) {
+                            latencies.add(latencyNanos / 1_000_000); // Convert to milliseconds
+                        }
                     }
+                    completionLatch.countDown();
+                    return CompletableFuture.completedFuture(null);
                 }
-                completionLatch.countDown();
-                return CompletableFuture.completedFuture(null);
-            });
+                @Override
+                public String getSubscriberId() { return "latency-subscriber"; }
+            };
+            eventBroker.subscribe(latencySubscriber, "latency.**");
             
             // Start concurrent senders
             CompletableFuture<?>[] senderFutures = new CompletableFuture[concurrentSenders];
@@ -268,8 +274,6 @@ public class PerformanceBenchmark {
             logger.severe("Latency benchmark failed: " + e.getMessage());
             return false;
         }
-        
-        return false;
     }
     
     /**
@@ -286,11 +290,17 @@ public class PerformanceBenchmark {
             CountDownLatch completionLatch = new CountDownLatch(totalEvents);
             
             // Setup subscription
-            eventBroker.subscribe("scalability.**", event -> {
-                eventsReceived.incrementAndGet();
-                completionLatch.countDown();
-                return CompletableFuture.completedFuture(null);
-            });
+            EventBroker.EventSubscriber scalabilitySubscriber = new EventBroker.EventSubscriber() {
+                @Override
+                public CompletableFuture<Void> handleEvent(Event event) {
+                    eventsReceived.incrementAndGet();
+                    completionLatch.countDown();
+                    return CompletableFuture.completedFuture(null);
+                }
+                @Override
+                public String getSubscriberId() { return "scalability-subscriber"; }
+            };
+            eventBroker.subscribe(scalabilitySubscriber, "scalability.**");
             
             Instant startTime = Instant.now();
             
@@ -372,11 +382,17 @@ public class PerformanceBenchmark {
             // Setup subscriptions for all topics
             for (int t = 0; t < numberOfTopics; t++) {
                 final int topicId = t;
-                eventBroker.subscribe("topic" + topicId + ".**", event -> {
-                    eventsReceived.incrementAndGet();
-                    completionLatch.countDown();
-                    return CompletableFuture.completedFuture(null);
-                });
+                EventBroker.EventSubscriber topicSubscriber = new EventBroker.EventSubscriber() {
+                    @Override
+                    public CompletableFuture<Void> handleEvent(Event event) {
+                        eventsReceived.incrementAndGet();
+                        completionLatch.countDown();
+                        return CompletableFuture.completedFuture(null);
+                    }
+                    @Override
+                    public String getSubscriberId() { return "topic" + topicId + "-subscriber"; }
+                };
+                eventBroker.subscribe(topicSubscriber, "topic" + topicId + ".**");
             }
             
             Instant startTime = Instant.now();
@@ -451,10 +467,16 @@ public class PerformanceBenchmark {
             AtomicInteger errors = new AtomicInteger(0);
             
             // Setup subscription
-            eventBroker.subscribe("sustained.**", event -> {
-                eventsReceived.incrementAndGet();
-                return CompletableFuture.completedFuture(null);
-            });
+            EventBroker.EventSubscriber sustainedSubscriber = new EventBroker.EventSubscriber() {
+                @Override
+                public CompletableFuture<Void> handleEvent(Event event) {
+                    eventsReceived.incrementAndGet();
+                    return CompletableFuture.completedFuture(null);
+                }
+                @Override
+                public String getSubscriberId() { return "sustained-subscriber"; }
+            };
+            eventBroker.subscribe(sustainedSubscriber, "sustained.**");
             
             Instant startTime = Instant.now();
             Instant endTime = startTime.plus(duration);
@@ -529,10 +551,16 @@ public class PerformanceBenchmark {
             AtomicLong totalEventsReceived = new AtomicLong(0);
             
             // Setup subscription
-            eventBroker.subscribe("spike.**", event -> {
-                totalEventsReceived.incrementAndGet();
-                return CompletableFuture.completedFuture(null);
-            });
+            EventBroker.EventSubscriber spikeSubscriber = new EventBroker.EventSubscriber() {
+                @Override
+                public CompletableFuture<Void> handleEvent(Event event) {
+                    totalEventsReceived.incrementAndGet();
+                    return CompletableFuture.completedFuture(null);
+                }
+                @Override
+                public String getSubscriberId() { return "spike-subscriber"; }
+            };
+            eventBroker.subscribe(spikeSubscriber, "spike.**");
             
             // Generate traffic spike - 5000 events in 1 second
             int spikeEvents = 5000;
@@ -615,11 +643,17 @@ public class PerformanceBenchmark {
             AtomicInteger received = new AtomicInteger(0);
             CountDownLatch completionLatch = new CountDownLatch(largeEvents);
             
-            eventBroker.subscribe("memory.**", event -> {
-                received.incrementAndGet();
-                completionLatch.countDown();
-                return CompletableFuture.completedFuture(null);
-            });
+            EventBroker.EventSubscriber memorySubscriber = new EventBroker.EventSubscriber() {
+                @Override
+                public CompletableFuture<Void> handleEvent(Event event) {
+                    received.incrementAndGet();
+                    completionLatch.countDown();
+                    return CompletableFuture.completedFuture(null);
+                }
+                @Override
+                public String getSubscriberId() { return "memory-subscriber"; }
+            };
+            eventBroker.subscribe(memorySubscriber, "memory.**");
             
             // Create large payloads
             StringBuilder largePayload = new StringBuilder();
