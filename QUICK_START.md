@@ -4,54 +4,45 @@
 
 ## ✅ Get Started in 5 Minutes!## ✅ **WORKING!** Your CLI is now ready to use!
 
+### **Prerequisites**
 
-
-This guide will get you up and running with AMCP v1.5 Open Source Edition.### 🎯 **Quick Launch Commands**
-
-
-
-### 🎯 Prerequisites```bash
-
-# From your terminal in the project directory:
-
-- **Java 21+** (OpenJDK or Oracle JDK)cd /Users/xcallens/xdev/private/amcp/amcp-v1.5-enterprise-edition
-
+- **Java 21+** (OpenJDK or Oracle JDK)
 - **Maven 3.8+** for build management
+- **Ollama** (optional, for LLM features) - [Install Guide](https://ollama.ai/)
 
-- **Ollama** (optional, for LLM features) - [Install Guide](https://ollama.ai/)# Basic launch (will build if needed)
+### **Installation**
 
-./amcp-cli --build
-
-### 🚀 Installation
-
-# Or just launch if already built
-
-```bash./amcp-cli
-
-# Clone the repository```
-
-git clone https://github.com/xaviercallens/amcp-v1.5-opensource.git
-
-cd amcp-v1.5-opensource### 🔧 **Optional: Set API Keys for Full Functionality**
-
-
-
-# Setup Java 21 (if needed)For stock and weather data, set these environment variables:
-
-./setup-java21.sh
+#### For Linux Users 
 
 ```bash
+# Clone the repository
+git clone https://github.com/xaviercallens/amcp-v1.5-opensource.git
+cd amcp-v1.5-opensource
 
-# Build the project# Add to your ~/.zshrc for permanent setup:
+# Run automated Linux setup (installs Java 21, Maven, configures environment)
+./setup-linux.sh
 
-mvn clean compile package -DskipTestsexport POLYGON_API_KEY="your_polygon_api_key_here"
+# Apply environment changes
+source ~/.bashrc  # or ~/.zshrc
 
-```export OPENWEATHER_API_KEY="your_openweather_api_key_here"
+# Build the project
+mvn clean compile package -DskipTests
+```
 
+**See [LINUX_DEPLOYMENT.md](LINUX_DEPLOYMENT.md) for detailed Linux-specific instructions.**
 
+#### For macOS Users 
 
-### 🎮 Run Demo Applications# Or set temporarily for one session:
+```bash
+# Clone the repository
+git clone https://github.com/xaviercallens/amcp-v1.5-opensource.git
+cd amcp-v1.5-opensource
 
+# Setup Java 21 (if needed)
+./setup-java21.sh
+
+# Build the project
+mvn clean compile package -DskipTests
 POLYGON_API_KEY="your_key" OPENWEATHER_API_KEY="your_key" ./amcp-cli
 
 #### 💬 MeshChat - Conversational AI```
