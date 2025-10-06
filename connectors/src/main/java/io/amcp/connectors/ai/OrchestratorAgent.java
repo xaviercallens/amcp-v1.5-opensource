@@ -505,7 +505,17 @@ public class OrchestratorAgent implements Agent {
         // Prepare request for target agent
         Map<String, Object> request = new HashMap<>();
         request.put("query", session.getOriginalQuery());
-        request.put("parameters", analysis.getParameters());
+        
+        // Extract location from query for weather requests
+        Map<String, Object> parameters = new HashMap<>(analysis.getParameters());
+        if ("weather".equals(analysis.getIntent()) && !parameters.containsKey("location")) {
+            String location = extractLocationFromQuery(session.getOriginalQuery());
+            if (location != null) {
+                parameters.put("location", location);
+            }
+        }
+        
+        request.put("parameters", parameters);
         request.put("conversationId", conversationId);
         request.put("sessionId", session.getSessionId());
         request.put("intent", analysis.getIntent());
@@ -611,23 +621,37 @@ public class OrchestratorAgent implements Agent {
     
     private void handleAgentResponse(Event event) {
         String correlationId = event.getCorrelationId();
-        if (correlationId != null && pendingResponses.containsKey(correlationId)) {
-            CompletableFuture<String> pendingResponse = pendingResponses.remove(correlationId);
+        
+        logMessage("📥 Received agent response for correlation: " + correlationId);
+        
+        if (correlationId == null) {
+            logMessage("⚠️ Agent response missing correlationId, ignoring");
+            return;
+        }
+        
+        CompletableFuture<String> pendingResponse = pendingResponses.remove(correlationId);
+        
+        if (pendingResponse == null) {
+            logMessage("⚠️ No pending response found for correlation: " + correlationId + " (may have timed out)");
+            return;
+        }
+        
+        try {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> payload = (Map<String, Object>) event.getPayload();
+            String response = (String) payload.get("response");
             
-            try {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> payload = (Map<String, Object>) event.getPayload();
-                String response = (String) payload.get("response");
-                
-                if (response != null) {
-                    pendingResponse.complete(response);
-                    logMessage("📥 Received agent response for correlation: " + correlationId);
-                } else {
-                    pendingResponse.completeExceptionally(new RuntimeException("Empty response from agent"));
-                }
-                
-            } catch (Exception e) {
-                logMessage("❌ Error processing agent response: " + e.getMessage());
+            if (response != null) {
+                pendingResponse.complete(response);
+                logMessage("✅ Completed response for correlation: " + correlationId);
+            } else {
+                logMessage("⚠️ Empty response from agent for correlation: " + correlationId);
+                pendingResponse.completeExceptionally(new RuntimeException("Empty response from agent"));
+            }
+            
+        } catch (Exception e) {
+            logMessage("❌ Error processing agent response: " + e.getMessage());
+            if (pendingResponse != null && !pendingResponse.isDone()) {
                 pendingResponse.completeExceptionally(e);
             }
         }
@@ -679,6 +703,49 @@ public class OrchestratorAgent implements Agent {
             return context.publishEvent(event);
         }
         return CompletableFuture.completedFuture(null);
+    }
+    
+    /**
+     * Extract location from a natural language query
+     */
+    private String extractLocationFromQuery(String query) {
+        if (query == null) return null;
+        
+        String lowerQuery = query.toLowerCase();
+        
+        // Common location patterns
+        String[] patterns = {
+            "in ",
+            "at ",
+            "for ",
+            "weather in ",
+            "weather at ",
+            "weather for "
+        };
+        
+        for (String pattern : patterns) {
+            int index = lowerQuery.indexOf(pattern);
+            if (index != -1) {
+                String afterPattern = query.substring(index + pattern.length()).trim();
+                // Extract first word/phrase (up to punctuation or end)
+                String[] words = afterPattern.split("[\\s,?.!]+");
+                if (words.length > 0 && !words[0].isEmpty()) {
+                    return words[0];
+                }
+            }
+        }
+        
+        // Check for common city names at the end
+        String[] words = query.split("\\s+");
+        if (words.length > 0) {
+            String lastWord = words[words.length - 1].replaceAll("[?.!,]", "");
+            // If it starts with capital letter, likely a location
+            if (lastWord.length() > 0 && Character.isUpperCase(lastWord.charAt(0))) {
+                return lastWord;
+            }
+        }
+        
+        return null;
     }
     
     private void logMessage(String message) {
