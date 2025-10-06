@@ -83,8 +83,11 @@ public class AIChatAgent implements Agent {
             return new ArrayList<>(history);
         }
         
+        @SuppressWarnings("unused")
         public String getConversationId() { return conversationId; }
+        @SuppressWarnings("unused")
         public long getLastActivity() { return lastActivity; }
+        @SuppressWarnings("unused")
         public Map<String, Object> getMetadata() { return metadata; }
     }
     
@@ -104,6 +107,7 @@ public class AIChatAgent implements Agent {
         
         public String getRole() { return role; }
         public String getContent() { return content; }
+        @SuppressWarnings("unused")
         public long getTimestamp() { return timestamp; }
     }
 

@@ -43,6 +43,7 @@ public class CloudEventsCompliantOrchestratorAgent implements Agent {
     
     private static final String AGENT_TYPE = "CLOUDEVENTS_ORCHESTRATOR";
     private static final String VERSION = "1.5.0";
+    @SuppressWarnings("unused")
     private static final String DOMAIN_PREFIX = "io.amcp";
     
     // CloudEvents compliant event types

@@ -7,12 +7,9 @@ import io.amcp.core.DeliveryOptions;
 import io.amcp.examples.weather.WeatherAgent;
 
 import java.util.*;
-import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.nio.file.*;
-import java.io.*;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;

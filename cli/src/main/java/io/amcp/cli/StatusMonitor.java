@@ -192,6 +192,7 @@ public class StatusMonitor {
         Runtime runtime = Runtime.getRuntime();
         long totalMemory = runtime.totalMemory();
         long freeMemory = runtime.freeMemory();
+        @SuppressWarnings("unused")
         long usedMemory = totalMemory - freeMemory;
         
         // Store system metrics (could be expanded)

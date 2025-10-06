@@ -35,10 +35,13 @@ import java.time.format.DateTimeFormatter;
  */
 public class AMCPInteractiveCLI {
     
+    @SuppressWarnings("unused")
     private static final String CLI_VERSION = "1.5.0-OPENSOURCE";
+    @SuppressWarnings("unused")
     private static final String CLI_TITLE = "AMCP Interactive CLI";
     private static final String HISTORY_FILE = System.getProperty("user.home") + "/.amcp_cli_history";
     private static final String SESSION_DIR = System.getProperty("user.home") + "/.amcp_cli_sessions";
+    @SuppressWarnings("unused")
     private static final int MAX_HISTORY_SIZE = 1000;
     
     private final AgentContext agentContext;
@@ -242,12 +245,10 @@ public class AMCPInteractiveCLI {
         if (data instanceof String) {
             System.out.println(data);
         } else if (data instanceof Map) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> map = (Map<String, Object>) data;
+            Map<?, ?> map = (Map<?, ?>) data;
             map.forEach((key, value) -> 
                 System.out.println("  " + key + ": " + value));
         } else if (data instanceof List) {
-            @SuppressWarnings("unchecked")
             List<?> list = (List<?>) data;
             for (int i = 0; i < list.size(); i++) {
                 System.out.println("  " + (i + 1) + ". " + list.get(i));

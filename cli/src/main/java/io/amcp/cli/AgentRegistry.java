@@ -2,7 +2,6 @@ package io.amcp.cli;
 
 import io.amcp.core.Agent;
 import io.amcp.core.AgentContext;
-import io.amcp.core.AgentID;
 import io.amcp.core.AgentLifecycle;
 
 import java.util.*;
@@ -186,6 +185,7 @@ public class AgentRegistry {
             this.description = description;
         }
         
+        @SuppressWarnings("unused")
         public String getName() { return name; }
         public Supplier<Agent> getAgentFactory() { return agentFactory; }
         public String getDescription() { return description; }
