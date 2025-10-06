@@ -54,8 +54,7 @@ public class WeatherAgent extends AbstractMobileAgent {
         logMessage("WeatherAgent activated - starting weather monitoring");
         
         // Subscribe to weather-related events INCLUDING chat requests
-        subscribe("weather.**");
-        subscribe("weather.request"); // Chat agent requests
+        subscribe("weather.**");  // Covers weather.request, weather.data.updated, etc.
         subscribe("location.add");
         subscribe("location.remove");
         subscribe("alert.severe");
