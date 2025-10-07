@@ -88,8 +88,10 @@ public class WeatherAgent extends AbstractMobileAgent {
     public CompletableFuture<Void> handleEvent(Event event) {
         return CompletableFuture.runAsync(() -> {
             try {
+                logMessage("📨 Received event: " + event.getTopic() + " (correlation: " + event.getCorrelationId() + ")");
                 switch (event.getTopic()) {
                     case "weather.request":
+                        logMessage("🎯 Handling weather.request event");
                         handleChatWeatherRequest(event);
                         break;
                     case "location.add":
@@ -132,14 +134,20 @@ public class WeatherAgent extends AbstractMobileAgent {
                 // Get weather for the requested location
                 WeatherData weatherData = callOpenWeatherMapAPI(location.trim());
                 
-                // Format response for chat
-                String response = formatWeatherForChat(weatherData);
-                
-                // Send response back to chat agent
+                // Create structured response (CloudEvents compliant)
                 Map<String, Object> responseData = new HashMap<>();
-                responseData.put("response", response);
-                responseData.put("location", location);
-                responseData.put("weatherData", weatherData);
+                responseData.put("temperature", weatherData.temperature);
+                responseData.put("conditions", weatherData.description);
+                responseData.put("humidity", weatherData.humidity);
+                responseData.put("windSpeed", weatherData.windSpeed);
+                responseData.put("pressure", weatherData.pressure);
+                responseData.put("city", weatherData.city);
+                responseData.put("timestamp", weatherData.timestamp.toString());
+                responseData.put("correlationId", event.getCorrelationId());
+                responseData.put("sourceAgent", "WeatherAgent");
+                
+                // Also include formatted text for display
+                responseData.put("formattedResponse", formatWeatherForChat(weatherData));
                 
                 publishEvent(Event.builder()
                     .topic("agent.response.weather")
@@ -148,12 +156,14 @@ public class WeatherAgent extends AbstractMobileAgent {
                     .sender(getAgentId())
                     .build());
                     
-                logMessage("Sent weather response for " + location);
+                logMessage("Sent structured weather response for " + location);
             } else {
                 // No location provided, send error response
                 Map<String, Object> errorResponse = new HashMap<>();
-                errorResponse.put("response", "I need a location to provide weather information. Please specify a city or location.");
                 errorResponse.put("error", "No location specified");
+                errorResponse.put("errorMessage", "I need a location to provide weather information. Please specify a city or location.");
+                errorResponse.put("correlationId", event.getCorrelationId());
+                errorResponse.put("sourceAgent", "WeatherAgent");
                 
                 publishEvent(Event.builder()
                     .topic("agent.response.weather")
@@ -165,7 +175,23 @@ public class WeatherAgent extends AbstractMobileAgent {
             
         } catch (Exception e) {
             logMessage("Error handling chat weather request: " + e.getMessage());
+            sendErrorResponse(event.getCorrelationId(), e.getMessage());
         }
+    }
+    
+    private void sendErrorResponse(String correlationId, String errorMessage) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("error", "WeatherRequestFailed");
+        errorResponse.put("errorMessage", errorMessage);
+        errorResponse.put("correlationId", correlationId);
+        errorResponse.put("sourceAgent", "WeatherAgent");
+        
+        publishEvent(Event.builder()
+            .topic("agent.response.weather")
+            .payload(errorResponse)
+            .correlationId(correlationId)
+            .sender(getAgentId())
+            .build());
     }
     
     private String formatWeatherForChat(WeatherData weather) {
@@ -430,6 +456,28 @@ public class WeatherAgent extends AbstractMobileAgent {
 
     public long getDataCollectionCount() {
         return dataCollectionCount.get();
+    }
+    
+    /**
+     * Health check for orchestrator integration
+     */
+    public boolean isHealthy() {
+        // Check if agent is active
+        if (getLifecycleState() != AgentLifecycle.ACTIVE) {
+            return false;
+        }
+        
+        // Check if scheduler is running
+        if (scheduler == null || scheduler.isShutdown()) {
+            return false;
+        }
+        
+        // Check if we have recent weather data
+        if (latestWeatherData.isEmpty()) {
+            return false;
+        }
+        
+        return true;
     }
 
     // Weather data classes

@@ -899,16 +899,26 @@ public class TravelPlannerAgent implements MobileAgent {
     }
     
     /**
-     * Sends travel response back to the requestor
+     * Sends travel response back to the requestor (CloudEvents compliant with structured data)
      */
     private void sendTravelResponse(TravelResponse travelResponse, String correlationId, Map<String, Object> originalMetadata) {
         try {
+            // Create structured response payload
             Map<String, Object> responsePayload = new HashMap<>();
-            responsePayload.put("response", travelResponse.getContent());
+            
+            // Structured data fields
             responsePayload.put("serviceType", travelResponse.getServiceType());
-            responsePayload.put("agentType", AGENT_TYPE);
+            responsePayload.put("recommendations", extractRecommendations(travelResponse));
+            responsePayload.put("itinerary", extractItinerary(travelResponse));
+            
+            // Standard CloudEvents fields
+            responsePayload.put("correlationId", correlationId);
+            responsePayload.put("sourceAgent", AGENT_TYPE);
             responsePayload.put("timestamp", LocalDateTime.now().toString());
             responsePayload.put("success", true);
+            
+            // Also include formatted text for display
+            responsePayload.put("formattedResponse", travelResponse.getContent());
             
             // Determine response topic based on original request
             String responseTopic = ORCHESTRATOR_RESPONSE_TOPIC;
@@ -926,11 +936,77 @@ public class TravelPlannerAgent implements MobileAgent {
             
             publishEvent(responseEvent);
             
-            logMessage("📤 Sent travel response [" + correlationId + "]");
+            logMessage("📤 Sent structured travel response [" + correlationId + "]");
             
         } catch (Exception e) {
             logMessage("❌ Error sending travel response: " + e.getMessage());
         }
+    }
+    
+    /**
+     * Extracts structured recommendations from response
+     */
+    private List<Map<String, Object>> extractRecommendations(TravelResponse response) {
+        List<Map<String, Object>> recommendations = new ArrayList<>();
+        
+        if ("destination_recommendations".equals(response.getServiceType())) {
+            // Parse destination recommendations from content
+            String content = response.getContent();
+            if (content.contains("**") && content.contains("📍")) {
+                // Extract structured data (simplified parsing)
+                Map<String, Object> rec = new HashMap<>();
+                rec.put("type", "destination");
+                rec.put("content", content);
+                recommendations.add(rec);
+            }
+        }
+        
+        return recommendations;
+    }
+    
+    /**
+     * Extracts structured itinerary from response
+     */
+    private Map<String, Object> extractItinerary(TravelResponse response) {
+        Map<String, Object> itinerary = new HashMap<>();
+        
+        if ("trip_planning".equals(response.getServiceType())) {
+            itinerary.put("type", "trip_plan");
+            itinerary.put("days", extractDays(response.getContent()));
+        }
+        
+        return itinerary;
+    }
+    
+    /**
+     * Extracts day-by-day breakdown from itinerary
+     */
+    private List<Map<String, String>> extractDays(String content) {
+        List<Map<String, String>> days = new ArrayList<>();
+        
+        // Simple extraction of day sections
+        String[] lines = content.split("\n");
+        Map<String, String> currentDay = null;
+        
+        for (String line : lines) {
+            if (line.contains("**Day")) {
+                if (currentDay != null) {
+                    days.add(currentDay);
+                }
+                currentDay = new HashMap<>();
+                currentDay.put("title", line.replaceAll("\\*", "").trim());
+                currentDay.put("activities", "");
+            } else if (currentDay != null && line.startsWith("•")) {
+                String activities = currentDay.get("activities");
+                currentDay.put("activities", activities + line + "\n");
+            }
+        }
+        
+        if (currentDay != null) {
+            days.add(currentDay);
+        }
+        
+        return days;
     }
     
     /**
@@ -1080,6 +1156,28 @@ public class TravelPlannerAgent implements MobileAgent {
     private void logMessage(String message) {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
         System.out.println("[" + timestamp + "] [TravelPlannerAgent] " + message);
+    }
+    
+    /**
+     * Health check for orchestrator integration
+     */
+    public boolean isHealthy() {
+        // Check if agent is active
+        if (lifecycleState != AgentLifecycle.ACTIVE) {
+            return false;
+        }
+        
+        // Check if context is available
+        if (context == null) {
+            return false;
+        }
+        
+        // Check if destination database is initialized
+        if (destinationDatabase.isEmpty()) {
+            return false;
+        }
+        
+        return true;
     }
     
     /**
