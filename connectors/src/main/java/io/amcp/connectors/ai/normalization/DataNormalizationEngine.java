@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 /**
  * Data normalization engine for LLM responses and agent communication.
@@ -16,10 +19,12 @@ public class DataNormalizationEngine {
     
     private final ObjectMapper objectMapper;
     private final Map<String, Pattern> normalizationPatterns;
+    private final LocationNormalizer locationNormalizer;
     
     public DataNormalizationEngine() {
         this.objectMapper = new ObjectMapper();
         this.normalizationPatterns = initializePatterns();
+        this.locationNormalizer = new LocationNormalizer();
     }
     
     /**
@@ -384,6 +389,127 @@ public class DataNormalizationEngine {
         // Add metadata
         normalized.put("normalized_at", System.currentTimeMillis());
         normalized.put("normalization_version", "1.5.0");
+        
+        return normalized;
+    }
+    
+    /**
+     * Normalizes location data (e.g., "Nice, Fr" -> "Nice,FR")
+     */
+    public String normalizeLocation(String location) {
+        return locationNormalizer.normalizeLocation(location);
+    }
+    
+    /**
+     * Enriches location with full country name (e.g., "Nice,FR" -> "Nice, France")
+     */
+    public String enrichLocation(String location) {
+        return locationNormalizer.enrichLocation(location);
+    }
+    
+    /**
+     * Normalizes date to ISO 8601 format (YYYY-MM-DD)
+     */
+    public String normalizeDate(String dateString) {
+        if (dateString == null || dateString.trim().isEmpty()) {
+            return null;
+        }
+        
+        // Try various date formats
+        DateTimeFormatter[] formatters = {
+            DateTimeFormatter.ISO_LOCAL_DATE,  // YYYY-MM-DD
+            DateTimeFormatter.ofPattern("MM/dd/yyyy"),
+            DateTimeFormatter.ofPattern("dd/MM/yyyy"),
+            DateTimeFormatter.ofPattern("yyyy/MM/dd"),
+            DateTimeFormatter.ofPattern("MMM dd, yyyy"),
+            DateTimeFormatter.ofPattern("dd MMM yyyy"),
+            DateTimeFormatter.ofPattern("MMMM dd, yyyy")
+        };
+        
+        for (DateTimeFormatter formatter : formatters) {
+            try {
+                LocalDate date = LocalDate.parse(dateString.trim(), formatter);
+                return date.format(DateTimeFormatter.ISO_LOCAL_DATE);
+            } catch (DateTimeParseException e) {
+                // Try next format
+            }
+        }
+        
+        // If no format matches, return original
+        return dateString;
+    }
+    
+    /**
+     * Normalizes language code to lowercase ISO 639-1 format
+     */
+    public String normalizeLanguageCode(String languageCode) {
+        if (languageCode == null || languageCode.trim().isEmpty()) {
+            return null;
+        }
+        
+        String normalized = languageCode.trim().toLowerCase();
+        
+        // Validate it's a 2-letter code
+        if (normalized.matches("^[a-z]{2}$")) {
+            return normalized;
+        }
+        
+        // Map common language names to codes
+        Map<String, String> languageMap = new HashMap<>();
+        languageMap.put("english", "en");
+        languageMap.put("french", "fr");
+        languageMap.put("german", "de");
+        languageMap.put("spanish", "es");
+        languageMap.put("italian", "it");
+        languageMap.put("portuguese", "pt");
+        languageMap.put("japanese", "ja");
+        languageMap.put("chinese", "zh");
+        languageMap.put("korean", "ko");
+        languageMap.put("russian", "ru");
+        
+        String code = languageMap.get(normalized);
+        return code != null ? code : normalized;
+    }
+    
+    /**
+     * Normalizes parameters with location, date, and language awareness
+     */
+    public Map<String, Object> normalizeParametersWithContext(Map<String, Object> parameters) {
+        if (parameters == null) {
+            return new HashMap<>();
+        }
+        
+        Map<String, Object> normalized = new HashMap<>();
+        
+        for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+            String key = entry.getKey().toLowerCase();
+            Object value = entry.getValue();
+            
+            // Apply context-aware normalization
+            if (key.contains("location") || key.contains("city") || key.contains("destination")) {
+                if (value instanceof String) {
+                    normalized.put(key, normalizeLocation((String) value));
+                    continue;
+                }
+            }
+            
+            if (key.contains("date") || key.contains("departure") || key.contains("arrival")) {
+                if (value instanceof String) {
+                    normalized.put(key, normalizeDate((String) value));
+                    continue;
+                }
+            }
+            
+            if (key.contains("language") || key.contains("lang")) {
+                if (value instanceof String) {
+                    normalized.put(key, normalizeLanguageCode((String) value));
+                    continue;
+                }
+            }
+            
+            // Default normalization
+            normalized.put(key, normalizeValue(value));
+        }
         
         return normalized;
     }
