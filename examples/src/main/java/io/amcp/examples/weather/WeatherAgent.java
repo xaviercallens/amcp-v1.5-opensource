@@ -88,8 +88,10 @@ public class WeatherAgent extends AbstractMobileAgent {
     public CompletableFuture<Void> handleEvent(Event event) {
         return CompletableFuture.runAsync(() -> {
             try {
+                logMessage("📨 Received event: " + event.getTopic() + " (correlation: " + event.getCorrelationId() + ")");
                 switch (event.getTopic()) {
                     case "weather.request":
+                        logMessage("🎯 Handling weather.request event");
                         handleChatWeatherRequest(event);
                         break;
                     case "location.add":

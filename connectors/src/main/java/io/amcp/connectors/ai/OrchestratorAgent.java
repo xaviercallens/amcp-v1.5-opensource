@@ -121,10 +121,16 @@ public class OrchestratorAgent implements Agent {
                     
                     String analysisPrompt = buildIntentAnalysisPrompt(userQuery, agentList);
                     
-                    // Call TinyLlama via OLLAMA for intent analysis
+                    // Get configured model (defaults to phi3:3.8b)
+                    String modelName = System.getenv("OLLAMA_MODEL");
+                    if (modelName == null || modelName.trim().isEmpty()) {
+                        modelName = "phi3:3.8b"; // Default to Phi3 3.8B
+                    }
+                    
+                    // Call LLM via OLLAMA for intent analysis
                     Map<String, Object> params = new HashMap<>();
                     params.put("prompt", analysisPrompt);
-                    params.put("model", "tinyllama");
+                    params.put("model", modelName);
                     params.put("temperature", 0.3); // Lower temperature for more consistent routing
                     params.put("max_tokens", 200);
                     
@@ -386,7 +392,13 @@ public class OrchestratorAgent implements Agent {
             subscribe("agent.response.**");
             
             logMessage("🎯 Orchestrator Agent activated successfully");
-            logMessage("🤖 TinyLlama integration ready for intent analysis");
+            
+            // Log the configured model
+            String modelName = System.getenv("OLLAMA_MODEL");
+            if (modelName == null || modelName.trim().isEmpty()) {
+                modelName = "phi3:3.8b";
+            }
+            logMessage("🤖 LLM integration ready with model: " + modelName);
             
         } catch (Exception e) {
             logMessage("❌ Error activating Orchestrator Agent: " + e.getMessage());
@@ -536,7 +548,14 @@ public class OrchestratorAgent implements Agent {
             .build();
             
         logMessage("🔍 Publishing event to topic: " + targetTopic + " with correlationId: " + correlationId);
-        publishEvent(routingEvent);
+        logMessage("   Request payload: " + request);
+        
+        try {
+            publishEvent(routingEvent).get(5, TimeUnit.SECONDS);
+            logMessage("📤 Event published successfully to " + targetTopic);
+        } catch (Exception e) {
+            logMessage("❌ Failed to publish event: " + e.getMessage());
+        }
         
         logMessage("📤 Routed request to " + analysis.getTargetAgent() + " via " + targetTopic);
         
