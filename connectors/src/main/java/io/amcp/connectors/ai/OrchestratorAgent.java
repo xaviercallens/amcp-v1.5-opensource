@@ -639,13 +639,26 @@ public class OrchestratorAgent implements Agent {
         try {
             @SuppressWarnings("unchecked")
             Map<String, Object> payload = (Map<String, Object>) event.getPayload();
-            String response = (String) payload.get("response");
             
-            if (response != null) {
+            // Try multiple response field names for compatibility
+            String response = (String) payload.get("response");
+            if (response == null) {
+                response = (String) payload.get("formattedResponse");
+            }
+            if (response == null) {
+                // Try to extract from structured data
+                Object weatherData = payload.get("weatherData");
+                if (weatherData != null) {
+                    response = "Weather data received: " + weatherData.toString();
+                }
+            }
+            
+            if (response != null && !response.trim().isEmpty()) {
                 pendingResponse.complete(response);
                 logMessage("✅ Completed response for correlation: " + correlationId);
             } else {
                 logMessage("⚠️ Empty response from agent for correlation: " + correlationId);
+                logMessage("   Payload keys: " + payload.keySet());
                 pendingResponse.completeExceptionally(new RuntimeException("Empty response from agent"));
             }
             

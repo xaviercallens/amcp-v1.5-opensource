@@ -37,9 +37,22 @@ public class OllamaConnectorConfig {
 
     /**
      * Creates OLLAMA connector config with default settings.
+     * Uses Phi3 3.8B as the default lightweight model (2.3GB RAM requirement).
      */
     public OllamaConnectorConfig() {
-        this("http://localhost:11434", "llama3.2", 30, 3, 60);
+        this("http://localhost:11434", getDefaultModelFromEnv(), 30, 3, 60);
+    }
+    
+    /**
+     * Gets the default model from environment variable or uses Phi3 3.8B as fallback.
+     */
+    private static String getDefaultModelFromEnv() {
+        String envModel = System.getenv("OLLAMA_MODEL");
+        if (envModel != null && !envModel.trim().isEmpty()) {
+            return envModel.trim();
+        }
+        // Default to Phi3 3.8B - excellent quality with only 2.3GB RAM requirement
+        return "phi3:3.8b";
     }
 
     /**
