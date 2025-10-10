@@ -263,6 +263,38 @@ public class StockAgent implements MobileAgent {
         return new ArrayList<>();
     }
     
+    /**
+     * Public method to get stock data for CLI usage
+     */
+    public StockData getStockData(String symbol) {
+        if (symbol == null || symbol.trim().isEmpty()) {
+            return null;
+        }
+        
+        String ticker = symbol.toUpperCase().trim();
+        StockData stock = null;
+        
+        // Try to get real-time data first
+        if (useRealTimeData) {
+            try {
+                stock = fetchRealTimeStockData(ticker);
+                logMessage("📊 Retrieved real-time data for " + ticker);
+            } catch (Exception e) {
+                logMessage("⚠️ Failed to fetch real-time data for " + ticker + ": " + e.getMessage());
+            }
+        }
+        
+        // Fallback to simulated data if real-time fails
+        if (stock == null) {
+            stock = stockDatabase.get(ticker);
+            if (stock != null) {
+                logMessage("📉 Using simulated data for " + ticker);
+            }
+        }
+        
+        return stock;
+    }
+    
     @Override
     public CompletableFuture<MobilityAssessment> assessMobility(String destinationContext) {
         return CompletableFuture.supplyAsync(() -> {

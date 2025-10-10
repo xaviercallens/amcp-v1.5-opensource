@@ -1,0 +1,31 @@
+[08:10:24] [LLMFallbackSystem] Loaded 6 fallback rules
+[08:10:24] [LLMFallbackSystem] Created 6 basic fallback rules
+[08:10:24] [AsyncLLMConnector] AsyncLLMConnector initialized
+[08:10:24] [AsyncLLMConnector] GPU Acceleration Configuration:
+  GPU Type: CPU_ONLY
+  VRAM Available: 0 MB
+  GPU Layers: 0
+  Acceleration Level: CPU_ONLY
+  CPU Threads: 12
+
+AGENT_TYPE: Weather
+QUERY: What's the weather like in Paris today?
+MODEL: qwen2.5:0.5b
+FALLBACK_URL: http://localhost:99999
+---
+[08:10:24] [AsyncLLMConnector] LLM request failed (attempt 1/2): port out of range:99999
+[08:10:26] [AsyncLLMConnector] LLM request failed (attempt 2/2): port out of range:99999
+[08:10:26] [LLMFallbackSystem] Attempting fallback for prompt: What's the weather like in Paris today?
+[08:10:26] [LLMFallbackSystem] Fallback successful using semantic similarity
+[08:10:26] [AsyncLLMConnector] Using fallback response after all retries failed
+RESPONSE: I understand you're asking about whats, weather, like. While I'm currently experiencing some technical difficulties with my main processing system, I can see this relates to whats, weather, like. Please try rephrasing your question or try again in a few moments when my systems are fully operational.
+DURATION_MS: 2057
+---
+TOTAL_REQUESTS: 1
+FALLBACK_RESPONSES: 1
+FAILED_REQUESTS: 0
+AVG_LATENCY_MS: 0.00
+FALLBACK_ATTEMPTS: 1
+SUCCESSFUL_FALLBACKS: 1
+SUCCESS_RATE: 100.00%
+[08:10:26] [AsyncLLMConnector] AsyncLLMConnector shutdown completed

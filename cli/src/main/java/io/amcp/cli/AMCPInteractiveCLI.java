@@ -1,8 +1,12 @@
 package io.amcp.cli;
 
 import io.amcp.examples.weather.WeatherAgent;
-import io.amcp.connectors.ai.EnhancedChatAgent; // Re-enabled with connectors dependency
-import io.amcp.connectors.ai.OrchestratorAgent; // Re-enabled with connectors dependency
+import io.amcp.examples.meshchat.StockAgent;
+import io.amcp.examples.meshchat.TravelPlannerAgent;
+import io.amcp.examples.meshchat.MeshChatAgent;
+// Temporarily disable connectors agents due to compilation issues
+// import io.amcp.connectors.ai.EnhancedChatAgent; // Re-enabled with connectors dependency
+// import io.amcp.connectors.ai.orchestration.EnhancedOrchestratorAgent; // Use the correct orchestrator
 
 import io.amcp.core.AgentContext;
 import io.amcp.messaging.EventBroker;
@@ -158,16 +162,30 @@ public class AMCPInteractiveCLI {
             agentRegistry.registerAgent("weather", WeatherAgent::new, 
                 "Weather information with OpenWeatherMap API integration");
             
-            // Re-enabled enhanced AI agents with connectors dependency
-            agentRegistry.registerAgent("chat", EnhancedChatAgent::new, 
-                "Enhanced conversational agent with AI capabilities");
+            // Register stock price agent
+            agentRegistry.registerAgent("stock", StockAgent::new, 
+                "Stock market data and financial information with Polygon.io API integration");
+            
+            // Register travel planner agent
+            agentRegistry.registerAgent("travel", TravelPlannerAgent::new, 
+                "Travel planning and booking assistance with Amadeus API integration");
+            
+            // Register mesh chat agent
+            agentRegistry.registerAgent("chat", MeshChatAgent::new, 
+                "Interactive conversational agent with multi-agent coordination capabilities");
+            
+            // Temporarily disabled enhanced AI agents due to compilation issues
+            // TODO: Fix connectors module compilation issues
+            // agentRegistry.registerAgent("enhanced-chat", EnhancedChatAgent::new, 
+            //     "Enhanced conversational agent with AI capabilities");
             
             // Note: MultiAgentDemo is a demo runner, not an agent, so we skip registration
             // The EnhancedChatAgent already provides multi-agent coordination capabilities
             
-            // Re-enabled orchestrator agent with connectors dependency
-            agentRegistry.registerAgent("orchestrator", OrchestratorAgent::new, 
-                "Master orchestrator for complex multi-agent workflows");
+            // Temporarily disabled orchestrator agent due to compilation issues
+            // TODO: Fix connectors module compilation issues
+            // agentRegistry.registerAgent("orchestrator", EnhancedOrchestratorAgent::new, 
+            //     "Master orchestrator for complex multi-agent workflows");
             
             System.out.println("✅ Agent registry initialized with " + agentRegistry.getRegisteredAgentCount() + " agents");
             

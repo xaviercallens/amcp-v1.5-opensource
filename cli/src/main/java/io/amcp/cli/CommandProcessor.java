@@ -5,6 +5,8 @@ import io.amcp.core.Event;
 import io.amcp.core.AgentID;
 import io.amcp.core.DeliveryOptions;
 import io.amcp.examples.weather.WeatherAgent;
+import io.amcp.examples.meshchat.StockAgent;
+import io.amcp.examples.meshchat.TravelPlannerAgent;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -65,6 +67,8 @@ public class CommandProcessor {
         commands.put("send", this::handleSend);
         commands.put("ask", this::handleAsk);
         commands.put("weather", this::handleWeather);
+        commands.put("stock", this::handleStock);
+        commands.put("travel", this::handleTravel);
         commands.put("chat", this::handleChat);
         
         // Session management
@@ -349,6 +353,72 @@ public class CommandProcessor {
         
         String message = String.join(" ", args);
         return CommandResult.info("Chatting: " + message);
+    }
+    
+    private CommandResult handleStock(String[] args) {
+        if (args.length == 0) {
+            return CommandResult.error("Usage: stock <symbol>");
+        }
+        
+        Agent stockAgent = agentRegistry.getActiveAgent("stock");
+        if (stockAgent == null) {
+            return CommandResult.error("Stock agent is not active. Use 'activate stock' first.");
+        }
+        
+        String symbol = args[0].toUpperCase();
+        
+        try {
+            if (stockAgent instanceof StockAgent) {
+                StockAgent sa = (StockAgent) stockAgent;
+                StockAgent.StockData stockData = sa.getStockData(symbol);
+                
+                if (stockData != null) {
+                    Map<String, Object> result = new HashMap<>();
+                    result.put("Symbol", stockData.getSymbol());
+                    result.put("Company", stockData.getCompanyName());
+                    result.put("Current Price", "$" + stockData.getCurrentPrice());
+                    result.put("Daily Change", stockData.getDailyChangeFormatted());
+                    result.put("Volume", stockData.getFormattedVolume());
+                    result.put("52-Week Low", "$" + stockData.getWeekLow52());
+                    result.put("52-Week High", "$" + stockData.getWeekHigh52());
+                    
+                    return CommandResult.success("Stock Quote for " + symbol, result);
+                } else {
+                    return CommandResult.error("Could not fetch stock data for " + symbol + ". Please check the symbol.");
+                }
+            } else {
+                return CommandResult.error("Stock agent type not supported");
+            }
+        } catch (Exception e) {
+            return CommandResult.error("Error fetching stock data: " + e.getMessage());
+        }
+    }
+    
+    private CommandResult handleTravel(String[] args) {
+        if (args.length == 0) {
+            return CommandResult.error("Usage: travel <destination>");
+        }
+        
+        Agent travelAgent = agentRegistry.getActiveAgent("travel");
+        if (travelAgent == null) {
+            return CommandResult.error("Travel agent is not active. Use 'activate travel' first.");
+        }
+        
+        String destination = String.join(" ", args);
+        
+        try {
+            // For now, return a simple message since TravelPlannerAgent doesn't have a direct method
+            // In the future, we could add a public method similar to what we did for StockAgent
+            Map<String, Object> result = new HashMap<>();
+            result.put("Destination", destination);
+            result.put("Status", "Travel planning request received");
+            result.put("Note", "Use the full travel planning interface for detailed itineraries");
+            
+            return CommandResult.success("Travel Planning for " + destination, result);
+            
+        } catch (Exception e) {
+            return CommandResult.error("Error processing travel request: " + e.getMessage());
+        }
     }
     
     private CommandResult handleSend(String[] args) {

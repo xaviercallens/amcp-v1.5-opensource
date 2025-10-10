@@ -1,0 +1,6 @@
+consider:
+
+Using a faster model (Gemma 2B)
+GPU acceleration
+Caching common intents
+Async LLM calls with longer timeouts

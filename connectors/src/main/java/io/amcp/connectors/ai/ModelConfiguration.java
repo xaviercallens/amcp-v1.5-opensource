@@ -6,19 +6,27 @@ import java.util.*;
  * Configuration for lightweight LLM models suitable for local deployment.
  * Optimized for resource-constrained environments (2-8GB RAM).
  * 
+ * PERFORMANCE OPTIMIZATIONS (v1.5.1):
+ * - Gemma 2B: Recommended for fast inference (1.4GB RAM, excellent speed/quality ratio)
+ * - Qwen2 1.5B: Ultra-fast for resource-constrained environments (0.9GB RAM)
+ * - GPU acceleration support for all models
+ * - Async inference with caching
+ * 
  * @author AMCP Development Team
- * @version 1.5.0
+ * @version 1.5.1
  */
 public class ModelConfiguration {
     
     /**
      * Recommended lightweight models for local deployment
+     * PRIORITY: Gemma 2B and Qwen2 for optimal performance
      */
     public enum LightweightModel {
-        // Ultra-light models (< 2GB RAM)
+        // Ultra-light models (< 2GB RAM) - RECOMMENDED FOR PERFORMANCE
+        QWEN2_5_0_5B("qwen2.5:0.5b", 0.4, "Alibaba Qwen2.5 0.5B - ULTRA-FAST minimal resource usage (NEW)"),
+        GEMMA_2B("gemma:2b", 1.4, "Google Gemma 2B - FAST and efficient (RECOMMENDED)"),
+        QWEN2_1_5B("qwen2:1.5b", 0.9, "Alibaba Qwen2 1.5B - Ultra-lightweight and FAST"),
         PHI3_MINI("phi3:3.8b", 2.3, "Microsoft Phi-3 Mini - Excellent quality, 3.8B parameters"),
-        GEMMA_2B("gemma:2b", 1.4, "Google Gemma 2B - Fast and efficient"),
-        QWEN2_1_5B("qwen2:1.5b", 0.9, "Alibaba Qwen2 1.5B - Very lightweight"),
         
         // Light models (2-4GB RAM)
         PHI3_MEDIUM("phi3:medium", 7.9, "Microsoft Phi-3 Medium - Better reasoning, 14B parameters"),
@@ -79,34 +87,80 @@ public class ModelConfiguration {
     
     /**
      * Get recommended model configuration based on available RAM
+     * PRIORITIZES Qwen2.5:0.5b, Gemma 2B and Qwen2 for optimal performance
      */
     public static LightweightModel getRecommendedModel(double availableRamGB) {
-        if (availableRamGB < 2.0) {
-            return LightweightModel.QWEN2_1_5B;
-        } else if (availableRamGB < 3.0) {
-            return LightweightModel.PHI3_MINI;
-        } else if (availableRamGB < 5.0) {
-            return LightweightModel.LLAMA3_8B;
+        if (availableRamGB < 0.8) {
+            return LightweightModel.QWEN2_5_0_5B; // NEW: Ultra-minimal for <0.8GB systems
+        } else if (availableRamGB < 1.5) {
+            return LightweightModel.QWEN2_1_5B;   // Ultra-fast for minimal resources
+        } else if (availableRamGB < 2.5) {
+            return LightweightModel.GEMMA_2B;     // RECOMMENDED: Fast and efficient
+        } else if (availableRamGB < 4.0) {
+            return LightweightModel.PHI3_MINI;    // Good balance
+        } else if (availableRamGB < 6.0) {
+            return LightweightModel.LLAMA3_8B;    // Larger models
         } else if (availableRamGB < 8.0) {
-            return LightweightModel.LLAMA3_1_8B;
+            return LightweightModel.QWEN2_7B;     // Better multilingual support
         } else {
-            return LightweightModel.PHI3_MEDIUM;
+            return LightweightModel.LLAMA3_1_8B;  // Latest version for high-end systems
         }
     }
     
     /**
      * Get optimized configuration for a specific model
+     * Enhanced configurations for Gemma 2B and Qwen2 performance
      */
     public static ModelConfig getModelConfig(LightweightModel model) {
         switch (model) {
+            case QWEN2_5_0_5B:
+                return new ModelConfig(
+                    model.getModelName(),
+                    0.5,    // Very low temperature for consistency in minimal model
+                    2048,   // Reasonable token limit for 0.5B model
+                    0.8,    // Lower top_p for more focused responses
+                    8192,   // Good context window
+                    true    // streaming support
+                );
+                
+            case GEMMA_2B:
+                return new ModelConfig(
+                    model.getModelName(),
+                    0.6,    // Lower temperature for more focused responses
+                    4096,   // Increased max tokens for better completions
+                    0.85,   // Optimized top_p for quality
+                    8192,   // Large context window
+                    true    // streaming support
+                );
+                
+            case QWEN2_1_5B:
+                return new ModelConfig(
+                    model.getModelName(),
+                    0.6,    // Lower temperature for consistency
+                    3072,   // Optimized token count
+                    0.9,    // Good diversity
+                    32768,  // Qwen2's large context advantage
+                    true
+                );
+                
+            case QWEN2_7B:
+                return new ModelConfig(
+                    model.getModelName(),
+                    0.7,
+                    4096,   // Higher token limit for complex tasks
+                    0.9,
+                    32768,  // Qwen2 has large context
+                    true
+                );
+                
             case PHI3_MINI:
                 return new ModelConfig(
                     model.getModelName(),
-                    0.7,    // temperature
-                    2048,   // max tokens
-                    0.9,    // top_p
-                    4096,   // context window
-                    true    // streaming support
+                    0.7,
+                    2048,
+                    0.9,
+                    4096,
+                    true
                 );
                 
             case PHI3_MEDIUM:
@@ -140,7 +194,6 @@ public class ModelConfiguration {
                     true
                 );
                 
-            case GEMMA_2B:
             case GEMMA_7B:
                 return new ModelConfig(
                     model.getModelName(),
@@ -148,17 +201,6 @@ public class ModelConfiguration {
                     2048,
                     0.9,
                     8192,
-                    true
-                );
-                
-            case QWEN2_1_5B:
-            case QWEN2_7B:
-                return new ModelConfig(
-                    model.getModelName(),
-                    0.7,
-                    2048,
-                    0.9,
-                    32768,  // Qwen2 has large context
                     true
                 );
                 
