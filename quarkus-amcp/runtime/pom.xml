@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.amcp</groupId>
+        <artifactId>quarkus-amcp-parent</artifactId>
+        <version>1.6.0</version>
+    </parent>
+
+    <artifactId>quarkus-amcp</artifactId>
+
+    <name>AMCP :: Quarkus Extension :: Runtime</name>
+    <description>Quarkus AMCP Extension Runtime Module</description>
+
+    <dependencies>
+        <!-- AMCP Core -->
+        <dependency>
+            <groupId>io.amcp</groupId>
+            <artifactId>amcp-core</artifactId>
+        </dependency>
+
+        <!-- Quarkus -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-arc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-core</artifactId>
+        </dependency>
+
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <!-- Broker Implementations -->
+        <dependency>
+            <groupId>io.amcp</groupId>
+            <artifactId>amcp-broker-kafka</artifactId>
+        </dependency>
+        <!-- NATS broker temporarily disabled due to API issues
+        <dependency>
+            <groupId>io.amcp</groupId>
+            <artifactId>amcp-broker-nats</artifactId>
+            <optional>true</optional>
+        </dependency>
+        -->
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-extension-maven-plugin</artifactId>
+                <version>${quarkus.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>extension-descriptor</goal>
+                        </goals>
+                        <configuration>
+                            <deployment>${project.groupId}:${project.artifactId}-deployment:${project.version}</deployment>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

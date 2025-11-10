@@ -1,0 +1,72 @@
+#!/bin/bash
+
+# AMCP Kafka Multi-Instance Test Script
+# This script demonstrates how to run 3 instances with Kafka
+
+echo "========================================="
+echo "AMCP Kafka Multi-Instance Test"
+echo "========================================="
+echo ""
+
+# Check if Kafka is running
+echo "Checking Kafka status..."
+if sudo docker ps | grep -q "amcp-kafka"; then
+    echo "✅ Kafka is running"
+else
+    echo "❌ Kafka is not running"
+    echo "Starting Kafka..."
+    sudo docker-compose -f docker-compose-kafka.yml up -d
+    echo "Waiting for Kafka to be ready..."
+    sleep 15
+fi
+
+echo ""
+echo "========================================="
+echo "To run the 3 instances manually:"
+echo "========================================="
+echo ""
+echo "Terminal 1 - Instance 1 (Port 8080):"
+echo "cd /home/kalxav/CascadeProjects/amcp-v1.6-opensource/amcp-examples"
+echo "AMCP_BROKER_TYPE=kafka AMCP_KAFKA_BOOTSTRAP_SERVERS=localhost:9092 AMCP_INSTANCE_ID=instance-1 mvn quarkus:dev -Dquarkus.http.port=8080"
+echo ""
+echo "Terminal 2 - Instance 2 (Port 8081):"
+echo "cd /home/kalxav/CascadeProjects/amcp-v1.6-opensource/amcp-examples"
+echo "AMCP_BROKER_TYPE=kafka AMCP_KAFKA_BOOTSTRAP_SERVERS=localhost:9092 AMCP_INSTANCE_ID=instance-2 mvn quarkus:dev -Dquarkus.http.port=8081"
+echo ""
+echo "Terminal 3 - Instance 3 (Port 8082):"
+echo "cd /home/kalxav/CascadeProjects/amcp-v1.6-opensource/amcp-examples"
+echo "AMCP_BROKER_TYPE=kafka AMCP_KAFKA_BOOTSTRAP_SERVERS=localhost:9092 AMCP_INSTANCE_ID=instance-3 mvn quarkus:dev -Dquarkus.http.port=8082"
+echo ""
+echo "========================================="
+echo "Test Commands:"
+echo "========================================="
+echo ""
+echo "# Check status of all instances"
+echo "curl http://localhost:8080/hello/status"
+echo "curl http://localhost:8081/hello/status"
+echo "curl http://localhost:8082/hello/status"
+echo ""
+echo "# Send 100 test messages"
+echo "for i in {1..100}; do"
+echo "  curl -X POST http://localhost:8080/hello/send \\"
+echo "    -H \"Content-Type: application/json\" \\"
+echo "    -d \"{\\\"name\\\":\\\"Test \$i\\\"}\" &"
+echo "done"
+echo "wait"
+echo ""
+echo "========================================="
+echo "Kafka Management:"
+echo "========================================="
+echo ""
+echo "# Check Kafka logs"
+echo "sudo docker logs amcp-kafka"
+echo ""
+echo "# List Kafka topics"
+echo "sudo docker exec amcp-kafka kafka-topics --list --bootstrap-server localhost:9092"
+echo ""
+echo "# Monitor Kafka messages"
+echo "sudo docker exec amcp-kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic hello.request --from-beginning"
+echo ""
+echo "# Stop Kafka"
+echo "sudo docker-compose -f docker-compose-kafka.yml down"
+echo ""

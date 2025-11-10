@@ -1,0 +1,12 @@
+---
+name: "AMCP"
+description: "Agent Mesh Communication Protocol for Quarkus"
+metadata:
+  keywords:
+    - "amcp"
+    - "agents"
+    - "cloudevents"
+  categories:
+    - "messaging"
+  status: "preview"
+  guide: "https://github.com/agentmeshcommunicationprotocol/amcpcore.github.io"

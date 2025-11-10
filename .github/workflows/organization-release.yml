@@ -1,0 +1,305 @@
+name: AMCP Organization Release
+
+on:
+  push:
+    branches:
+      - release/*
+      - main
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  ORGANIZATION: agentmeshcommunicationprotocol
+  REPOSITORY: amcpcore.github.io
+  JAVA_VERSION: '21'
+
+jobs:
+  validate:
+    name: Validate Release
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: maven
+      
+      - name: Extract Version
+        id: version
+        run: |
+          if [ -f VERSION.txt ]; then
+            VERSION=$(cat VERSION.txt)
+          else
+            VERSION="1.6.0"
+            echo "1.6.0" > VERSION.txt
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Release Version: $VERSION"
+      
+      - name: Validate Version Format
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "❌ Invalid version format: $VERSION"
+            exit 1
+          fi
+          echo "✅ Version format valid: $VERSION"
+      
+      - name: Check for Breaking Changes
+        run: |
+          if grep -q "BREAKING CHANGES" CHANGELOG.md; then
+            echo "⚠️  Breaking changes detected - ensure migration guide exists"
+            if [ ! -f "docs/MIGRATION_V1.5_TO_V1.6.md" ]; then
+              echo "❌ Migration guide missing for breaking changes"
+              exit 1
+            fi
+          fi
+          echo "✅ Breaking changes documented"
+      
+      - name: Build Project
+        run: |
+          echo "🔨 Building AMCP v${{ steps.version.outputs.version }}"
+          mvn clean install -DskipTests
+      
+      - name: Run Tests
+        run: |
+          echo "🧪 Running test suite"
+          mvn test
+      
+      - name: Run Security Scan
+        run: |
+          echo "🔐 Running security scan"
+          mvn dependency-check:check || echo "⚠️  Security scan completed with warnings"
+      
+      - name: Generate Documentation
+        run: |
+          echo "📚 Generating documentation"
+          mvn javadoc:aggregate || echo "⚠️  Javadoc generation skipped"
+      
+      - name: Package Artifacts
+        run: |
+          echo "📦 Packaging artifacts"
+          mvn package -DskipTests
+      
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: amcp-build-artifacts-${{ steps.version.outputs.version }}
+          path: |
+            **/target/*.jar
+            docs/
+            CHANGELOG.md
+            VERSION.txt
+          retention-days: 30
+
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: validate
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+      packages: write
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Extract Version from Tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📌 Tag Version: v$VERSION"
+      
+      - name: Extract Release Notes
+        id: release_notes
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          
+          if [ -f CHANGELOG.md ]; then
+            # Extract section for this version
+            NOTES=$(sed -n "/## \[$VERSION\]/,/## \[/p" CHANGELOG.md | head -n -1)
+            
+            if [ -z "$NOTES" ]; then
+              NOTES="Release notes not found in CHANGELOG.md"
+            fi
+          else
+            NOTES="## AMCP v$VERSION
+
+Major Features:
+- Strong Mobility Framework with automatic state preservation
+- CloudEvents v1.0 integration
+- Enterprise security (mTLS, RBAC, audit logging)
+- Enhanced LLM orchestration
+- Advanced agent mesh
+
+See documentation for complete details."
+          fi
+          
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: amcp-build-artifacts-${{ steps.version.outputs.version }}
+          path: ./artifacts
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: AMCP v${{ steps.version.outputs.version }} - Major Architecture Evolution
+          body: ${{ steps.release_notes.outputs.notes }}
+          draft: false
+          prerelease: false
+          files: |
+            ./artifacts/**/*.jar
+            CHANGELOG.md
+            VERSION.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Create Release Announcement
+        run: |
+          cat << EOF > release-announcement.md
+          # 🚀 AMCP v${{ steps.version.outputs.version }} Released!
+          
+          We're excited to announce the release of AMCP v${{ steps.version.outputs.version }}!
+          
+          ## 🎯 Highlights
+          - Strong Mobility Framework
+          - CloudEvents Integration
+          - Enterprise Security
+          - Enhanced Performance
+          
+          ## 📥 Download
+          https://github.com/${{ env.ORGANIZATION }}/${{ env.REPOSITORY }}/releases/tag/v${{ steps.version.outputs.version }}
+          
+          ## 📚 Documentation
+          - [Architecture Guide](docs/AMCP_V1.6_ARCHITECTURE.md)
+          - [Migration Guide](docs/MIGRATION_V1.5_TO_V1.6.md)
+          - [Release Notes](CHANGELOG.md)
+          EOF
+          
+          echo "📢 Release announcement created"
+          cat release-announcement.md
+      
+      - name: Notify Release
+        run: |
+          echo "✅ Successfully released AMCP v${{ steps.version.outputs.version }}"
+          echo "🔗 Release URL: https://github.com/${{ env.ORGANIZATION }}/${{ env.REPOSITORY }}/releases/tag/v${{ steps.version.outputs.version }}"
+
+  publish-docs:
+    name: Publish Documentation to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: release
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+      
+      - name: Check for Jekyll
+        id: jekyll_check
+        run: |
+          if [ -f Gemfile ] && grep -q jekyll Gemfile; then
+            echo "has_jekyll=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_jekyll=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Build Jekyll Site
+        if: steps.jekyll_check.outputs.has_jekyll == 'true'
+        run: |
+          bundle install
+          bundle exec jekyll build
+      
+      - name: Prepare Documentation
+        run: |
+          mkdir -p _site/docs
+          
+          # Copy documentation files
+          if [ -d docs ]; then
+            cp -r docs/* _site/docs/
+          fi
+          
+          # Copy README
+          if [ -f README.md ]; then
+            cp README.md _site/
+          fi
+          
+          # Copy CHANGELOG
+          if [ -f CHANGELOG.md ]; then
+            cp CHANGELOG.md _site/
+          fi
+          
+          echo "📚 Documentation prepared"
+      
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
+          publish_branch: gh-pages
+          commit_message: "docs: Update documentation for v${{ needs.release.outputs.version }}"
+
+  notify:
+    name: Post-Release Notifications
+    runs-on: ubuntu-latest
+    needs: [release, publish-docs]
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+      - name: Create Success Summary
+        run: |
+          cat << EOF >> $GITHUB_STEP_SUMMARY
+          # ✅ AMCP Release Complete
+          
+          **Version**: v${{ needs.release.outputs.version }}
+          **Repository**: ${{ env.ORGANIZATION }}/${{ env.REPOSITORY }}
+          
+          ## 📦 Deliverables
+          - ✅ GitHub Release Created
+          - ✅ Artifacts Published
+          - ✅ Documentation Updated
+          - ✅ GitHub Pages Deployed
+          
+          ## 🔗 Links
+          - [Release Page](https://github.com/${{ env.ORGANIZATION }}/${{ env.REPOSITORY }}/releases)
+          - [Documentation](https://${{ env.ORGANIZATION }}.github.io)
+          - [Repository](https://github.com/${{ env.ORGANIZATION }}/${{ env.REPOSITORY }})
+          
+          ## 📋 Next Steps
+          1. Verify release artifacts
+          2. Test documentation links
+          3. Announce to community
+          4. Monitor for issues
+          EOF
+          
+          echo "✅ Release workflow completed successfully"

@@ -1,284 +1,347 @@
-# AMCP GitHub Pages Website
+# AMCP v1.6 - Agent Mesh Communication Protocol
 
-This repository contains the official website for AMCP (Agent Mesh Communication Protocol) hosted at `https://amcp.github.io`.
+**Version**: 1.6.0  
+**Status**: Development / Documentation Phase  
+**Organization**: https://github.com/agentmeshcommunicationprotocol  
 
-## 🌐 Website Overview
+---
 
-The AMCP website provides comprehensive documentation, examples, and resources for the Agent Mesh Communication Protocol framework.
+## 📋 Overview
 
-### Features
+This is the **AMCP v1.6** development repository containing comprehensive documentation, implementation guides, and configuration for the major architecture evolution from v1.5 to v1.6.
 
-- **Modern Design**: Clean, responsive design with mobile-first approach
-- **Comprehensive Documentation**: Getting started guides, API reference, and tutorials
-- **Interactive Examples**: Live demos and code samples
-- **Performance Optimized**: Fast loading with optimized assets
-- **SEO Friendly**: Structured data and meta tags for search engines
-- **Accessibility**: WCAG 2.1 compliant design
+### What's New in v1.6
 
-## 🛠️ Technology Stack
+- 🚀 **Strong Mobility Framework** - Automatic state preservation for agent migration
+- 🔗 **CloudEvents Integration** - Industry-standard event format (v1.0 compliance)
+- 🛡️ **Enterprise Security** - mTLS, RBAC, audit logging, Vault integration
+- ⚡ **Enhanced LLM Orchestration** - 95% faster responses, intelligent fallback
+- 🔄 **Advanced Agent Mesh** - Dynamic discovery, load balancing, circuit breaker
+- 👨‍💻 **Developer Experience** - Enhanced CLI v2, visual designer, profiler
 
-- **Jekyll**: Static site generator
-- **GitHub Pages**: Hosting platform
-- **Sass**: CSS preprocessing
-- **JavaScript**: Interactive features
-- **Responsive Design**: Mobile-first approach
+---
 
-## 📁 Site Structure
+## 📁 Repository Structure
 
 ```
-amcp.github.io/
-├── _config.yml              # Jekyll configuration
-├── _layouts/                 # Page templates
-│   ├── default.html
-│   ├── page.html
-│   └── post.html
-├── _includes/                # Reusable components
-│   ├── header.html
-│   ├── footer.html
-│   └── navigation.html
-├── _sass/                    # Sass partials
-├── assets/                   # Static assets
-│   ├── css/
-│   ├── js/
-│   └── images/
-├── docs/                     # Documentation pages
-├── examples/                 # Example pages
-├── blog/                     # Blog posts
-└── index.html               # Homepage
+amcp-v1.6-opensource/
+├── .git/                           # Git repository
+├── .github/                        # GitHub workflows and templates
+│   ├── workflows/
+│   │   ├── organization-release.yml
+│   │   ├── release.yml
+│   │   └── ci.yml
+│   └── pull_request_template.md
+│
+├── docs/                           # Documentation
+│   ├── AMCP_V1.6_ARCHITECTURE.md
+│   ├── MIGRATION_V1.5_TO_V1.6.md
+│   └── specs/
+│       └── Quarkus AMCP Extension.md
+│
+├── scripts/                        # Automation scripts
+│   └── setup-organization-release.sh
+│
+├── Implementation Guides/          # Step-by-step guides
+│   ├── AMCP_V1.6_MASTER_IMPLEMENTATION_GUIDE.md
+│   ├── AMCP_V1.6_IMPLEMENTATION_ROADMAP.md
+│   ├── WINDSURF_IMPLEMENTATION_GUIDE.md
+│   ├── V1.6_IMPLEMENTATION_STEPS.md
+│   └── V1.6_QUICK_START.md
+│
+├── Release Documentation/          # Release management
+│   ├── AMCP_V1.6_RELEASE_GUIDE.md
+│   ├── GITHUB_ORGANIZATION_RELEASE_SETUP.md
+│   ├── QUICK_RELEASE_COMMANDS.md
+│   └── ORGANIZATION_RELEASE_SUMMARY.md
+│
+├── Reference Documents/            # Quick reference
+│   ├── README_V1.6.md
+│   ├── INDEX_V1.6.md
+│   └── AMCP_V1.6_SUMMARY.md
+│
+├── CHANGELOG.md                    # Complete changelog
+├── VERSION.txt                     # Version number (1.6.0)
+└── README.md                       # This file
 ```
 
-## 🚀 Local Development
+---
 
-### Prerequisites
+## 🚀 Quick Start
 
-- Ruby 2.7 or higher
-- Bundler gem
-- Git
+### For New Users
 
-### Setup
+1. **Start Here**: Read `README_V1.6.md` for overview
+2. **Architecture**: Review `docs/AMCP_V1.6_ARCHITECTURE.md`
+3. **Implementation**: Follow `AMCP_V1.6_MASTER_IMPLEMENTATION_GUIDE.md`
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/agentmeshcommunicationprotocol/amcpcore.github.io.git
-   cd amcpcore.github.io
-   ```
+### For Developers
 
-2. **Install dependencies**
-   ```bash
-   bundle install
-   ```
+1. **Implementation Roadmap**: `AMCP_V1.6_IMPLEMENTATION_ROADMAP.md`
+2. **Windsurf Commands**: `WINDSURF_IMPLEMENTATION_GUIDE.md`
+3. **Step-by-Step**: `V1.6_IMPLEMENTATION_STEPS.md`
 
-3. **Start the development server**
-   ```bash
-   bundle exec jekyll serve
-   ```
+### For Release Managers
 
-4. **Open in browser**
-   ```
-   http://localhost:4000
-   ```
+1. **Release Setup**: `GITHUB_ORGANIZATION_RELEASE_SETUP.md`
+2. **Quick Commands**: `QUICK_RELEASE_COMMANDS.md`
+3. **Release Guide**: `AMCP_V1.6_RELEASE_GUIDE.md`
 
-### Development Commands
+---
+
+## 📚 Documentation Index
+
+### Core Documentation
+
+| Document | Purpose | Audience |
+|----------|---------|----------|
+| `README_V1.6.md` | Quick overview | Everyone |
+| `INDEX_V1.6.md` | Complete index | Everyone |
+| `AMCP_V1.6_SUMMARY.md` | Executive summary | Managers |
+| `CHANGELOG.md` | All changes | Everyone |
+
+### Implementation Guides
+
+| Document | Purpose | Time Required |
+|----------|---------|---------------|
+| `AMCP_V1.6_MASTER_IMPLEMENTATION_GUIDE.md` | Complete guide | Study: 2h |
+| `AMCP_V1.6_IMPLEMENTATION_ROADMAP.md` | 19-week roadmap | 19 weeks |
+| `WINDSURF_IMPLEMENTATION_GUIDE.md` | Windsurf commands | Execute: varies |
+| `V1.6_IMPLEMENTATION_STEPS.md` | Git workflow | Execute: 1h |
+| `V1.6_QUICK_START.md` | Quick reference | Read: 10min |
+
+### Architecture & Design
+
+| Document | Purpose |
+|----------|---------|
+| `docs/AMCP_V1.6_ARCHITECTURE.md` | Detailed architecture (12 sections) |
+| `docs/MIGRATION_V1.5_TO_V1.6.md` | Migration guide (10 steps) |
+| `docs/specs/Quarkus AMCP Extension.md` | Quarkus extension specification |
+
+### Release Management
+
+| Document | Purpose |
+|----------|---------|
+| `AMCP_V1.6_RELEASE_GUIDE.md` | Complete release process |
+| `GITHUB_ORGANIZATION_RELEASE_SETUP.md` | Organization release setup |
+| `QUICK_RELEASE_COMMANDS.md` | Copy-paste commands |
+| `ORGANIZATION_RELEASE_SUMMARY.md` | Configuration summary |
+
+---
+
+## 🎯 Implementation Paths
+
+### Path 1: Proof of Concept (4 weeks)
+→ Fastest path to working demo
+
+1. Phase 0: Foundation (Week 1-2)
+2. Phase 1: Core Refactoring (Week 3)
+3. Phase 2: Basic Quarkus Extension (Week 4)
+
+### Path 2: MVP (8 weeks)
+→ Production-ready basic version
+
+1. Foundation + Core + Quarkus (Week 1-7)
+2. HelloWorld Example + Testing (Week 8)
+
+### Path 3: Full Implementation (19 weeks)
+→ Complete AMCP v1.6 with all features
+
+1. All 8 phases from roadmap
+2. Comprehensive testing and validation
+
+---
+
+## 🔗 Git Configuration
+
+### Remotes
+
+This repository is configured for dual-remote workflow:
 
 ```bash
-# Serve with live reload
-bundle exec jekyll serve --livereload
-
-# Build for production
-bundle exec jekyll build
-
-# Check for broken links
-bundle exec htmlproofer ./_site
-
-# Update dependencies
-bundle update
+origin      → Personal: https://github.com/xaviercallens/amcp-v1.5-opensource.git
+amcpcore    → Organization: https://github.com/agentmeshcommunicationprotocol/amcpcore.github.io.git
 ```
 
-## 📝 Content Management
+### Current Branch Strategy
 
-### Adding New Pages
+- `main` - Stable v1.5 codebase
+- `release/v1.6.0` - v1.6 release preparation
+- `feature/*` - Feature development branches
 
-1. Create a new Markdown file in the appropriate directory
-2. Add front matter with layout and metadata
-3. Write content in Markdown format
-
-Example:
-```markdown
----
-layout: page
-title: "Page Title"
-description: "Page description for SEO"
-permalink: /custom-url/
----
-
-# Page Content
-
-Your content here...
-```
-
-### Adding Blog Posts
-
-1. Create a new file in `_posts/` with format: `YYYY-MM-DD-title.md`
-2. Add front matter with post metadata
-3. Write content in Markdown
-
-Example:
-```markdown
----
-layout: post
-title: "Post Title"
-date: 2024-01-01
-categories: [announcement, tutorial]
-author: "Author Name"
----
-
-Post content here...
-```
-
-### Adding Examples
-
-1. Create a new file in `examples/`
-2. Include code samples and explanations
-3. Link from the examples index page
-
-## 🎨 Styling Guidelines
-
-### CSS Architecture
-
-- Use Sass for styling
-- Follow BEM methodology for class naming
-- Maintain consistent spacing and typography
-- Ensure responsive design
-
-### Color Palette
-
-- Primary: `#2196F3` (Blue)
-- Secondary: `#4CAF50` (Green)
-- Accent: `#FF9800` (Orange)
-- Text: `#212121` (Dark Gray)
-- Background: `#FFFFFF` (White)
-
-### Typography
-
-- Primary Font: Inter (Sans-serif)
-- Monospace Font: JetBrains Mono
-- Base Font Size: 16px
-- Line Height: 1.5
-
-## 📱 Responsive Design
-
-The website is designed mobile-first with breakpoints:
-
-- Mobile: < 768px
-- Tablet: 768px - 1024px
-- Desktop: > 1024px
-
-## ⚡ Performance Optimization
-
-- Optimized images (WebP format when possible)
-- Minified CSS and JavaScript
-- Lazy loading for images
-- CDN for external resources
-- Gzip compression
-
-## 🔍 SEO Features
-
-- Structured data (JSON-LD)
-- Open Graph meta tags
-- Twitter Cards
-- Sitemap generation
-- Robots.txt
-- Canonical URLs
-
-## 📊 Analytics
-
-The site includes Google Analytics for tracking:
-
-- Page views and user behavior
-- Download tracking
-- External link clicks
-- Search queries
-
-## 🚀 Deployment
-
-The site is automatically deployed via GitHub Pages when changes are pushed to the `main` branch.
-
-### Deployment Process
-
-1. Push changes to `main` branch
-2. GitHub Actions builds the site
-3. Site is deployed to `https://amcp.github.io`
-4. CDN cache is invalidated
-
-### Custom Domain Setup
-
-To use a custom domain:
-
-1. Add CNAME file with domain name
-2. Configure DNS records
-3. Enable HTTPS in repository settings
-
-## 🧪 Testing
-
-### Local Testing
+### Setup Commands
 
 ```bash
-# Build and test locally
-bundle exec jekyll build
-bundle exec htmlproofer ./_site
+# Clone this repository
+cd /home/kalxav/CascadeProjects/amcp-v1.6-opensource
 
-# Test responsive design
-# Use browser dev tools or online tools
+# Verify remotes
+git remote -v
+
+# Fetch all
+git fetch --all
+
+# Check out release branch
+git checkout -b release/v1.6.0
 ```
 
-### Automated Testing
+---
 
-GitHub Actions runs automated tests:
+## 🛠️ Getting Started
 
-- HTML validation
-- Link checking
-- Performance audits
-- Accessibility testing
+### Option 1: Automated Setup
+```bash
+# Run setup script
+./scripts/setup-organization-release.sh
+```
+
+### Option 2: Manual Setup
+```bash
+# 1. Read documentation
+cat README_V1.6.md
+
+# 2. Check version
+cat VERSION.txt
+
+# 3. Review implementation guide
+cat AMCP_V1.6_MASTER_IMPLEMENTATION_GUIDE.md
+
+# 4. Start implementation
+# Follow WINDSURF_IMPLEMENTATION_GUIDE.md
+```
+
+---
+
+## 📊 Project Status
+
+| Component | Status | Notes |
+|-----------|--------|-------|
+| **Documentation** | ✅ Complete | All guides created |
+| **Architecture** | ✅ Complete | Detailed specs ready |
+| **Implementation** | 📝 Planning | Roadmap defined |
+| **Testing** | 📋 Planned | Framework designed |
+| **Release** | ⏳ Pending | Configuration ready |
+
+---
+
+## 🎯 Major Features (v1.6)
+
+### Strong Mobility Framework
+- Automatic state preservation
+- ATP (Agent Transfer Protocol)
+- Bytecode instrumentation
+- 70-80% code reduction
+
+### CloudEvents Integration
+- CloudEvents v1.0 compliant
+- Event routing & filtering
+- Distributed tracing
+- Event sourcing
+
+### Enterprise Security
+- mTLS support
+- RBAC implementation
+- Comprehensive audit logging
+- HashiCorp Vault integration
+
+### Enhanced LLM Orchestration
+- 95% faster cached responses (50ms vs 500ms)
+- Intelligent fallback system
+- Two-tier caching
+- 60% reduced memory usage
+
+### Advanced Agent Mesh
+- Dynamic service discovery
+- Load balancing
+- Circuit breaker pattern
+- Service mesh integration (Istio, Linkerd)
+
+### Developer Experience
+- Enhanced CLI v2
+- Visual agent designer
+- Performance profiler
+- Comprehensive testing framework
+
+---
+
+## 📈 Performance Targets
+
+| Metric | v1.5 | v1.6 Target | Improvement |
+|--------|------|-------------|-------------|
+| Cached Response | 500ms | 50ms | **10x faster** |
+| Memory Usage | 2.5GB | 1GB | **60% reduction** |
+| Concurrent Requests | 1 | 10 | **10x capacity** |
+| Fallback Response | N/A | <50ms | **New feature** |
+
+---
+
+## 🔄 Breaking Changes
+
+- Agent interface: `Agent` → `StrongMobilityAgent`
+- Event model: Custom → CloudEvents standard
+- Configuration: Old schema → New security-aware schema
+- LLM API: Basic → Enhanced with fallback
+
+**Migration Guide**: See `docs/MIGRATION_V1.5_TO_V1.6.md`
+
+---
+
+## 🚢 Release Process
+
+### Quick Release
+```bash
+# 1. Run setup
+./scripts/setup-organization-release.sh
+
+# 2. Create PR
+gh pr create --repo agentmeshcommunicationprotocol/amcpcore.github.io \
+  --base main --head release/v1.6.0
+
+# 3. After merge, create tag
+git tag -a v1.6.0 -m "AMCP v1.6.0"
+git push amcpcore v1.6.0
+```
+
+**Detailed Guide**: `GITHUB_ORGANIZATION_RELEASE_SETUP.md`
+
+---
 
 ## 🤝 Contributing
 
-### Content Contributions
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test locally
-5. Submit a pull request
-
-### Code Contributions
-
-1. Follow existing code style
-2. Test your changes
-3. Update documentation
-4. Submit a pull request
-
-### Reporting Issues
-
-- Use GitHub Issues for bug reports
-- Include browser and device information
-- Provide steps to reproduce
-
-## 📄 License
-
-This website is licensed under the MIT License. See [LICENSE](LICENSE) for details.
-
-## 🆘 Support
-
-- **Documentation**: [AMCP Docs](https://amcp.github.io/docs/)
-- **GitHub Issues**: [Report bugs](https://github.com/agentmeshcommunicationprotocol/amcpcore.github.io/issues)
-- **Discussions**: [Community discussions](https://github.com/agentmeshcommunicationprotocol/amcpcore.github.io/discussions)
-
-## 📞 Contact
-
-- **Website**: https://amcp.github.io
-- **Email**: contact@amcp.dev
-- **GitHub**: https://github.com/agentmeshcommunicationprotocol/amcpcore.github.io
+This is currently in the documentation and planning phase. Implementation contributions will follow the roadmap in `AMCP_V1.6_IMPLEMENTATION_ROADMAP.md`.
 
 ---
 
-Built with ❤️ by the AMCP Development Team
+## 📞 Support & Resources
+
+- **Organization**: https://github.com/agentmeshcommunicationprotocol
+- **Repository**: https://github.com/agentmeshcommunicationprotocol/amcpcore.github.io
+- **Documentation**: All guides in this repository
+- **Issues**: GitHub Issues (once implementation begins)
+
+---
+
+## 📜 License
+
+Apache 2.0 (to be confirmed in implementation phase)
+
+---
+
+## 🎉 Next Steps
+
+1. **Read**: `README_V1.6.md` for quick overview
+2. **Study**: `AMCP_V1.6_MASTER_IMPLEMENTATION_GUIDE.md` for complete picture
+3. **Choose**: Implementation path (PoC, MVP, or Full)
+4. **Execute**: Follow chosen guide
+5. **Release**: Use release management docs
+
+---
+
+**Repository Created**: 2024-11-10  
+**Version**: 1.6.0  
+**Status**: Documentation & Planning Phase  
+**Ready For**: Implementation
+
+---
+
+Built with ❤️ for the future of Agent Mesh Communication

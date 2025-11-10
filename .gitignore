@@ -1,58 +1,42 @@
-# Jekyll build files
-_site/
-.sass-cache/
-.jekyll-cache/
-.jekyll-metadata
-
-# Ruby/Bundler files
-.bundle/
-vendor/
-Gemfile.lock
-
-# Node.js files (if using npm)
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Environment variables
+# Environment variables and secrets
 .env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*.local
+*.key
+*.pem
+secrets/
 
-# IDE files
-.vscode/
+# IDE
 .idea/
+.vscode/
 *.swp
 *.swo
 *~
-
-# OS generated files
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
 
-# Temporary files
-*.tmp
-*.temp
+# Build
+target/
+build/
+*.class
+*.jar
+*.war
+
+# Maven
+.m2/
+dependency-reduced-pom.xml
+
+# Quarkus
+.quarkus/
+.gradle/
+
+# Node
+node_modules/
+npm-debug.log
+
+# Test results
+test-results-*/
 *.log
 
-# Backup files
-*.bak
-*.backup
-
-# Jekyll specific
-.jekyll-cache/
-_drafts/
-
-# GitHub Pages specific
-.github/workflows/pages-deploy.yml.hook
-
-# Local development
-.serve/
+# OS
+.DS_Store
+Thumbs.db
