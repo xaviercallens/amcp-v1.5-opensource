@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AMCP Blog - Latest updates, releases, and insights about Agent Mesh Communication Protocol">
+    <title>AMCP Blog | Agent Mesh Communication Protocol</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 3em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.2em;
+        }
+
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .blog-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .blog-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .blog-card-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4em;
+        }
+
+        .blog-card-content {
+            padding: 25px;
+        }
+
+        .blog-card-title {
+            color: #667eea;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .blog-card-meta {
+            color: #999;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+        .blog-card-excerpt {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .blog-card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .tag {
+            background: #f0f0f0;
+            color: #667eea;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .read-more {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.3s ease;
+        }
+
+        .read-more:hover {
+            transform: scale(1.05);
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            padding: 30px 0;
+        }
+
+        @media (max-width: 768px) {
+            .blog-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>📝 AMCP Blog</h1>
+            <p>Latest updates, releases, and insights about Agent Mesh Communication Protocol</p>
+        </header>
+
+        <div class="blog-grid">
+            <!-- v1.6 Release Article -->
+            <article class="blog-card">
+                <div class="blog-card-image">🚀</div>
+                <div class="blog-card-content">
+                    <h2 class="blog-card-title">AMCP v1.6: The Evolution</h2>
+                    <div class="blog-card-meta">📅 November 2025 | 🏷️ Release</div>
+                    <div class="blog-card-tags">
+                        <span class="tag">v1.6</span>
+                        <span class="tag">Evolution</span>
+                        <span class="tag">Performance</span>
+                        <span class="tag">Enterprise</span>
+                    </div>
+                    <p class="blog-card-excerpt">
+                        AMCP v1.6 brings revolutionary improvements: 10x faster performance, 60% memory reduction, 
+                        enterprise security, and cloud-native optimization with Quarkus integration.
+                    </p>
+                    <a href="v16-release.html" class="read-more">Read More →</a>
+                </div>
+            </article>
+
+            <!-- v1.5 Release Article -->
+            <article class="blog-card" id="v15-release">
+                <div class="blog-card-image">🎯</div>
+                <div class="blog-card-content">
+                    <h2 class="blog-card-title">AMCP v1.5: The Foundation</h2>
+                    <div class="blog-card-meta">📅 Q2 2024 | 🏷️ Release</div>
+                    <div class="blog-card-tags">
+                        <span class="tag">v1.5</span>
+                        <span class="tag">Foundation</span>
+                        <span class="tag">Multi-Agent</span>
+                        <span class="tag">LLM</span>
+                    </div>
+                    <p class="blog-card-excerpt">
+                        Introducing AMCP v1.5 - The foundational release that establishes core architecture for 
+                        enterprise-grade multi-agent orchestration with lifecycle management and LLM integration.
+                    </p>
+                    <a href="v15-release.html" class="read-more">Read More →</a>
+                </div>
+            </article>
+
+            <!-- Getting Started Guide -->
+            <article class="blog-card">
+                <div class="blog-card-image">📚</div>
+                <div class="blog-card-content">
+                    <h2 class="blog-card-title">Getting Started with AMCP</h2>
+                    <div class="blog-card-meta">📅 Updated Regularly | 🏷️ Tutorial</div>
+                    <div class="blog-card-tags">
+                        <span class="tag">Guide</span>
+                        <span class="tag">Tutorial</span>
+                        <span class="tag">Quick Start</span>
+                    </div>
+                    <p class="blog-card-excerpt">
+                        Complete guide to building your first agent system with AMCP. Learn agent lifecycle, 
+                        event communication, and deployment in just 5 minutes.
+                    </p>
+                    <a href="../docs/getting-started.html" class="read-more">Read More →</a>
+                </div>
+            </article>
+
+            <!-- Architecture Deep Dive -->
+            <article class="blog-card">
+                <div class="blog-card-image">🏗️</div>
+                <div class="blog-card-content">
+                    <h2 class="blog-card-title">AMCP Architecture Deep Dive</h2>
+                    <div class="blog-card-meta">📅 Technical | 🏷️ Architecture</div>
+                    <div class="blog-card-tags">
+                        <span class="tag">Architecture</span>
+                        <span class="tag">Design</span>
+                        <span class="tag">Technical</span>
+                    </div>
+                    <p class="blog-card-excerpt">
+                        Explore the layered architecture, event-driven design, and distributed coordination 
+                        mechanisms that power AMCP's agent mesh.
+                    </p>
+                    <a href="../docs/architecture.html" class="read-more">Read More →</a>
+                </div>
+            </article>
+
+            <!-- LLM Integration Guide -->
+            <article class="blog-card">
+                <div class="blog-card-image">🤖</div>
+                <div class="blog-card-content">
+                    <h2 class="blog-card-title">Enhanced LLM Integration</h2>
+                    <div class="blog-card-meta">📅 v1.6 Feature | 🏷️ Integration</div>
+                    <div class="blog-card-tags">
+                        <span class="tag">LLM</span>
+                        <span class="tag">OpenAI</span>
+                        <span class="tag">Azure</span>
+                        <span class="tag">Ollama</span>
+                    </div>
+                    <p class="blog-card-excerpt">
+                        Unified LLM integration supporting OpenAI, Azure OpenAI, Ollama, and LightLLM. 
+                        Build AI-powered agents with intelligent caching and fallback.
+                    </p>
+                    <a href="../tutorials/llm-integration.html" class="read-more">Read More →</a>
+                </div>
+            </article>
+
+            <!-- Quarkus Integration -->
+            <article class="blog-card">
+                <div class="blog-card-image">⚡</div>
+                <div class="blog-card-content">
+                    <h2 class="blog-card-title">Quarkus AMCP Extension</h2>
+                    <div class="blog-card-meta">📅 v1.6 Feature | 🏷️ Cloud-Native</div>
+                    <div class="blog-card-tags">
+                        <span class="tag">Quarkus</span>
+                        <span class="tag">Cloud-Native</span>
+                        <span class="tag">Performance</span>
+                    </div>
+                    <p class="blog-card-excerpt">
+                        Build cloud-native agent applications with Quarkus. Sub-second startup, 60% less memory, 
+                        and Kubernetes-native deployment.
+                    </p>
+                    <a href="../docs/quarkus-extension.html" class="read-more">Read More →</a>
+                </div>
+            </article>
+        </div>
+
+        <footer>
+            <p>&copy; 2024-2025 Agent Mesh Communication Protocol | Open Source under MIT License</p>
+            <p style="margin-top: 10px; opacity: 0.8;">
+                <a href="https://agentmeshcommunicationprotocol.github.io" style="color: white; text-decoration: none;">Home</a> | 
+                <a href="https://agentmeshcommunicationprotocol.github.io/docs" style="color: white; text-decoration: none;">Documentation</a> | 
+                <a href="https://github.com/agentmeshcommunicationprotocol" style="color: white; text-decoration: none;">GitHub</a>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

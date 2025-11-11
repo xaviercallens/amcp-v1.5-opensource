@@ -93,7 +93,10 @@ public class NatsEventBroker implements EventBroker {
             
             // Subscribe with queue group for load balancing
             String queueGroup = "amcp-" + instanceId;
-            natsSubscription.natsSubscription = connection.subscribe(subject, queueGroup, msg -> {
+            natsSubscription.natsSubscription = connection.subscribe(subject, queueGroup);
+            
+            // Set up message handler
+            connection.createDispatcher(msg -> {
                 try {
                     Event event = deserializeEvent(new String(msg.getData()));
                     
@@ -103,7 +106,7 @@ public class NatsEventBroker implements EventBroker {
                 } catch (Exception e) {
                     logger.error("Error handling message: {}", e.getMessage());
                 }
-            });
+            }).subscribe(subject, queueGroup);
             
             subscriptions.put(subscriptionId, natsSubscription);
             logger.debug("Subscribed to subject pattern: {} ({})", topicPattern, subject);
@@ -177,7 +180,7 @@ public class NatsEventBroker implements EventBroker {
                 subscriptions.clear();
                 
                 // Close connection
-                if (connection != null && !connection.getStatus().isClosed()) {
+                if (connection != null && connection.getStatus() == Connection.Status.CONNECTED) {
                     connection.close();
                 }
                 
@@ -199,7 +202,7 @@ public class NatsEventBroker implements EventBroker {
 
     @Override
     public boolean isRunning() {
-        return running && connection != null && !connection.getStatus().isClosed();
+        return running && connection != null && connection.getStatus() == Connection.Status.CONNECTED;
     }
 
     @Override
@@ -223,15 +226,30 @@ public class NatsEventBroker implements EventBroker {
      * Serializes an Event to JSON string.
      */
     private String serializeEvent(Event event) {
-        // Use CloudEvents JSON format
-        return event.getCloudEvent().toString();
+        // Simple JSON serialization
+        byte[] data = event.getData();
+        String payloadStr = data != null ? new String(data) : "";
+        return String.format("{\"topic\":\"%s\",\"payload\":%s}", 
+            event.getTopic(), payloadStr);
     }
 
     /**
      * Deserializes a JSON string to an Event.
      */
     private Event deserializeEvent(String json) {
-        // Parse CloudEvents JSON and reconstruct Event
-        return Event.create("amcp.event", json);
+        // Simple JSON parsing
+        try {
+            String topic = json.substring(json.indexOf("\"topic\":\"") + 9);
+            topic = topic.substring(0, topic.indexOf("\""));
+            
+            String payload = json.substring(json.indexOf("\"payload\":\"") + 11);
+            payload = payload.substring(0, payload.lastIndexOf("\""));
+            
+            return Event.create(topic, payload);
+        } catch (Exception e) {
+            logger.error("Error deserializing event: {}", e.getMessage());
+            return Event.create("error.deserialize", json);
+        }
     }
+    
 }
